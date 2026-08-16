@@ -1,0 +1,12 @@
+numpy
+scikit-learn
+pandas
+category-encoders
+matplotlib
+seaborn
+tabulate
+torch
+nbconvert[webpdf]
+torchvision
+scikit-image
+jupyterlab
