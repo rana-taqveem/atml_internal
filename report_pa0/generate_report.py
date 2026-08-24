@@ -80,17 +80,11 @@ def assemble_tex():
   {\large """ + _tex_escape_title(config.AUTHORS) + r"""}
 \end{center}
 \vspace{1em}
-\begin{center}
-\begin{minipage}{0.92\linewidth}
+]
+
 \begin{abstract}
 \itshape """ + config.ABSTRACT + r"""
 \end{abstract}
-\end{minipage}
-\end{center}
-\vspace{0.5em}
-\rule{\linewidth}{0.4pt}
-\vspace{1em}
-]
 
 """ + body + r"""
 

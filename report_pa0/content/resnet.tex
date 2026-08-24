@@ -22,7 +22,7 @@ All experiments use \texttt{torchvision}'s \texttt{ResNet-152}, pretrained
 on ImageNet, applied to CIFAR-10 (10 classes, resized to $224\times224$ and
 normalized with ImageNet statistics). Section 1 establishes the baseline
 protocol used throughout: every backbone parameter is frozen
-(\texttt{requires\_grad=False}) and only a newly-initialized linear
+(\texttt{requires\_\allowbreak grad\allowbreak=\allowbreak False}) and only a newly-initialized linear
 classification head is trained, using a train/validation subset (batch size
 $64$) for computational tractability. Because the backbone is frozen and
 never updated, its per-image features are identical on every epoch; the
