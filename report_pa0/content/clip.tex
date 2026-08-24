@@ -1,0 +1,169 @@
+\subsection{Introduction}
+
+CLIP (Radford et al., 2021) applies contrastive representation learning
+across modalities: an image encoder and a text encoder are trained jointly
+so that an image's embedding and its matching caption's embedding land close
+together in a shared space, while embeddings of mismatched image/caption
+pairs are pushed apart. This section investigates three consequences of that
+design: whether the resulting shared space supports zero-shot
+classification -- assigning an image to a class it was never explicitly
+trained on, purely by comparing embeddings; whether the two modalities'
+embeddings actually occupy the same region of that shared space or a
+measurably separated one (the ``modality gap''); and whether a simple
+rigid-rotation alignment can close that gap and improve zero-shot accuracy.
+The implementation notebook (\texttt{clip.ipynb}) is fully written --
+including the CLIP install, model loading, three prompting strategies,
+modality-gap visualization, and the Procrustes-alignment pipeline -- but has
+not yet been executed at the time of writing, so this section presents the
+experimental design and the theoretical predictions each experiment is
+built to test, without reporting accuracy numbers that do not yet exist.
+
+\subsection{Methodology}
+
+\subsubsection{Contrastive Pretraining and InfoNCE}
+
+Directly maximizing the mutual information $I(X;Z)$ between an input $X$
+and a representation $Z=f(X)$ is intractable for high-dimensional data, since
+it requires density estimates that are unavailable. Contrastive learning
+sidesteps this by turning representation learning into a classification
+problem: given an anchor and a batch of candidates (one positive, many
+negatives), train an encoder to identify the positive. The InfoNCE loss,
+\[
+  \mathcal{L}_{\text{InfoNCE}} = -\mathbb{E}\left[\log\frac{f(x_{\text{pos}},c)}{\sum_j f(x_j,c)}\right],
+\]
+satisfies $I(x;c)\geq\log N - \mathcal{L}_{\text{InfoNCE}}$: minimizing
+InfoNCE maximizes a lower bound on mutual information, so ``can you pick the
+correct pair out of a batch of distractors'' is a tractable proxy for ``does
+this representation preserve the information that matters.''
+
+\subsubsection{CLIP: Cross-Modal Contrastive Pretraining}
+
+CLIP applies this InfoNCE-style objective \emph{across} modalities rather
+than within one: an image and its caption form a positive pair; an image
+paired with any other caption in the batch is a negative. Two separate
+encoders -- image and text -- map into a shared embedding space. For a
+batch of $N$ (image, text) pairs, CLIP computes the full $N\times N$
+cosine-similarity matrix between all image and text embeddings and applies
+a symmetric cross-entropy loss in both the image-to-text and text-to-image
+directions, averaged. Trained on roughly 400M (image, text) pairs, this
+produces encoders whose embeddings are meaningfully alignable across
+modalities. Because the training objective is exactly ``does this image's
+embedding have the highest similarity with the correct text embedding among
+a set of candidates,'' a trained CLIP can classify images into any set of
+classes never seen during training by comparing the image embedding against
+text embeddings of candidate class descriptions,
+$\hat{c}=\arg\max_c\,\mathrm{sim}(\mathbf{e}_{\text{img}},\mathbf{e}_{\text{text},c})$
+-- no classification head, no fine-tuning. Since embeddings are
+L2-normalized before comparison, cosine similarity reduces to a plain dot
+product.
+
+\subsubsection{Zero-Shot Classification Protocol (Task 3.1)}
+
+\texttt{ViT-B/32} CLIP is evaluated on the full STL-10 test set (8000
+images, 10 classes) under three prompting strategies of increasing
+richness: plain labels (e.g.\ ``cat''), a fixed template (``a photo of a
+\{class\}''), and more descriptive hand-written variants. Since only the
+text side changes across strategies, the 8000 test images are encoded once
+and cached; each strategy costs only 10 additional text encodings (one per
+class) evaluated against that same cached image-embedding matrix.
+
+\subsubsection{Modality Gap Protocol (Task 3.2)}
+
+Image and text embeddings for 100 paired STL-10 samples are jointly
+projected to 2D via UMAP, once on raw embeddings and once on L2-normalized
+embeddings, to visualize whether the two modalities occupy separate regions
+of the shared space. A quantitative centroid-distance metric between the
+image-embedding cloud and the text-embedding cloud supplements the
+visualization.
+
+\subsubsection{Procrustes Alignment Protocol (Task 3.3)}
+
+An orthogonal matrix $R$ (satisfying $R^\top R=I$, i.e.\ a pure rotation
+with no scaling or shearing) is fit via SciPy's
+\texttt{orthogonal\_procrustes} function on the same 100 paired
+embeddings to minimize $\|XR-Y\|_F$, where $X$ are image embeddings and $Y$
+the corresponding text embeddings. Because $R$ is a single $512\times512$
+global rotation of the shared embedding space rather than a
+sample-specific transform, it is fit on the 100-pair subset and then
+applied to all 8000 test-image embeddings, analogous to fitting PCA
+components on a subset and transforming new data with them. Zero-shot
+accuracy is recomputed on the rotated embeddings and compared against the
+Task 3.1 baseline.
+
+\subsection{Results}
+
+\subsubsection{Status}
+
+The notebook implementing all three experiments above is complete but has
+not yet been run to completion at the time of writing -- no zero-shot
+accuracy numbers, modality-gap distances, or post-alignment accuracy exist
+yet. This subsection intentionally reports no results rather than
+estimated or placeholder figures; it will be populated once the notebook
+is executed.
+
+\subsection{Discussion}
+
+\subsubsection{Expected Effect of Prompt Engineering}
+
+CLIP's text encoder was trained on naturally-occurring web captions --
+full sentences, not bare category words. A bare label like ``cat'' is
+out-of-distribution relative to that training data, so its embedding may
+land in a less well-calibrated region of the shared space than a templated
+prompt like ``a photo of a cat,'' which more closely matches the
+\emph{style} of the training distribution. The original CLIP paper reports
+measurable accuracy gains from prompt engineering with no change to model
+weights; Task 3.1 is designed to reproduce that effect directly, and the
+prediction is that plain labels underperform the templated and descriptive
+variants, though the exact magnitude can only be established once the
+notebook is run.
+
+\subsubsection{Why a Modality Gap Is Expected Despite the Training Objective}
+
+That image and text embedding clouds might occupy visibly separate regions
+of the shared space is initially counterintuitive, since CLIP's objective
+explicitly rewards matching pairs for having \emph{high} similarity. The
+resolution is in what InfoNCE actually optimizes: within a batch, the
+correct pairing only needs \emph{higher} similarity than the incorrect
+pairings -- a relative-ranking requirement, not a requirement that positive
+pairs be close in an absolute sense, and certainly not a requirement that
+the two modalities' embedding clouds fully overlap. Two mechanisms are
+typically cited: a cone effect from the shared temperature-scaled softmax
+(there is no loss term forcing the image-cone and text-cone to be the
+\emph{same} cone, only that within-batch correct pairs win their softmax),
+and the fact that the two encoders never directly compare same-modality
+neighbors (an image is never contrasted against other images), so nothing
+in the loss constrains within-modality geometry beyond what cross-modal
+ranking requires. If Task 3.2's centroid-distance metric confirms a
+non-trivial gap, this is the expected, literature-consistent outcome
+(Liang et al., \emph{Mind the Gap}, 2022), not evidence of a broken model.
+
+\subsubsection{Why Zero-Shot Classification Still Works Despite the Gap}
+\label{sec:clip-zeroshot-despite-gap}
+
+Classification only needs
+$\arg\max_c\,\mathrm{sim}(\mathbf{e}_{\text{img}},\mathbf{e}_{\text{text},c})$
+-- a relative comparison across candidate classes for the \emph{same}
+image. A constant, or roughly constant, offset between the two modalities'
+overall clouds does not change which text embedding is closest to a given
+image embedding, provided the offset does not distort the relative
+ordering across classes. This is the same ``only relative ranking
+matters'' property that makes InfoNCE a tractable mutual-information proxy
+in the first place, and predicts that zero-shot accuracy should remain
+largely intact even if Task 3.2 finds a substantial modality gap.
+
+\subsubsection{Expected Effect of Procrustes Alignment}
+
+Because $R$ is constrained to be orthogonal, it can only rotate the image
+embedding cloud rigidly to better align with the text cloud -- it cannot
+distort either modality's internal geometry (e.g.\ stretch it) to
+artificially shrink the alignment objective, and since all embeddings are
+already unit-normalized, applying $R$ preserves that normalization
+automatically. The prediction is therefore narrow and testable: alignment
+should visibly reduce the centroid separation between the two clouds in
+the post-alignment UMAP projection, but because zero-shot accuracy already
+depends only on relative, within-image ranking
+(Section~\ref{sec:clip-zeroshot-despite-gap}'s argument), the accuracy
+gain from alignment -- if any -- should be modest
+rather than dramatic, since the gap was not obviously hurting
+classification in the first place. Whether the data bears this out is a
+direct, checkable question for the notebook's Task 3.3(f) once executed.

@@ -1,0 +1,35 @@
+% Placeholder 2-column academic-paper preamble, styled to approximate the
+% ATML PA0 example report (rule-framed title block, "Abstract" heading,
+% numbered sections, 2-column body). This is NOT the official course
+% template -- swap this file for the real .cls/.sty once you have the
+% source files, without touching extract.py or generate_report.py.
+
+\documentclass[10pt]{article}
+% NOTE: not using the `twocolumn` class option directly -- the body switches
+% into two-column mode via \twocolumn after the title/abstract block, so the
+% title and abstract span the full page width (matching the example), and
+% only Section 1 onward is two-column.
+
+\usepackage[margin=0.75in,columnsep=0.3in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+% Note: no `abstract` package -- not available in this MiKTeX install, and
+% not actually needed: article's own built-in `abstract` environment
+% already renders a bold, centered "Abstract" heading. generate_report.py
+% wraps the abstract text itself in \itshape directly instead of using the
+% abstract package's font hooks.
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+% Section numbering/format close to the example: "1. Introduction", bold.
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalfont\bfseries}{\thesubsection.}{0.5em}{}
+\titleformat{\subsubsection}{\normalfont\itshape}{\thesubsubsection.}{0.5em}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{\small\itshape \ReportTitle}
+\renewcommand{\headrulewidth}{0pt}
