@@ -53,8 +53,11 @@ encoder's weights.
 The training objective is the negative ELBO, decomposed into a
 reconstruction term and a KL-regularization term:
 \[
-  \mathcal{L}(x) = \underbrace{-\sum_i\big[x_i\log\hat{x}_i+(1-x_i)\log(1-\hat{x}_i)\big]}_{\text{reconstruction (binary cross-entropy)}}
-  \;+\; \underbrace{D_{KL}\big(q_\phi(z|x)\,\|\,\mathcal{N}(0,I)\big)}_{\text{KL term}},
+  \small
+  \begin{aligned}
+  \mathcal{L}(x) = &\underbrace{-\sum_i\big[x_i\log\hat{x}_i+(1-x_i)\log(1-\hat{x}_i)\big]}_{\text{reconstruction (BCE)}} \\
+  &+ \underbrace{D_{KL}\big(q_\phi(z|x)\,\|\,\mathcal{N}(0,I)\big)}_{\text{KL term}},
+  \end{aligned}
 \]
 with the closed-form Gaussian KL divergence, implemented exactly as
 \[

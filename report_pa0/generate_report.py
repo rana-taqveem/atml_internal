@@ -77,7 +77,7 @@ def assemble_tex():
   \vspace{0.4em}
   \rule{\linewidth}{0.8pt} \\
   \vspace{0.6em}
-  {\large """ + _tex_escape_title(config.AUTHORS) + r"""}
+  {\large """ + config.AUTHORS + r"""}
 \end{center}
 \vspace{1em}
 ]

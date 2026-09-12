@@ -6,7 +6,12 @@ Plain Python (no YAML dependency) so the whole pipeline stays stdlib-only.
 """
 
 REPORT_TITLE = "Explorative Experiments in Deep-Learning Methods"
-AUTHORS = "Rana Taqveem Ul Hassan"
+AUTHORS = (
+    r"Name: Rana Taqveem Ul Hassan \\ "
+    r"LUMS Id: 25280030 \\ "
+    r"Git repo link: \href{https://github.com/rana-taqveem/atml/tree/main/src/assignment_00}"
+    r"{\texttt{github.com/rana-taqveem/atml/tree/main/src/assignment\_00}}"
+)
 ABSTRACT = (
     "This report examines four deep-learning paradigms -- supervised "
     "residual learning, vision transformers, cross-modal contrastive "
