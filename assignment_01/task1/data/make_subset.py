@@ -5,11 +5,9 @@ from torchvision import datasets, transforms, models
 from torch.utils.data import DataLoader
 from assignment_01.task1.data.transforms import apply_universal_transforms
 
-import config
+from config import task_config
 from sklearn.model_selection import train_test_split
 import numpy as np
-
-task_config = config.TaskConfig(task_name='task1')
 
 def get_train_val_subsets():
     

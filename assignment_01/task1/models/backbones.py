@@ -1,16 +1,10 @@
 import torch
+import open_clip
 import torch.nn as nn
 from torchvision import models
-import config
-import open_clip
 
+from config import task_config
 from data.transforms import apply_normalization
-
-task_config = config.TaskConfig(task_name='task1')
-
-# Device configuration
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using Device: {DEVICE}")
 
 class LinearClassifier(nn.Module):
     def __init__(self, input_dim, num_classes = 10):
@@ -21,14 +15,13 @@ class LinearClassifier(nn.Module):
         return self.fc(x)
     
 
-class resnet50_backbone(nn.Module):
+class Resnet50Backbone(nn.Module):
     def __init__(self, pretrained=True):
-        super(resnet50_backbone, self).__init__()
+        super(Resnet50Backbone, self).__init__()
         
         weights = models.ResNet50_Weights.IMAGENET1K_V2
-        self.model = models.resnet50(weights=weights).to(DEVICE)
-        self.model.fc = nn.Identity()  # Remove the final fully connected layer
-
+        self.model = models.resnet50(weights=weights).to(task_config.DEVICE)
+        self.model.fc = nn.Identity()
         for param in self.model.parameters():
             param.requires_grad = False
             
@@ -37,13 +30,13 @@ class resnet50_backbone(nn.Module):
         return self.model(x)
     
     
-class torchvision_vit_b_16_backbone(nn.Module):
+class Torchvision_Vit_B_16_Backbone(nn.Module):
     def __init__(self, pretrained=True):
-        super(torchvision_vit_b_16_backbone, self).__init__()
+        super(Torchvision_Vit_B_16_Backbone, self).__init__()
         
         weights = models.ViT_B_16_Weights.IMAGENET1K_V1
-        self.model = models.vit_b_16(weights=weights).to(DEVICE)
-        self.model.heads = nn.Identity()  
+        self.model = models.vit_b_16(weights=weights).to(task_config.DEVICE)
+        self.model.heads = nn.Identity() 
         
         for param in self.model.parameters():
             param.requires_grad = False
@@ -63,13 +56,11 @@ class torchvision_vit_b_16_backbone(nn.Module):
         return x[:, 0]
         
     
-class openai_clip_backbone(nn.Module):
+class Openai_Clip_Backbone(nn.Module):
     def __init__(self, pretrained=True):
-        super(openai_clip_backbone, self).__init__()
+        super(Openai_Clip_Backbone, self).__init__()
         model, _, _ = open_clip.create_model_and_transforms('ViT-B-32', pretrained='openai')
         self.model = model
-        self.model.visual.proj = nn.Identity()  
-        
         for param in self.model.parameters():
             param.requires_grad = False
             
