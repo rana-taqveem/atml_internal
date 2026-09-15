@@ -39,6 +39,7 @@ def get_data_dir(task_name: str):
         base_dir = (
             Path(mount_point)
             / "MyDrive"
+            / "ATML"
             / "assignment_01"
             / task_name
         )
