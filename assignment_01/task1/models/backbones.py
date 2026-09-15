@@ -14,7 +14,6 @@ class LinearClassifier(nn.Module):
     def forward(self, x):
         return self.fc(x)
     
-
 class Resnet50Backbone(nn.Module):
     def __init__(self, pretrained=True):
         super(Resnet50Backbone, self).__init__()
@@ -26,10 +25,9 @@ class Resnet50Backbone(nn.Module):
             param.requires_grad = False
             
     def forward(self, x):
-        x = apply_normalization(x, model_type='resnet50')
+        x = apply_normalization(x, model_type=task_config.RESNET50)
         return self.model(x)
-    
-    
+       
 class Torchvision_Vit_B_16_Backbone(nn.Module):
     def __init__(self, pretrained=True):
         super(Torchvision_Vit_B_16_Backbone, self).__init__()
@@ -42,20 +40,19 @@ class Torchvision_Vit_B_16_Backbone(nn.Module):
             param.requires_grad = False
 
     def forward(self, x):
-        x = apply_normalization(x, model_type='vit_b_16')
+        x = apply_normalization(x, model_type=task_config.VIT_B_16)
         return self.model(x)
     
     def get_cls_token(self, x):
         
-        x = apply_normalization(x, model_type='vit_b_16')
+        x = apply_normalization(x, model_type=task_config.VIT_B_16)
         shape = x.shape[0]    
         x = self.model._process_input(x) 
         batch_class_token = self.model.cls_token.expand(shape, -1, -1)
         x = torch.cat((batch_class_token, x), dim=1)
         x = self.model.encoder(x)
         return x[:, 0]
-        
-    
+         
 class Openai_Clip_Backbone(nn.Module):
     def __init__(self, pretrained=True):
         super(Openai_Clip_Backbone, self).__init__()
@@ -65,7 +62,7 @@ class Openai_Clip_Backbone(nn.Module):
             param.requires_grad = False
             
     def forward(self, x):
-        x = apply_normalization(x, model_type='clip_vit_b_32')
+        x = apply_normalization(x, model_type=task_config.CLIP_VIT_B_32)
         img_embedding = self.model.encode_image(x)
         img_embedding = img_embedding / img_embedding.norm(dim=-1, keepdim=True)
         

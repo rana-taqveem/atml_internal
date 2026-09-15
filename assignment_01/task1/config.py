@@ -34,6 +34,26 @@ class TaskConfig:
         self.TOTAL_TARGET_IMAGES = 500
         self.NUM_CLASSES = num_classes
         self.TARGET_PER_CLASS = self.TOTAL_TARGET_IMAGES // self.NUM_CLASSES
+        
+        self.RESNET50 = "resnet50"
+        self.VIT_B_16 = "vit_b_16"
+        self.CLIP_VIT_B_32 = "clip_vit_b_32"
+        
+        self.NUM_CONFLICT_IMAGES = 200
+        self.CLASS_PAIRS = [
+            (0, 1), # e.g., airplane vs bird
+            (2, 3), # e.g., car vs cat
+            (4, 5), # e.g., deer vs dog
+            (6, 7), # e.g., horse vs monkey
+            (8, 9)  # e.g., ship vs truck
+        ]
+
+        # CLIP Specific Prompt
+        self.CLIP_PROMPT = "a photo of a {}."
+        self.STL10_CLASSES = [
+            "airplane", "bird", "car", "cat", "deer", 
+            "dog", "horse", "monkey", "ship", "truck"
+        ]
 
     def init_env(self):
         os.makedirs(self.TASK_DIR, exist_ok=True)
