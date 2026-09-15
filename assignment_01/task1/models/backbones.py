@@ -56,7 +56,7 @@ class Torchvision_Vit_B_16_Backbone(nn.Module):
 class Openai_Clip_Backbone(nn.Module):
     def __init__(self, pretrained=True):
         super(Openai_Clip_Backbone, self).__init__()
-        model, _, _ = open_clip.create_model_and_transforms('ViT-B-32', pretrained='openai')
+        model, _, _ = open_clip.create_model_and_transforms('ViT-B-32', pretrained='openai', force_quick_gelu=True)
         self.model = model
         for param in self.model.parameters():
             param.requires_grad = False
