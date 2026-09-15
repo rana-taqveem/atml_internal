@@ -4,8 +4,6 @@ import torchvision.transforms.functional as F
 from copy import deepcopy
 import torch.nn as nn
 
-from external.adain import net
-from external.adain.function import adaptive_instance_normalization as adain
 
 from config import task_config
 
@@ -175,6 +173,15 @@ class StyleTransferModel(nn.Module):
     
     def __init__(self, encoder_path, decoder_path):
         super(StyleTransferModel, self).__init__()
+        
+         # Load the dependency only when style transfer is requested.
+        from external.adain import net
+        from external.adain.function import (
+            adaptive_instance_normalization,
+        )
+
+        self.adain = adaptive_instance_normalization
+        
         self.encoder = encoder_path
         self.decoder = decoder_path
         self.device = task_config.DEVICE
@@ -237,7 +244,7 @@ class StyleTransferModel(nn.Module):
         content_features = self.encoder(content_image)
         style_features = self.encoder(style_image)
         
-        transferred_features = adain(content_features, style_features)
+        transferred_features = self.adain(content_features, style_features)
         mixed_features = alpha * transferred_features + (1 - alpha) * content_features
     
         output_image = self.decoder(mixed_features)
