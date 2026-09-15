@@ -7,6 +7,11 @@ seaborn
 tabulate
 torch
 nbconvert[webpdf]
+torch
 torchvision
 scikit-image
 jupyterlab
+torchvision
+open_clip_torch
+scikit-learn
+tqdm

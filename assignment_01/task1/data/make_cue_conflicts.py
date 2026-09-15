@@ -1,5 +1,5 @@
 import torch
-
+from assignment_01.task1.config import task_config
 def generate_cue_conflicts(dataset, 
                            content_id, 
                            style_id, 

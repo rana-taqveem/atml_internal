@@ -1,5 +1,6 @@
 import torch
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from assignment_01.task1.config import task_config
 
 def calcultate_metrics(result):
     

@@ -4,7 +4,7 @@ import torchvision
 from torchvision import datasets, transforms, models
 from torch.utils.data import DataLoader, TensorDataset
 from assignment_01.task1.data.transforms import *
-from config import task_config
+from assignment_01.task1.config import task_config
 import numpy as np
 
 def get_test_subset(

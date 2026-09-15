@@ -3,8 +3,8 @@ import open_clip
 import torch.nn as nn
 from torchvision import models
 
-from config import task_config
-from data.transforms import apply_normalization
+from assignment_01.task1.config import task_config
+from assignment_01.task1.data.transforms import apply_normalization
 
 class LinearClassifier(nn.Module):
     def __init__(self, input_dim, num_classes = 10):

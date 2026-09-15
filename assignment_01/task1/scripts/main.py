@@ -2,7 +2,6 @@ import argparse
 import os
 import gc
 import numpy as np
-from assignment_01.task1.data.make_subset import get_test_subset
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -13,9 +12,11 @@ from torchvision import datasets
 from torch.utils.data import Subset, DataLoader, TensorDataset
 from sklearn.model_selection import train_test_split
 from matplotlib import pyplot as plt
-from config import task_config
+
+from assignment_01.task1.data.make_subset import get_test_subset
+from assignment_01.task1.config import task_config
 from assignment_01.task1.data.transforms import apply_universal_transforms
-from models.backbones import (
+from assignment_01.task1.models.backbones import (
     Resnet50Backbone, 
     Torchvision_Vit_B_16_Backbone, 
     Openai_Clip_Backbone,
@@ -371,8 +372,7 @@ def make_clip_zero_shot_predictions(clip_result, text_features, logit_scale, pro
 def main():
     
     parser = argparse.ArgumentParser(description="Train and Evaluate Models on STL-10 Dataset")
-    parser.add_argument("--mode", choices=["train", "infer"], required=True, help="Mode: 'train' to train models, 'infer' to run inference")
-    
+    parser.add_argument("--mode", choices=["train", "infer", "dry-run"], required=True, help="Mode: 'train' to train models, 'infer' to run inference or 'dry-run' to check setup without training or inference")
     args = parser.parse_args()
     
     if args.mode == "train":
@@ -381,6 +381,8 @@ def main():
     elif args.mode == "infer":
         print("Starting inference...")
         start_inference()
+    elif args.mode == "dry-run":
+            print("All set! dry run passed. You can now run the script with --mode train or --mode infer to proceed.")
     else:
         print("Please specify a mode: --train or --infer")
         parser.print_help()

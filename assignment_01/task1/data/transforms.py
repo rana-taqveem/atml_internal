@@ -5,7 +5,7 @@ from copy import deepcopy
 import torch.nn as nn
 
 
-from config import task_config
+from assignment_01.task1.config import task_config
 
 
 UNIVERSAL_TRANSFORMS = T.Compose([
@@ -175,8 +175,8 @@ class StyleTransferModel(nn.Module):
         super(StyleTransferModel, self).__init__()
         
          # Load the dependency only when style transfer is requested.
-        from external.adain import net
-        from external.adain.function import (
+        from assignment_01.task1.data.external.adain import net
+        from assignment_01.task1.data.external.adain.function import (
             adaptive_instance_normalization,
         )
 

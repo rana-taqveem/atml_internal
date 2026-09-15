@@ -1,6 +1,6 @@
 import os
 import torch
-import utils
+from assignment_01.task1  import utils
 
 class TaskConfig:
     
