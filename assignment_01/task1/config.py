@@ -24,7 +24,7 @@ class TaskConfig:
         self.WEIGHT_DECAY = 1e-4
         self.EARLY_STOPPING_PATIENCE = 5
         self.BATCH_SIZE = 64
-        self.NUM_EPOCHS = 1
+        self.NUM_EPOCHS = 50
         
         ## DATASET CONFIGURATIONS
         self.SEED = 6304
