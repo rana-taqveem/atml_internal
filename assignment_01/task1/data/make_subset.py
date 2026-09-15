@@ -5,6 +5,7 @@ from torchvision import datasets, transforms, models
 from torch.utils.data import DataLoader, TensorDataset
 from assignment_01.task1.data.transforms import *
 from assignment_01.task1.config import task_config
+from assignment_01.task1.data.download import prepare_stl10
 import numpy as np
 
 def get_test_subset(
@@ -19,9 +20,10 @@ def get_test_subset(
     if transformation_type not in allowed_transformations:
         raise ValueError(f"Invalid transformation_type. Allowed values are: {allowed_transformations}")
     
+    prepare_stl10(task_config.TASK_DATASET_DIR)
     test_ds_full = datasets.STL10(root=task_config.TASK_DATASET_DIR,
                                   split='test', 
-                                  download=True,
+                                  download=False,
                                   transform=apply_universal_transforms)
     
     if os.path.exists(task_config.SELECTED_INDICES_FILE):

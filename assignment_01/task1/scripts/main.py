@@ -14,6 +14,7 @@ from sklearn.model_selection import train_test_split
 from matplotlib import pyplot as plt
 
 from assignment_01.task1.data.make_subset import get_test_subset
+from assignment_01.task1.data.download import prepare_stl10
 from assignment_01.task1.config import task_config
 from assignment_01.task1.data.transforms import apply_universal_transforms
 from assignment_01.task1.models.backbones import (
@@ -30,10 +31,10 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using Device: {DEVICE}")
 
 def get_train_val_dataloaders():
-    
+    prepare_stl10(task_config.TASK_DATASET_DIR)
     train_ds_full = datasets.STL10(root=task_config.TASK_DATASET_DIR, 
                                    split='train', 
-                                   download=True,
+                                   download=False,
                                    transform=apply_universal_transforms)
     
     class_names = train_ds_full.classes
