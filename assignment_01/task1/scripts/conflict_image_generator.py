@@ -64,6 +64,7 @@ def main():
             stylizer=stylizer,
             alpha=strength,
         )
+        print(f"Generated conflict image with alpha={strength}: {metadata}")
     
     conflict_id = f"conflict_{content_id}_{style_id}_alpha_{strength}"
     conflict_image_path = output_dir / f"{conflict_id}.png"
@@ -71,7 +72,10 @@ def main():
     metadata["conflict_id"] = conflict_id
     metadata["image_path"] = conflict_image_path
 
-    save_image(conflict_image, conflict_image_path)
+    with (output_dir / f"{conflict_id}.json").open("w", encoding="utf-8") as file:
+        json.dump(metadata, file, indent=2)
+
+    outputs.append(conflict_image)
     
     content_image, _ = test_dataset[content_id]
     style_image, _ = test_dataset[style_id]
