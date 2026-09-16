@@ -1,3 +1,5 @@
+import os
+
 import torch
 from assignment_01.task1.config import task_config
 def generate_cue_conflicts(dataset, 
@@ -16,13 +18,14 @@ def generate_cue_conflicts(dataset,
     conflict_image = stylizer(content_image, 
                               style_image, 
                               alpha=alpha)
-    
+
     metadata = {
         "content_id": int(content_id),
         "style_id": int(style_id),
         "content_label": int(content_label),
         "style_label": int(style_lablel),
         "alpha": float(alpha),
+        "seed": task_config.SEED,
         "accepted": None,
         "rejection_reason": None
     }

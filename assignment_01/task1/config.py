@@ -11,6 +11,7 @@ class TaskConfig:
         self.TASK_FEATURES_DIR = os.path.join(self.TASK_DIR, 'features')
         self.TASK_DATASET_DIR = os.path.join(self.TASK_DIR, 'dataset')
         self.TASK_RESULTS_DIR = os.path.join(self.TASK_DIR, 'results')
+        self.TASK_CONFLICT_DATASET_DIR = os.path.join(self.TASK_DIR, 'conflict_dataset')
         self.TASK_TRAIN_DIR = os.path.join(self.TASK_DIR, 'train')
         self.TASK_TEST_DIR = os.path.join(self.TASK_DIR, 'test')
         
@@ -63,6 +64,7 @@ class TaskConfig:
         os.makedirs(self.TASK_RESULTS_DIR, exist_ok=True)
         os.makedirs(self.MODEL_WEIGHTS_DIR, exist_ok=True)
         os.makedirs(self.CUE_CONFLICT_DIR, exist_ok=True)
+        os.makedirs(self.TASK_CONFLICT_DATASET_DIR, exist_ok=True)
 
         TORCH_HOME = os.path.join(self.TASK_DIR, 'torch_cache')
         os.environ['TORCH_HOME'] = TORCH_HOME

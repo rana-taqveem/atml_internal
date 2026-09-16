@@ -168,7 +168,6 @@ class PatchShuffler:
         
         return shuffled_image, permuted_indices
     
-
 class StyleTransferModel(nn.Module):
     
     def __init__(self, encoder_path, decoder_path):
@@ -219,7 +218,7 @@ class StyleTransferModel(nn.Module):
             raise ValueError("Alpha must be in the range [0, 1]")
         
         for image in (content_image, style_image):
-            if image.shape[1] != (3, 224, 224):
+            if tuple(image.shape) != (3, 224, 224):
                 raise ValueError("Input images must have shape (3, 224, 224)")
             
             if not torch.is_floating_point(image):
