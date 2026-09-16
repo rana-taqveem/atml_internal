@@ -118,6 +118,10 @@ Manual implementation exercise: add a separate compare_with_clean(clean_result, 
 
 ## Revision questions
 
+### Why does JSON reject PosixPath, and why were alpha variants missing?
+
+Path objects provide filesystem operations; JSON stores basic values such as strings, numbers, lists and dictionaries. Store str(image_path) in metadata while retaining Path objects for filesystem operations. In the reviewed strength sweep, the saving and outputs.append blocks were outside the loop, so they would process only the final alpha. Indent image saving, metadata saving and outputs.append inside the loop; keep the combined preview after it. Explicitly call save_image for individual candidates too. A failed json.dump can leave a partial JSON file; rerunning the corrected write block replaces that file. No model retraining is needed for this serialization error.
+
 ### Why does the first airplane/bird stylization look like a color change?
 
 In the supplied preview, airplane shape survives but recognizable bird texture is not evident. This is insufficient visual evidence for an accepted cue conflict; it does not alone prove a coding error. AdaIN matches whole feature-map channel statistics, without identifying the bird or isolating feathers. The blurry bird and substantial background may provide weak object-specific texture cues. The current alpha=0.5 also mixes stylized features equally with original content features.

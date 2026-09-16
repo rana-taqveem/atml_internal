@@ -64,23 +64,27 @@ def main():
             stylizer=stylizer,
             alpha=strength,
         )
-        print(f"Generated conflict image with alpha={strength}: {metadata}")
-    
-    conflict_id = f"conflict_{content_id}_{style_id}_alpha_{strength}"
-    conflict_image_path = output_dir / f"{conflict_id}.png"
-    
-    metadata["conflict_id"] = conflict_id
-    metadata["image_path"] = conflict_image_path
 
-    with (output_dir / f"{conflict_id}.json").open("w", encoding="utf-8") as file:
-        json.dump(metadata, file, indent=2)
+        conflict_id = f"conflict_{content_id}_{style_id}_alpha_{strength}"
+        conflict_image_path = output_dir / f"{conflict_id}.png"
 
-    outputs.append(conflict_image)
-    
+        save_image(conflict_image, conflict_image_path)
+
+        metadata["conflict_id"] = conflict_id
+        metadata["image_path"] = str(conflict_image_path)
+
+        with (output_dir / f"{conflict_id}.json").open(
+            "w", encoding="utf-8"
+        ) as file:
+            json.dump(metadata, file, indent=2)
+
+        outputs.append(conflict_image)
+
+    # Outside the loop: assemble all four outputs into one preview.
     content_image, _ = test_dataset[content_id]
     style_image, _ = test_dataset[style_id]
-    
-    preview_path = output_dir / f"alpha_comparison_{content_id}_{style_id}_alpha_{strength}.png"
+
+    preview_path = output_dir / f"alpha_comparison_{content_id}_{style_id}.png"
 
     save_image(
         [content_image, style_image] + outputs,
@@ -90,6 +94,6 @@ def main():
 
     print("Saved preview:", preview_path)
     print("Order: content | style | alpha 0 | 0.5 | 0.75 | 1.0")
-    
+
 if __name__ == "__main__":
     main()
