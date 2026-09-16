@@ -51,49 +51,134 @@ def main():
     #     alpha=0.5
     # )
     
-    strengths = [0.0, 0.5, 0.75, 1.0]
-    outputs = []
+    candidates_per_direction = 40
+    alpha = 1.0
+    rng = np.random.default_rng(task_config.SEED)
 
-    output_dir = Path(task_config.TASK_CONFLICT_DATASET_DIR)
-
-    for strength in strengths:
-        conflict_image, metadata = generate_cue_conflicts(
-            dataset=test_dataset,
-            content_id=content_id,
-            style_id=style_id,
-            stylizer=stylizer,
-            alpha=strength,
-        )
-
-        conflict_id = f"conflict_{content_id}_{style_id}_alpha_{strength}"
-        conflict_image_path = output_dir / f"{conflict_id}.png"
-
-        save_image(conflict_image, conflict_image_path)
-
-        metadata["conflict_id"] = conflict_id
-        metadata["image_path"] = str(conflict_image_path)
-
-        with (output_dir / f"{conflict_id}.json").open(
-            "w", encoding="utf-8"
-        ) as file:
-            json.dump(metadata, file, indent=2)
-
-        outputs.append(conflict_image)
-
-    # Outside the loop: assemble all four outputs into one preview.
-    content_image, _ = test_dataset[content_id]
-    style_image, _ = test_dataset[style_id]
-
-    preview_path = output_dir / f"alpha_comparison_{content_id}_{style_id}.png"
-
-    save_image(
-        [content_image, style_image] + outputs,
-        preview_path,
-        nrow=6,
+    # Separate production candidates from earlier pilot images.
+    output_dir = (
+        Path(task_config.TASK_CONFLICT_DATASET_DIR)
+        / "candidates_v1"
     )
+    output_dir.mkdir(parents=True, exist_ok=False)
 
-    print("Saved preview:", preview_path)
-    print("Order: content | style | alpha 0 | 0.5 | 0.75 | 1.0")
+    # Group original dataset IDs by class.
+    ids_by_class = {
+        class_id: [
+            int(image_id)
+            for image_id in selected_indices
+            if int(test_dataset.labels[image_id]) == class_id
+        ]
+        for class_id in range(task_config.NUM_CLASSES)
+    }
 
+    records = []
+    sampling_plan = []
+
+    for class_a, class_b in task_config.CLASS_PAIRS:
+        directions = [
+            (class_a, class_b),
+            (class_b, class_a),
+        ]
+
+        for content_class, style_class in directions:
+            # All distinct content/style combinations for this direction.
+            combinations = [
+                (content_id, style_id)
+                for content_id in ids_by_class[content_class]
+                for style_id in ids_by_class[style_class]
+            ]
+
+            if len(combinations) < candidates_per_direction:
+                raise ValueError(
+                    f"Not enough combinations for "
+                    f"{content_class} -> {style_class}"
+                )
+
+            # Save the full random order so later candidates can extend it.
+            order = rng.permutation(len(combinations))
+            ordered_pairs = [
+                combinations[int(index)] for index in order
+            ]
+
+            sampling_plan.append({
+                "content_class": content_class,
+                "style_class": style_class,
+                "ordered_pairs": ordered_pairs,
+            })
+
+    # Save the plan before expensive image generation.
+    with (output_dir / "sampling_plan.json").open(
+        "w", encoding="utf-8"
+    ) as file:
+        json.dump({
+            "seed": task_config.SEED,
+            "alpha": alpha,
+            "candidates_per_direction": candidates_per_direction,
+            "groups": sampling_plan,
+        }, file, indent=2)
+
+    for group in sampling_plan:
+        content_class = group["content_class"]
+        style_class = group["style_class"]
+
+        for candidate_order, (content_id, style_id) in enumerate(
+            group["ordered_pairs"][:candidates_per_direction]
+        ):
+            conflict_image, metadata = generate_cue_conflicts(
+                dataset=test_dataset,
+                content_id=content_id,
+                style_id=style_id,
+                stylizer=stylizer,
+                alpha=alpha,
+            )
+
+            conflict_id = (
+                f"c{content_class}_s{style_class}"
+                f"_{candidate_order:04d}"
+                f"_{content_id}_{style_id}"
+            )
+
+            image_name = f"{conflict_id}.png"
+            preview_name = f"preview_{conflict_id}.png"
+
+            save_image(conflict_image, output_dir / image_name)
+
+            content_image, _ = test_dataset[content_id]
+            style_image, _ = test_dataset[style_id]
+
+            save_image(
+                [content_image, style_image, conflict_image],
+                output_dir / preview_name,
+                nrow=3,
+            )
+
+            metadata.update({
+                "conflict_id": conflict_id,
+                "pair": sorted([content_class, style_class]),
+                "direction": f"{content_class}->{style_class}",
+                "candidate_order": candidate_order,
+                "image_path": image_name,
+                "preview_path": preview_name,
+                "selected_for_evaluation": False,
+            })
+
+            # Save each record immediately to preserve completed work.
+            with (output_dir / f"{conflict_id}.json").open(
+                "w", encoding="utf-8"
+            ) as file:
+                json.dump(metadata, file, indent=2)
+
+            records.append(metadata)
+            print(f"Saved candidate {len(records)}: {conflict_id}")
+
+    with (output_dir / "manifest.json").open(
+        "w", encoding="utf-8"
+    ) as file:
+        json.dump(records, file, indent=2)
+
+    print("Candidates generated:", len(records))
+    print("Review directory:", output_dir)
+    
 if __name__ == "__main__":
     main()

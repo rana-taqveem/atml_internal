@@ -1,5 +1,7 @@
 # Task 1 learning notes and question log
 
+See [cue-conflict review protocol](CUE_CONFLICT_REVIEW.md) for the proposed 400-candidate pool, acceptance/rejection rules and balanced selection of 200 valid images. Selection follows fixed candidate order among accepted images, rather than an undefined visual ranking of the "best" outputs. Extra accepted but unused examples are not rejections.
+
 Track implementation and experiment completion in [Task 1 checklist](TASK1_CHECKLIST.md). A checked implementation item does not establish that final experimental evidence has been generated.
 
 These are revision notes from our implementation discussions, not experimental results or report prose. Keep adding questions, explanations, examples and implementation decisions as we progress. User preference: provide implementation code in chat for manual typing; edit code only when explicitly requested. Documentation updates are requested.
@@ -117,6 +119,10 @@ Manual implementation exercise: add a separate compare_with_clean(clean_result, 
 7. Inspect informative cue-conflict agreements/disagreements/failures; distinguish prediction stability from feature stability and architecture effects from pretraining/data/capacity confounds. Interpret actual results yourself after running experiments.
 
 ## Revision questions
+
+### Should we choose the rightmost alpha=1 preview?
+
+In the supplied six-panel preview (content, style, alpha=0, 0.5, 0.75, 1), the rightmost output shows the strongest visible stylization and preserves a recognizable airplane silhouette. However, much of the transferred grain resembles the style image's background; recognizable bird plumage is not clear at preview resolution. Stronger whole-image stylization does not establish stronger bird-specific texture. Alpha=1 is a reasonable pilot setting to inspect on multiple exemplars, not automatic evidence that this sample qualifies. Inspect the saved individual output and use a predefined visual rule requiring recognizable content plus discernible intended texture, without classifier predictions. Keep ambiguous samples pending or reject them with a reason. Record style_label as the dataset class bird, not a more specific species inferred from appearance.
 
 ### Why does JSON reject PosixPath, and why were alpha variants missing?
 
