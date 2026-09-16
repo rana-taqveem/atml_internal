@@ -76,7 +76,7 @@ def main():
     content_image, _ = test_dataset[content_id]
     style_image, _ = test_dataset[style_id]
     
-    preview_path = output_dir / f"alpha_comparison_{content_id}_{style_id}.png"
+    preview_path = output_dir / f"alpha_comparison_{content_id}_{style_id}_alpha_{strength}.png"
 
     save_image(
         [content_image, style_image] + outputs,
