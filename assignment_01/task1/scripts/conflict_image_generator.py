@@ -35,12 +35,12 @@ def main():
     
     content_id = next(
         image_id for image_id in selected_indices 
-        if int(test_dataset.targets[image_id]) == content_class
+        if int(test_dataset.labels[image_id]) == content_class
     )
     
     style_id = next(
         image_id for image_id in selected_indices
-        if int(test_dataset.targets[image_id]) == style_class
+        if int(test_dataset.labels[image_id]) == style_class
     )
     
     conflict_image, metadata = generate_cue_conflicts(
