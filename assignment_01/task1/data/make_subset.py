@@ -34,7 +34,7 @@ def get_test_subset(
         selected_indices = []
         for class_idx in range(task_config.NUM_CLASSES):
             class_indices = np.flatnonzero(
-                np.array(test_ds_full.targets) == class_idx)
+                np.array(test_ds_full.labels) == class_idx)
             
             rng.shuffle(class_indices)
             
@@ -49,7 +49,7 @@ def get_test_subset(
     np.save(task_config.SELECTED_INDICES_FILE, np.array(selected_indices))
     print(f"Saved selected indices to {task_config.SELECTED_INDICES_FILE}")
     
-    selected_labels = np.asarray(test_ds_full.targets)[selected_indices]
+    selected_labels = np.asarray(test_ds_full.labels)[selected_indices]
     class_counts = np.bincount(selected_labels, minlength=task_config.NUM_CLASSES)
     print(f"Class counts in selected subset: {class_counts}")
     

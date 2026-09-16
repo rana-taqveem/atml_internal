@@ -118,6 +118,10 @@ Manual implementation exercise: add a separate compare_with_clean(clean_result, 
 
 ## Revision questions
 
+### Why is selected_indices.npy missing during conflict generation?
+
+The generator loads previously selected test IDs; loading does not create the file. Training does not necessarily call get_test_subset, which creates this artifact. After correcting both test_ds_full.targets references in make_subset.py to test_ds_full.labels for torchvision STL10, call get_test_subset(transformation_type='original') only if the configured index file is absent, then load the IDs. This prepares clean images and IDs without running inference. Preserve any existing intended selection by locating/reusing its file rather than replacing it. Longer-term, separate lightweight ID selection from image transformation to avoid materializing 500 images just to obtain their IDs.
+
 ### Review of conflict_image_generator.py
 
 The generator separates image generation from saving and creates a PNG plus a content/style/output preview. The weight directory now exists as data/external/model_weights (renamed from mode_weights). Syntax checks passed, but execution remains blocked by config referencing TASK_CONFLICT_DATASET_DIR before assignment; its parent should be TASK_DIR. The installed torchvision STL10 source uses dataset.labels, not dataset.targets, for class selection. download=True in the new script bypasses the staged download helper if data are missing; use prepare_stl10 followed by download=False, or download=False alone when data are already prepared. Add conflict_id and image_path to each JSON record. Avoid adding the conflict_ prefix twice to JSON filenames. This helper now returns tensors and metadata without saving .pt files; the generator currently saves PNGs only. Rerunning the same pair overwrites its filenames, so use distinct run/candidate identifiers when trying multiple alpha values. These are review findings, not automatic Python edits.

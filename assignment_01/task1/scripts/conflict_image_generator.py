@@ -4,6 +4,7 @@ import numpy as np
 from torchvision.datasets import STL10
 from torchvision.utils import save_image
 
+from assignment_01.task1.data.make_subset import get_test_subset
 from assignment_01.task1.config import task_config
 from assignment_01.task1.data.transforms import StyleTransferModel, apply_universal_transforms
 from assignment_01.task1.data.make_cue_conflicts import generate_cue_conflicts
@@ -23,8 +24,13 @@ def main():
     # Load the STL10 test dataset
     test_dataset = STL10(root=task_config.TASK_DATASET_DIR, split='test', download=False, transform=apply_universal_transforms)
     
-    selected_indices = np.load(task_config.SELECTED_INDICES_FILE).tolist()
-    
+    indices_path = Path(task_config.SELECTED_INDICES_FILE)
+
+    if not indices_path.is_file():
+        print("Preparing the fixed test subset and saving its image IDs...")
+        get_test_subset(transformation_type="original")
+
+    selected_indices = np.load(indices_path).tolist()
     content_class, style_class = task_config.CLASS_PAIRS[0]  # Example: (0, 1)
     
     content_id = next(
