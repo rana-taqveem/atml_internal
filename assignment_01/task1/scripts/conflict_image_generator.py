@@ -43,16 +43,30 @@ def main():
         if int(test_dataset.labels[image_id]) == style_class
     )
     
-    conflict_image, metadata = generate_cue_conflicts(
-        dataset=test_dataset,
-        content_id=content_id,
-        style_id=style_id,
-        stylizer=stylizer,
-        alpha=0.5
-    )
+    # conflict_image, metadata = generate_cue_conflicts(
+    #     dataset=test_dataset,
+    #     content_id=content_id,
+    #     style_id=style_id,
+    #     stylizer=stylizer,
+    #     alpha=0.5
+    # )
     
-    conflict_id = f"conflict_{content_id}_{style_id}"
-    conflict_image_path = str(Path(task_config.TASK_CONFLICT_DATASET_DIR) / f"{conflict_id}.png")
+    strengths = [0.0, 0.5, 0.75, 1.0]
+    outputs = []
+
+    output_dir = Path(task_config.TASK_CONFLICT_DATASET_DIR)
+
+    for strength in strengths:
+        conflict_image, metadata = generate_cue_conflicts(
+            dataset=test_dataset,
+            content_id=content_id,
+            style_id=style_id,
+            stylizer=stylizer,
+            alpha=strength,
+        )
+    
+    conflict_id = f"conflict_{content_id}_{style_id}_alpha_{strength}"
+    conflict_image_path = output_dir / f"{conflict_id}.png"
     
     metadata["conflict_id"] = conflict_id
     metadata["image_path"] = conflict_image_path
@@ -62,14 +76,16 @@ def main():
     content_image, _ = test_dataset[content_id]
     style_image, _ = test_dataset[style_id]
     
-    save_image([content_image, style_image, conflict_image], 
-               str(Path(task_config.TASK_CONFLICT_DATASET_DIR) / f"preview_{conflict_id}.png"),
-               nrow=3)
-    
-    with (Path(task_config.TASK_CONFLICT_DATASET_DIR) / f"{conflict_id}.json").open("w", encoding="utf-8") as file: json.dump(metadata, file, indent=2)
+    preview_path = output_dir / f"alpha_comparison_{content_id}_{style_id}.png"
 
-    print("Saved candidate:", conflict_id)
-    print("Preview order: content | style | generated conflict")
+    save_image(
+        [content_image, style_image] + outputs,
+        preview_path,
+        nrow=6,
+    )
+
+    print("Saved preview:", preview_path)
+    print("Order: content | style | alpha 0 | 0.5 | 0.75 | 1.0")
     
 if __name__ == "__main__":
     main()

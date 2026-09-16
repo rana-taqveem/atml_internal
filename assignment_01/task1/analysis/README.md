@@ -118,6 +118,16 @@ Manual implementation exercise: add a separate compare_with_clean(clean_result, 
 
 ## Revision questions
 
+### Why does the first airplane/bird stylization look like a color change?
+
+In the supplied preview, airplane shape survives but recognizable bird texture is not evident. This is insufficient visual evidence for an accepted cue conflict; it does not alone prove a coding error. AdaIN matches whole feature-map channel statistics, without identifying the bird or isolating feathers. The blurry bird and substantial background may provide weak object-specific texture cues. The current alpha=0.5 also mixes stylized features equally with original content features.
+
+For a diagnostic preview, keep the same pair and compare alpha=0, 0.5, 0.75 and 1.0. Alpha=0 tests encoder/decoder reconstruction and need not reproduce input pixels exactly; alpha=1 removes the original-content blend but does not guarantee a valid texture conflict. Save distinctly named pilot previews to avoid overwriting candidates. Inspect several texture-rich style exemplars, then freeze a documented generation/visual-rejection protocol before evaluating classifiers. Reject samples whose only visible change is color or whose content becomes unrecognizable; never use classifier predictions for acceptance. Reference implementation: https://github.com/naoto0804/pytorch-AdaIN.
+
+### The generator prints Saved candidate, but where are the images?
+
+The current generator writes to TASK_CONFLICT_DATASET_DIR, which is TASK_DIR/conflict_dataset. It does not write to the separate cue_conflict folder or the repository's scripts directory. In the reported Colab setup this is /content/drive/MyDrive/ATML/assignment_01/task1/conflict_dataset. Candidate conflict_2937_5093 produces conflict_2937_5093.png, preview_conflict_2937_5093.png and conflict_2937_5093.json. The preview is a separate saved image; save_image does not display it in the notebook. Print the configured absolute directory, list files and use PIL with IPython.display.display in a Colab cell to inspect it. A local editor cannot show remote Drive artifacts unless downloaded/synchronized.
+
 ### Why is selected_indices.npy missing during conflict generation?
 
 The generator loads previously selected test IDs; loading does not create the file. Training does not necessarily call get_test_subset, which creates this artifact. After correcting both test_ds_full.targets references in make_subset.py to test_ds_full.labels for torchvision STL10, call get_test_subset(transformation_type='original') only if the configured index file is absent, then load the IDs. This prepares clean images and IDs without running inference. Preserve any existing intended selection by locating/reusing its file rather than replacing it. Longer-term, separate lightweight ID selection from image transformation to avoid materializing 500 images just to obtain their IDs.
