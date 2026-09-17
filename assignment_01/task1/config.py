@@ -50,11 +50,11 @@ class TaskConfig:
         # ]
 
         self.CLASS_PAIRS = [
-            (0, 1), # e.g., airplane vs bird
-            (2, 3), # e.g., car vs cat
-            (1, 3), # e.g., deer vs dog
-            (8, 3), # e.g., horse vs monkey
-            (9, 1)  # e.g., ship vs truck
+            (0, 1),  # airplane / bird
+            (1, 2),  # bird / car
+            (7, 9),  # monkey / truck
+            (2, 4),  # car / deer
+            (1, 3),  # bird / cat
         ]
                 
         # CLIP Specific Prompt

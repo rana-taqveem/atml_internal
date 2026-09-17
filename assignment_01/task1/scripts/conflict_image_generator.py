@@ -1,17 +1,10 @@
-"""Generate a balanced pool of cue-conflict candidates for visual review.
+"""Generate cue-conflict candidates for visual review.
 
-For five unordered class pairs, generate both directions with 40 candidates
-per direction: 5 * 2 * 40 = 400 candidates.
-
-Each candidate contains:
-    content.png   -- clean content input, resized to 224x224
-    style.png     -- clean style input, resized to 224x224
-    conflict.png  -- generated image
-    preview.png   -- content | style | conflict
-    metadata.json
-
-Image paths in metadata are relative to the run directory.
-Candidates must be visually reviewed before classifier inference.
+Production: 25 candidates in each direction, 50 per pair, 250 across five
+pairs. Each pair has one flat folder. Filenames identify direction and
+candidate; content, style, conflict, preview and metadata are saved together.
+Select 20 valid images per direction for 200 total, generating more if needed.
+Pilot mode retains the alpha-comparison workflow and its separate layout.
 """
 
 import argparse
@@ -33,7 +26,7 @@ from assignment_01.task1.data.transforms import (
 
 
 ALPHA = 0.7
-CANDIDATES_PER_DIRECTION = 40
+CANDIDATES_PER_DIRECTION = 25
 TARGET_ACCEPTED_PER_DIRECTION = 20
 RUN_VERSION = "v1"
 
@@ -149,7 +142,7 @@ def main():
     cause an error to prevent overwriting images or review decisions.
     """
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--mode", choices=("pilot", "production"), default="pilot")
+    parser.add_argument("--mode", choices=("pilot", "production"), default="production")
     parser.add_argument("--run-version", default=RUN_VERSION)
     args = parser.parse_args()
     candidates_per_direction = 5 if args.mode == "pilot" else CANDIDATES_PER_DIRECTION
@@ -175,7 +168,7 @@ def main():
     output_dir = (
         Path(task_config.TASK_CONFLICT_DATASET_DIR)
         / (f"alpha_pilot_{args.run_version}" if args.mode == "pilot"
-           else f"candidates_alpha_{alpha_tag}_{args.run_version}")
+           else f"flat_pairs_alpha_{alpha_tag}_{args.run_version}")
     )
 
     if output_dir.exists():
@@ -381,22 +374,18 @@ def main():
                 f"_{candidate_order:04d}_{content_id}_{style_id}"
             )
 
-            candidate_dir = (
-                output_dir
-                / group["pair_name"]
-                / group["direction_name"]
-                / f"candidate_{candidate_order:04d}_{content_id}_{style_id}"
-            )
-            candidate_dir.mkdir(parents=True, exist_ok=False)
+            candidate_dir = output_dir / group["pair_name"]
+            candidate_dir.mkdir(parents=True, exist_ok=True)
+            stem = f"{group['direction_name']}__{conflict_id}"
 
             content_image, _ = test_dataset[content_id]
             style_image, _ = test_dataset[style_id]
 
-            content_path = candidate_dir / "content.png"
-            style_path = candidate_dir / "style.png"
-            conflict_path = candidate_dir / "conflict.png"
-            preview_path = candidate_dir / "preview.png"
-            metadata_path = candidate_dir / "metadata.json"
+            content_path = candidate_dir / f"content__{stem}.png"
+            style_path = candidate_dir / f"style__{stem}.png"
+            conflict_path = candidate_dir / f"conflict__{stem}.png"
+            preview_path = candidate_dir / f"preview__{stem}.png"
+            metadata_path = candidate_dir / f"metadata__{stem}.json"
 
             save_image(content_image, content_path)
             save_image(style_image, style_path)
@@ -457,7 +446,8 @@ def main():
     print("Output directory:", output_dir)
     print("Preview order: content | style | conflict")
     print("All candidates remain unreviewed.")
-    print("Review each metadata.json before selecting inference images.")
+    print("Filter preview__*.png within each pair folder for visual review.")
+    print("Select 20 accepted images PER DIRECTION (200 total across five pairs).")
 
 
 if __name__ == "__main__":
