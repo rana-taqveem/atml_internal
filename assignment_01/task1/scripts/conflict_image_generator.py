@@ -14,6 +14,7 @@ Image paths in metadata are relative to the run directory.
 Candidates must be visually reviewed before classifier inference.
 """
 
+import argparse
 import json
 from pathlib import Path
 
@@ -43,6 +44,98 @@ def save_json(path, data):
         json.dump(data, file, indent=2)
 
 
+
+def generate_alpha_pilot(dataset, stylizer, groups, output_dir,
+                         selected_ids, class_names, candidates_per_direction):
+    """Compare fixed source pairs across strengths without selecting a winner.
+
+    Each candidate folder contains clean content/style images, four variant
+    folders with independent review metadata, and a labeled comparison PNG.
+    The pilot reuses the production sampling order. Review five candidates
+    per direction, select a direction-level alpha, and record it before
+    production inference. No model predictions participate in this process.
+    """
+    from PIL import Image, ImageDraw
+
+    strengths = [0.5, 0.7, 0.85, 1.0]
+    output_dir.mkdir(parents=True, exist_ok=False)
+    save_json(output_dir / "sampling_plan.json", {
+        "mode": "pilot", "seed": int(task_config.SEED),
+        "strengths": strengths, "classes": class_names,
+        "selected_image_ids": selected_ids,
+        "candidates_per_direction": candidates_per_direction,
+        "groups": groups,
+    })
+    save_json(output_dir / "direction_choices.json", {
+        f"{g['content_class']}->{g['style_class']}": {
+            "alpha": None, "reason": "", "reviewed": False,
+        } for g in groups
+    })
+    save_json(output_dir / "review_protocol.json", {
+        "accept_if": [
+            "Content shape remains recognizable.",
+            "Style texture visibly transfers to the object, beyond color alone.",
+            "Source ambiguity, background transfer or severe artifacts do not dominate.",
+        ],
+        "decision": "Most visually valid candidates per direction; lower alpha breaks ties.",
+        "model_predictions_used": False,
+        "note": "Leave direction alpha unset if no strength gives usable examples.",
+    })
+    records = []
+    for group in groups:
+        for order, (content_id, style_id) in enumerate(
+            group["ordered_pairs"][:candidates_per_direction]
+        ):
+            candidate_id = f"c{group['content_class']}_s{group['style_class']}_{order:04d}_{content_id}_{style_id}"
+            folder = (output_dir / group["pair_name"] / group["direction_name"]
+                      / f"candidate_{order:04d}_{content_id}_{style_id}")
+            folder.mkdir(parents=True, exist_ok=False)
+            content, _ = dataset[content_id]
+            style, _ = dataset[style_id]
+            save_image(content, folder / "content.png")
+            save_image(style, folder / "style.png")
+            panels = [("Content", folder / "content.png"),
+                      ("Style", folder / "style.png")]
+            for alpha in strengths:
+                variant = folder / f"alpha_{str(alpha).replace('.', '_')}"
+                variant.mkdir()
+                output, metadata = generate_cue_conflicts(
+                    dataset, content_id, style_id, stylizer, alpha=alpha,
+                )
+                image_path = variant / "conflict.png"
+                save_image(output, image_path)
+                metadata.update({
+                    "conflict_id": f"{candidate_id}_alpha_{alpha}",
+                    "candidate_id": candidate_id, "candidate_order": order,
+                    "pair": group["pair"], "direction": f"{group['content_class']}->{group['style_class']}",
+                    "mode": "pilot", "selected_for_evaluation": False,
+                    "image_path": image_path.relative_to(output_dir).as_posix(),
+                    "content_image_path": (folder / "content.png").relative_to(output_dir).as_posix(),
+                    "style_image_path": (folder / "style.png").relative_to(output_dir).as_posix(),
+                })
+                save_json(variant / "metadata.json", metadata)
+                records.append({
+                    "conflict_id": metadata["conflict_id"],
+                    "metadata_path": (variant / "metadata.json").relative_to(output_dir).as_posix(),
+                })
+                panels.append((f"alpha = {alpha}", image_path))
+
+            # Label the saved pixel images without altering model input files.
+            sheet = Image.new("RGB", (224 * len(panels), 254), "white")
+            draw = ImageDraw.Draw(sheet)
+            for column, (label, path) in enumerate(panels):
+                draw.text((column * 224 + 8, 8), label, fill="black")
+                with Image.open(path) as panel:
+                    sheet.paste(panel.convert("RGB"), (column * 224, 30))
+            sheet.save(folder / "comparison.png")
+            save_json(output_dir / "manifest.json", records)
+            print(f"Saved pilot comparison: {folder / 'comparison.png'}")
+
+    print(f"Pilot complete: {len(records)} variants in {output_dir}")
+    print("Review comparison.png files; record decisions in variant metadata.json.")
+    print("Record chosen strengths in direction_choices.json; choices are not applied automatically.")
+
+
 def main():
     """Prepare inputs, save a seeded sampling plan, then generate candidates.
 
@@ -55,6 +148,11 @@ def main():
     This script does not resume interrupted runs. Existing run directories
     cause an error to prevent overwriting images or review decisions.
     """
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--mode", choices=("pilot", "production"), default="pilot")
+    parser.add_argument("--run-version", default=RUN_VERSION)
+    args = parser.parse_args()
+    candidates_per_direction = 5 if args.mode == "pilot" else CANDIDATES_PER_DIRECTION
     task_config.init_env()
 
     if not 0 < ALPHA <= 1:
@@ -76,13 +174,14 @@ def main():
     alpha_tag = str(ALPHA).replace(".", "_")
     output_dir = (
         Path(task_config.TASK_CONFLICT_DATASET_DIR)
-        / f"candidates_alpha_{alpha_tag}_{RUN_VERSION}"
+        / (f"alpha_pilot_{args.run_version}" if args.mode == "pilot"
+           else f"candidates_alpha_{alpha_tag}_{args.run_version}")
     )
 
     if output_dir.exists():
         raise FileExistsError(
             f"Run directory already exists: {output_dir}\n"
-            "Choose a new RUN_VERSION to preserve the existing run."
+            "Use a new --run-version to preserve the existing run."
         )
 
     prepare_stl10(task_config.TASK_DATASET_DIR)
@@ -182,7 +281,7 @@ def main():
                 for style_id in ids_by_class[style_class]
             ]
 
-            if len(combinations) < CANDIDATES_PER_DIRECTION:
+            if len(combinations) < candidates_per_direction:
                 raise ValueError(
                     f"Not enough combinations for "
                     f"{class_names[content_class]} content / "
@@ -210,6 +309,13 @@ def main():
         encoder_path=encoder_path,
         decoder_path=decoder_path,
     )
+
+    if args.mode == "pilot":
+        generate_alpha_pilot(
+            test_dataset, stylizer, sampling_plan, output_dir,
+            selected_indices, class_names, candidates_per_direction,
+        )
+        return
 
     output_dir.mkdir(parents=True, exist_ok=False)
 
