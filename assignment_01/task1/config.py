@@ -41,14 +41,22 @@ class TaskConfig:
         self.CLIP_VIT_B_32 = "clip_vit_b_32"
         
         self.NUM_CONFLICT_IMAGES = 200
+        # self.CLASS_PAIRS = [
+        #     (0, 1), # e.g., airplane vs bird
+        #     (2, 3), # e.g., car vs cat
+        #     (4, 5), # e.g., deer vs dog
+        #     (6, 7), # e.g., horse vs monkey
+        #     (8, 9)  # e.g., ship vs truck
+        # ]
+
         self.CLASS_PAIRS = [
             (0, 1), # e.g., airplane vs bird
             (2, 3), # e.g., car vs cat
-            (4, 5), # e.g., deer vs dog
-            (6, 7), # e.g., horse vs monkey
-            (8, 9)  # e.g., ship vs truck
+            (1, 3), # e.g., deer vs dog
+            (8, 3), # e.g., horse vs monkey
+            (9, 1)  # e.g., ship vs truck
         ]
-
+                
         # CLIP Specific Prompt
         self.CLIP_PROMPT = "a photo of a {}."
         self.STL10_CLASSES = [
