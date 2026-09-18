@@ -42,7 +42,7 @@ def generate_alpha_pilot(dataset, stylizer, groups, output_dir,
                          selected_ids, class_names, candidates_per_direction):
     """Compare fixed source pairs across strengths without selecting a winner.
 
-    Each candidate folder contains clean content/style images, four variant
+    Each candidate folder contains baseline content/style images, four variant
     folders with independent review metadata, and a labeled comparison PNG.
     The pilot reuses the production sampling order. Review five candidates
     per direction, select a direction-level alpha, and record it before
@@ -182,7 +182,7 @@ def main():
     indices_path = Path(task_config.SELECTED_INDICES_FILE)
     if not indices_path.is_file():
         print("Preparing the fixed test subset and saving its IDs...")
-        get_test_subset(transformation_type="original")
+        get_test_subset(transformation_type="baseline")
 
     test_dataset = STL10(
         root=task_config.TASK_DATASET_DIR,

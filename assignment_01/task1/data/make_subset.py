@@ -9,13 +9,13 @@ from assignment_01.task1.data.download import prepare_stl10
 import numpy as np
 
 def get_test_subset(
-    transformation_type = 'original',
+    transformation_type = 'baseline',
     *,
     hue_rotation_angle = 0,
     translation_x = 0,
     translation_y = 0,):
     
-    allowed_transformations = ['original', 'grey_scale', 'hue', 'translation', 'patch_shuffle', 'style_transfer']
+    allowed_transformations = ['baseline', 'grey_scale', 'hue', 'translation', 'patch_shuffle', 'style_transfer']
     
     if transformation_type not in allowed_transformations:
         raise ValueError(f"Invalid transformation_type. Allowed values are: {allowed_transformations}")

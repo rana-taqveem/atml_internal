@@ -33,3 +33,11 @@ Review every generated candidate to distinguish accepted, rejected and unreviewe
 Automate sampling, generation, saving and count summaries. Human review establishes visual validity; a large pixel/feature change alone does not establish transferred object texture. Selection constrains conclusions to visually valid stylizations; report rejection patterns rather than hiding difficult groups.
 
 Status: protocol documented; production generation/review not yet executed or verified. Python implementation is supplied in chat for manual typing.
+
+## Pilot amendment: investigate direction-specific strengths
+
+Downloaded alpha=0.7 candidates were generated. A review of the first two previews in each of ten directions (20 total, not the entire pool) found heterogeneous effects: ship/truck examples mostly preserved geometry with color or weak surface changes, while cat-content/car-style examples showed substantial smoothing and distortion. Variation also occurred within directions, e.g. horse-content/monkey-style. These observations motivate a pilot, not confirmed alpha assignments or acceptance decisions.
+
+Use the same first five candidate combinations per direction at alpha 0.5, 0.7, 0.85 and 1.0. Review without model predictions using the same visual rule. Choose one strength per direction by highest valid-candidate count; break ties using the lower strength. Freeze and save the resulting direction-to-alpha map before production review/inference. If no strength yields usable examples, reconsider style exemplars or the stylizer rather than forcing acceptance. Do not count multiple strengths of the same content/style combination as separate selected conflicts.
+
+Direction-specific alpha is a proposed protocol change, not yet implemented or finalized. Archive the previous run and use a new version. Report alpha and acceptance counts per direction; compare models on identical saved outputs. Different strengths confound comparisons between class pairs, even though the common-input comparison between models is retained. The original single-alpha plan above is historical and superseded only once this pilot policy is adopted and its settings recorded.

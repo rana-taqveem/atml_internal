@@ -90,7 +90,7 @@ def show_transformation(image_tensor, transformation_func, *args, **kwargs):
     
     fig, axes = plt.subplots(1, 2, figsize=(10, 5))
     axes[0].imshow(image_tensor.permute(1, 2, 0).cpu().numpy())
-    axes[0].set_title("Original Image")
+    axes[0].set_title("Baseline Image")
     
     axes[0].axis('off')
     axes[1].imshow(transformed_image.permute(1, 2, 0).cpu().numpy())

@@ -76,7 +76,7 @@ def main():
 
     indices_path = Path(task_config.SELECTED_INDICES_FILE)
     if not indices_path.is_file():
-        get_test_subset(transformation_type="original")
+        get_test_subset(transformation_type="baseline")
 
     dataset = STL10(
         root=task_config.TASK_DATASET_DIR,

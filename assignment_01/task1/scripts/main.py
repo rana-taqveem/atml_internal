@@ -13,16 +13,24 @@ from torch.utils.data import Subset, DataLoader, TensorDataset
 from sklearn.model_selection import train_test_split
 from matplotlib import pyplot as plt
 
+from assignment_01.task1.data.conflict_dataset import ConflictDataset
 from assignment_01.task1.data.make_subset import get_test_subset
 from assignment_01.task1.data.download import prepare_stl10
 from assignment_01.task1.config import task_config
 from assignment_01.task1.data.transforms import apply_universal_transforms
+from assignment_01.task1.data.conflict_dataset import ConflictDataset
 from assignment_01.task1.models.backbones import (
     Resnet50Backbone, 
     Torchvision_Vit_B_16_Backbone, 
     Openai_Clip_Backbone,
     LinearClassifier
 )
+from assignment_01.task1.data.translation_dataset import (
+    TranslationDataset,
+    get_translation_conditions,
+    get_translation_dataset,
+)
+
 import open_clip
 
 
@@ -158,7 +166,7 @@ def train_model_head(model, model_name, train_loader, val_loader, criterion, opt
     print(f"Loaded best model weights with Val Acc: {best_val_acc:.2f}%")
     
   torch.save(model.state_dict(), task_config.MODEL_WEIGHTS_DIR + f"/{model_name}_{best_val_acc:.2f}.pth")
-  print(f"Saved optimized best classifier head cleanly to {task_config.MODEL_WEIGHTS_DIR}/{model_name}_{best_val_acc:.2f}.pth")
+  print(f"Saved optimized best classifier head baselinely to {task_config.MODEL_WEIGHTS_DIR}/{model_name}_{best_val_acc:.2f}.pth")
         
   return results
 
@@ -370,12 +378,148 @@ def make_clip_zero_shot_predictions(clip_result, text_features, logit_scale, pro
         "confidence": confidence,
     }
 
+@torch.no_grad()
+def infer_cue_conflicts(model, loader, model_name):
+    model.eval()
+    
+    feature_batches = []
+    logit_batches = []
+    conflict_ids = []
+    
+    collected = {
+        "content_id": [],
+        "style_id": [],
+        "content_label": [],
+        "style_label": [],
+    }
+    
+    for batch in loader:
+        images = batch["image"].to(DEVICE)
+        
+        features = model[0](images)
+        logits = model[1](features)
+        
+        feature_batches.append(features.cpu())
+        logit_batches.append(logits.cpu())
+        conflict_ids.extend(batch["conflict_id"])
+        
+        for key in collected.keys():
+            collected[key].append(batch[key].cpu())
+            
+    if not conflict_ids:
+        raise ValueError("No conflict IDs were collected. Please check the data loader and model.")
+    
+    if len(set(conflict_ids)) != len(conflict_ids):
+        raise ValueError("Duplicate conflict IDs found in the collected data.")
+    
+    features = torch.cat(feature_batches, dim=0)
+    logits = torch.cat(logit_batches, dim=0)
+    
+    combined = { key: torch.cat(batches, dim=0) 
+                for key, batches in collected.items()
+            }
+    
+    checkpoint_path = os.path.join(task_config.TASK_CHECKPOINTS_DIR, f"{model_name}_head.pth")
+    
+    return {
+        "model_name": model_name,
+        "head_checkpoint": os.path.abspath(checkpoint_path),
+        "classes": list(task_config.STL10_CLASSES),
+        "transformation": "cue_conflict",
+        "conflict_ids": conflict_ids,
+        "content_ids": combined["content_id"],
+        "style_ids": combined["style_id"],
+        "content_labels": combined["content_label"],
+        "style_labels": combined["style_label"],
+        "features": features,
+        "logits": logits,
+        "y_pred": logits.argmax(dim=1).tolist(),
+    }
+       
+def run_translation_inference(
+    baseline_dataset, baseline_metadata, models,
+    text_features, logit_scale, prompts,
+):
+    for condition in get_translation_conditions():
+        dataset = TranslationDataset(
+            baseline_dataset=baseline_dataset,
+            translate_x=condition["translation_x"],
+            translate_y=condition["translation_y"],
+        )
+
+        loader = DataLoader(
+            dataset,
+            batch_size=task_config.BATCH_SIZE,
+            shuffle=False,
+            num_workers=0,
+        )
+
+        metadata = {
+            **baseline_metadata,
+            **condition,
+            "transformations": condition["condition_id"],
+        }
+
+        clip_result = None
+
+        for model_name, model in models:
+            result = initialize_results(model_name, metadata)
+            result = test_and_report(
+                model, loader, nn.CrossEntropyLoss(), result
+            )
+
+            if model_name == task_config.CLIP_VIT_B_32:
+                clip_result = result
+
+        if clip_result is None:
+            raise RuntimeError("CLIP translation features are missing.")
+
+        zero_shot_result = make_clip_zero_shot_predictions(
+            clip_result, text_features, logit_scale, prompts
+        )
+
+        filename = (
+            f"{zero_shot_result['model_name']}_"
+            f"{condition['condition_id']}_results.pt"
+        )
+
+        torch.save(
+            zero_shot_result,
+            os.path.join(task_config.TASK_RESULTS_DIR, filename),
+        )
+        
+@torch.no_grad()
+def make_clip_conflict_zero_shot(clip_result, text_features, logit_scale, prompts):
+    image_features = F.normalize(clip_result["features"].float().cpu(), dim=1)
+    text_features = F.normalize(text_features.float().cpu(), dim=1)
+    
+    logits = logit_scale * (image_features @ text_features.T)
+    
+    probabilities  = F.softmax(logits, dim=-1)
+    confidence, predictions = torch.max(probabilities , dim=-1)
+    
+    result = copy.deepcopy(clip_result)
+    
+    result.update({
+        "model_name": f"{task_config.CLIP_VIT_B_32}_zero_shot",
+        "backbone_name": task_config.CLIP_VIT_B_32,
+        "pretrained": "openai",
+        "head_checkpoint": None,
+        "prompts": list(prompts),
+        "logit_scale": float(logit_scale),
+        "features": image_features,
+        "logits": logits,
+        "confidence": confidence,
+        "y_pred": predictions.tolist(),
+    })
+
+    return result
 def main():
     
     parser = argparse.ArgumentParser(description="Train and Evaluate Models on STL-10 Dataset")
     parser.add_argument("--mode", choices=["train", "infer", "dry-run"], required=True, help="Mode: 'train' to train models, 'infer' to run inference or 'dry-run' to check setup without training or inference")
     args = parser.parse_args()
-    
+
     if args.mode == "train":
         print("Starting training...")
         start_training()
@@ -411,16 +555,16 @@ def start_training():
 def start_inference():
     task_config.init_env()
 
-    org_testset, org_metadata     = get_test_subset(transformation_type='original')
+    org_testset, org_metadata     = get_test_subset(transformation_type='baseline')
     gray_testset, gray_metadata   = get_test_subset(transformation_type='grey_scale')
     hue_testset, hue_metadata     = get_test_subset(transformation_type='hue', hue_rotation_angle=30)
-    trans_testset, trans_metadata = get_test_subset(transformation_type='translation', translation_x=8, translation_y=0)
+    # trans_testset, trans_metadata = get_test_subset(transformation_type='translation', translation_x=8, translation_y=0)
     patch_testset, patch_metadata = get_test_subset(transformation_type='patch_shuffle')
     
     orginal_loader = DataLoader(org_testset,   batch_size=task_config.BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
     grey_loader    = DataLoader(gray_testset,  batch_size=task_config.BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
     hue_loader     = DataLoader(hue_testset,   batch_size=task_config.BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
-    trans_loader   = DataLoader(trans_testset, batch_size=task_config.BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
+    # trans_loader   = DataLoader(trans_testset, batch_size=task_config.BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
     patch_loader   = DataLoader(patch_testset, batch_size=task_config.BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
     
     resnet = get_classifier_head(Resnet50Backbone(), model_name=task_config.RESNET50)
@@ -432,17 +576,17 @@ def start_inference():
     print("Logit scale:", logit_scale)
     print("Prompts:", prompts)
     
-    ### original images
+    ### baseline images
 
-    print("Starting inference on original with ResNet50 ...")
+    print("Starting inference on baseline with ResNet50 ...")
     resnet_org_result = initialize_results(task_config.RESNET50, org_metadata)
     test_and_report(resnet, orginal_loader, nn.CrossEntropyLoss(), resnet_org_result)
     
-    print("Starting inference on original with ViT-B/16 ...")
+    print("Starting inference on baseline with ViT-B/16 ...")
     vit_org_result = initialize_results(task_config.VIT_B_16, org_metadata)
     test_and_report(vit, orginal_loader, nn.CrossEntropyLoss(), vit_org_result)
 
-    print("Starting inference on original with CLIP ViT-B/32 ...")
+    print("Starting inference on baseline with CLIP ViT-B/32 ...")
     clip_org_result = initialize_results(task_config.CLIP_VIT_B_32, org_metadata)
     clip_org_result =  test_and_report(clip, orginal_loader, nn.CrossEntropyLoss(), clip_org_result)
     
@@ -487,23 +631,36 @@ def start_inference():
     
     
     ### translated images
-    print("Starting inference on translated images with ResNet50 ...")
-    resnet_trans_result = initialize_results(task_config.RESNET50, trans_metadata)
-    resnet_trans_result = test_and_report(resnet, trans_loader, nn.CrossEntropyLoss(), resnet_trans_result)
+    # print("Starting inference on translated images with ResNet50 ...")
+    # resnet_trans_result = initialize_results(task_config.RESNET50, trans_metadata)
+    # resnet_trans_result = test_and_report(resnet, trans_loader, nn.CrossEntropyLoss(), resnet_trans_result)
 
-    print("Starting inference on translated images with ViT-B/16 ...")
-    vit_trans_result = initialize_results(task_config.VIT_B_16, trans_metadata)
-    vit_trans_result = test_and_report(vit, trans_loader, nn.CrossEntropyLoss(), vit_trans_result)
+    # print("Starting inference on translated images with ViT-B/16 ...")
+    # vit_trans_result = initialize_results(task_config.VIT_B_16, trans_metadata)
+    # vit_trans_result = test_and_report(vit, trans_loader, nn.CrossEntropyLoss(), vit_trans_result)
 
-    print("Starting inference on translated images with CLIP ViT-B/32 ...")
-    clip_trans_result = initialize_results(task_config.CLIP_VIT_B_32, trans_metadata)
-    clip_trans_result = test_and_report(clip, trans_loader, nn.CrossEntropyLoss(), clip_trans_result)
+    # print("Starting inference on translated images with CLIP ViT-B/32 ...")
+    # clip_trans_result = initialize_results(task_config.CLIP_VIT_B_32, trans_metadata)
+    # clip_trans_result = test_and_report(clip, trans_loader, nn.CrossEntropyLoss(), clip_trans_result)
 
-    clip_zero_shot_result = make_clip_zero_shot_predictions(clip_trans_result, text_features, logit_scale, prompts)
-    results_file = f"{clip_zero_shot_result["model_name"]}_{clip_zero_shot_result["transformation"]}_results.pt"
-    torch.save(clip_zero_shot_result, os.path.join(task_config.TASK_RESULTS_DIR, results_file))
+    # clip_zero_shot_result = make_clip_zero_shot_predictions(clip_trans_result, text_features, logit_scale, prompts)
+    # results_file = f"{clip_zero_shot_result["model_name"]}_{clip_zero_shot_result["transformation"]}_results.pt"
+    # torch.save(clip_zero_shot_result, os.path.join(task_config.TASK_RESULTS_DIR, results_file))
     
     
+    run_translation_inference(
+        baseline_dataset=org_testset,
+        baseline_metadata=org_metadata,
+        models=[
+            (task_config.RESNET50, resnet),
+            (task_config.VIT_B_16, vit),
+            (task_config.CLIP_VIT_B_32, clip),
+        ],
+        text_features=text_features,
+        logit_scale=logit_scale,
+        prompts=prompts,
+    )
+        
     ### patch-shuffled images
     print("Starting inference on patch-shuffled images with ResNet50 ...")
     resnet_patch_result = initialize_results(task_config.RESNET50, patch_metadata)
@@ -522,6 +679,56 @@ def start_inference():
     torch.save(clip_zero_shot_result, os.path.join(task_config.TASK_RESULTS_DIR, results_file))
     
 
+    conflict_dateset = ConflictDataset(task_config.TASK_CONFLICTS_DIR)
+    
+    conflict_loader = DataLoader(conflict_dateset, batch_size=task_config.BATCH_SIZE, shuffle=False, num_workers=0)
+
+    conflict_models = [
+        (task_config.RESNET50, resnet),
+        (task_config.VIT_B_16, vit),
+        (task_config.CLIP_VIT_B_32, clip)
+    ]
+    
+    clip_conflict_result = None
+    
+    for model_name, model in conflict_models:
+        
+        result = infer_cue_conflicts(model, conflict_loader, model_name)
+        
+        result["metadata"] = {
+            "dataset_dir": str(conflict_dateset.dataset_dir.resolve()),
+            "manifest_path": str(
+                (conflict_dateset.dataset_dir / "manifest.json").resolve()
+            ),
+            "n_conflicts": len(conflict_dateset),
+        }
+        
+        os.makedirs(task_config.TASK_RESULTS_DIR, exist_ok=True)
+
+        result_path = os.path.join(
+            task_config.TASK_RESULTS_DIR,
+            f"{model_name}_cue_conflict_results.pt",
+        )
+        torch.save(result, result_path)
+
+        if model_name == task_config.CLIP_VIT_B_32:
+            clip_conflict_result = result
+
+        print(f"Saved conflict inference: {result_path}")
+        
+    if clip_conflict_result is None:
+        raise RuntimeError("CLIP conflict features were not collected.")
+    
+    zero_shot_result  = make_clip_conflict_zero_shot(clip_conflict_result, 
+                                                    text_features, logit_scale, 
+                                                    prompts)
+    result_path = os.path.join(
+        task_config.TASK_RESULTS_DIR,
+        f"{zero_shot_result['model_name']}_cue_conflict_results.pt",
+    )
+    torch.save(zero_shot_result, result_path)
+    print(f"Saved zero-shot conflict inference: {result_path}")
+     
     print("All models evaluated.")
 
 def initialize_results(model_name, metadata):
@@ -560,5 +767,16 @@ def get_classifier_head(backbone, model_name):
     classifier_head = nn.Sequential(backbone, head_resent).to(DEVICE).eval()
     return classifier_head
 
+def generate_cue_conflict_images():
+    
+    from assignment_01.task1.data.make_cue_conflicts import generate_cue_conflicts
+    from assignment_01.task1.data.transforms import StyleTransferModel
+    
+    style_transfer_model = StyleTransferModel()
+    
+    style_transfer_model.load_state_dict(torch.load(task_config.STYLE_TRANSFER_MODEL_PATH, map_location=DEVICE))
+    style_transfer_model.to(DEVICE).eval()
+    generate_cue_conflicts()
+    
 if __name__ == "__main__":
     main()

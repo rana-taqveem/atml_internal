@@ -1,7 +1,7 @@
 # Task 1 implementation and evidence checklist
 
 Source: `assignment_01/ATML-PA1.pdf`, Task 1, pages 2-5; shared submission rules also apply.
-Last reviewed: 2026-09-16. Companion explanations: [study README](README.md).
+Last reviewed: 2026-09-17. Companion explanations: [study README](README.md).
 
 Checked items mean the stated implementation step was observed, not that the final experiment is complete. Unchecked items can have partial code. Mark final evidence complete only after checking saved results. Training completion below is based on previously reviewed Colab logs; checkpoint files were not revalidated in this review.
 
@@ -15,7 +15,7 @@ Checked items mean the stated implementation step was observed, not that the fin
 - [ ] Verify inference loads the intended best head checkpoints and matching backbone/cache versions; use eval mode and disabled gradients.
 - [ ] Verify saved test selection: 500 official test images, class-balanced, seed 6304, stable IDs; document any shortage/imbalance.
 - [ ] Verify common 224x224 RGB intervention inputs and exactly one application of model-specific normalization.
-- [ ] Verify exact clean/transformed image reuse across all methods, including randomized patch permutations.
+- [ ] Verify exact baseline/transformed image reuse across all methods, including randomized patch permutations.
 - [ ] Record dataset, class order, IDs, seeds, transformation settings, model/pretraining identity, head checkpoint and software environment.
 - [ ] State hypotheses and metrics for experimental choices before interpreting outcomes: dataset, cue-conflict pairs/style strength, additional color intervention, representation visualization/settings.
 - [x] Implement zero-shot CLIP text/scoring helpers in main.py.
@@ -28,16 +28,17 @@ Checked items mean the stated implementation step was observed, not that the fin
 
 - [x] Implement top-1 accuracy, macro-F1 and mean maximum confidence.
 - [x] Add supplementary per-class precision/recall/F1/support, macro precision/recall and configurable top-k.
-- [ ] Verify the current user-written implementation with known synthetic answers and invalid inputs.
+- [x] Verify baseline metrics on a known synthetic example (2026-09-18): top-1 70%, macro-F1 71.1111%, mean maximum confidence 0.8482255; supplementary top-2 100%.
+- [ ] Verify invalid inputs and edge cases after validation cleanup.
 - [ ] Clean up duplicated k validation; validate integer k and labels before casting; document consistent output units.
 - [ ] Connect metric calculation to saved inference results and export machine-readable tables.
 
-### B2. Clean versus transformed comparison
+### B2. baseline versus transformed comparison
 
 - [x] Validate unique, nonempty, one-dimensional image IDs and matching ID sets.
 - [x] Align labels/logits using each run's sorted ID indices.
 - [x] Check class-order agreement, score row/column counts and aligned true labels.
-- [x] Implement clean/transformed accuracy, signed change/drop in percentage points, prediction consistency.
+- [x] Implement baseline/transformed accuracy, signed change/drop in percentage points, prediction consistency.
 - [ ] Verify reordered IDs give identical answers; reject duplicates, missing IDs, incompatible labels and class orders.
 - [ ] Enforce or explicitly verify matching model, decision method and checkpoint in the calling layer.
 - [ ] Update stale comparison docstring: import syntax and labels.shape[1] issues have now been corrected.
@@ -46,10 +47,10 @@ Checked items mean the stated implementation step was observed, not that the fin
 
 - [ ] Define result records with unique conflict ID, content/style IDs, content/shape label, style/texture label, accepted status, rejection reason, alpha and model predictions.
 - [ ] Validate accepted examples have distinct valid shape and texture labels and aligned predictions.
-- [ ] Count shape predictions, texture predictions and other predictions; verify their sum equals the number of evaluated conflicts.
-- [ ] Compute shape bias (%) = 100*N_shape/(N_shape+N_texture).
-- [ ] Compute coverage (%) = 100*(N_shape+N_texture)/N_total.
-- [ ] Report undefined shape bias when N_shape+N_texture=0; reject empty evaluation sets.
+- [x] Count shape predictions, texture predictions and other predictions; verify their sum equals the number of evaluated conflicts (synthetic checks).
+- [x] Compute shape bias (%) = 100*N_shape/(N_shape+N_texture).
+- [x] Compute coverage (%) = 100*(N_shape+N_texture)/N_total.
+- [x] Report undefined shape bias when N_shape+N_texture=0; reject empty evaluation sets.
 - [ ] Report generation accepted/rejected counts separately from model decision counts.
 - [ ] Check toy cases, then evaluate the same accepted conflicts with all four methods.
 
@@ -58,26 +59,26 @@ Checked items mean the stated implementation step was observed, not that the fin
 - [ ] Use paired comparisons for displacement 0, 8, 16 and 32 pixels in four cardinal directions.
 - [ ] Average accuracy and consistency across directions at each displacement; preserve individual direction results.
 - [ ] Plot both accuracy and consistency versus displacement (step 4 requests both).
-- [ ] Verify zero displacement reproduces clean accuracy and 100% prediction consistency.
+- [ ] Verify zero displacement reproduces baseline accuracy and 100% prediction consistency.
 
 ### B5. Representation analysis
 
-- [ ] Align transformed features with clean counterparts using image/content IDs; handle repeated content images in cue-conflict records explicitly.
+- [ ] Align transformed features with baseline counterparts using image/content IDs; handle repeated content images in cue-conflict records explicitly.
 - [ ] Calculate per-example cosine similarity and its mean for grayscale, cue conflict, translation and patch shuffle for each backbone.
 - [ ] Validate feature dimensions/finite values and define handling of zero-norm vectors.
 - [ ] Choose t-SNE or UMAP and record settings, fixed subset and seed.
-- [ ] Fit one joint clean/transformed 2D projection per backbone; color by ground-truth/content class and mark condition separately.
+- [ ] Fit one joint baseline/transformed 2D projection per backbone; color by ground-truth/content class and mark condition separately.
 - [ ] Do not compare absolute coordinates between separately fitted backbones or treat 2D distances as exact original distances.
-- [ ] Inspect class separation, condition mixing and transformed examples moving from clean clusters.
+- [ ] Inspect class separation, condition mixing and transformed examples moving from baseline clusters.
 
 ## C. Intervention generation and final experimental evidence
 
-### Clean and color
+### baseline and color
 
-- [x] Inference code includes clean, grayscale and fixed 30-degree hue conditions.
+- [x] Inference code includes baseline, grayscale and fixed 30-degree hue conditions.
 - [ ] Verify grayscale preserves three channels and hue changes color while preserving geometry; document what is changed/preserved.
-- [ ] Run clean evaluation and save top-1/macro-F1/confidence for all four methods; zero-shot confidence uses scaled similarities.
-- [ ] Run grayscale and hue and save absolute performance, accuracy changes and paired consistency against each method's own clean baseline.
+- [ ] Run baseline evaluation and save top-1/macro-F1/confidence for all four methods; zero-shot confidence uses scaled similarities.
+- [ ] Run grayscale and hue and save absolute performance, accuracy changes and paired consistency against each method's own baseline baseline.
 
 ### Cue conflicts
 
@@ -85,8 +86,8 @@ Checked items mean the stated implementation step was observed, not that the fin
 - [ ] Verify pretrained stylizer/weights, output quality and reproducible generation.
 - [x] Configure five unordered class pairs in CLASS_PAIRS; IDs match STL10_CLASSES.
 - [ ] Generate both directions for each configured pair, targeting 20 accepted examples per direction for 200 total.
-- [ ] Correct StyleTransferModel input shape check: compare the full image.shape with (3,224,224), not image.shape[1].
-- [ ] Define a visual rejection rule before evaluating models; never use predictions to select accepted images.
+- [x] Correct StyleTransferModel input shape check: compare the full image.shape with (3,224,224), not image.shape[1].
+- [x] Define a visual rejection rule before evaluating models; recorded in CUE_CONFLICT_REVIEW.md. Application and final counts remain pending.
 - [ ] Produce at least 200 valid conflicts, balanced across pairs/directions as closely as possible.
 - [ ] Save accepted/rejected totals and per-pair/direction counts with reasons, settings and image identifiers.
 - [ ] Integrate accepted-conflict inference for all four methods and produce counts, shape bias and coverage.
@@ -102,7 +103,7 @@ Checked items mean the stated implementation step was observed, not that the fin
 
 ## D. Required outputs and interpretation
 
-- [ ] Compact comparison table: clean, grayscale, additional color and patch shuffle.
+- [ ] Compact comparison table: baseline, grayscale, additional color and patch shuffle.
 - [ ] Cue-conflict table: shape/texture/other counts, shape bias, coverage, accepted/rejected counts.
 - [ ] Translation accuracy/consistency curves.
 - [ ] Representation stability results for every required intervention and joint t-SNE/UMAP plots.
@@ -121,5 +122,11 @@ Checked items mean the stated implementation step was observed, not that the fin
 - [ ] Include Task 1 evidence in the shared 8-page NeurIPS-style report and public GitHub submission; report wording/interpretation remain the student's own under the assignment policy.
 
 ## Working sequence
+
+Full implementation contract: [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md). It includes required inference integration, sample identity rules, all metric/plot outputs and end-to-end verification. Review counts remain distinct from prediction coverage. Documentation is prepared; remaining code is not marked complete.
+
+2026-09-18 selection update: user's retained set finalized locally: 200 unique conflicts, exactly 20 per direction across the final five pairs. Manifest and acceptance flags now reflect retained selection; PNG integrity and archive verified. Pending: reasons/status for 50 excluded candidates, remote Drive archive synchronization, conflict dataset loader/inference and analysis. Visual validity follows user selection rather than a new assistant audit.
+
+Current review: only standalone metrics and paired comparison functions exist in analysis Python files. Cue-conflict counting, direction aggregation, cosine stability, joint projection, result loading/validation and report exports remain to implement. All-pairs exploration is running per user; final pairs/strengths and selected accepted set are not yet frozen. Develop analysis using toy data without claiming final results are available. Next manual coding exercise is calculate_cue_conflict_metrics with three aligned label arrays and an explicit class count, followed by checks for known counts and the all-other case.
 
 Next: learn and implement B3 shape/texture/other counting, then shape bias and coverage using a toy example. Full cue-conflict generation is a separate dependency for final results. Before trusting B1/B2 in experiments, finish their small synthetic verification checks. Then proceed through B4, B5 and final reporting/integration. Update this checklist as each implementation and evidence item is verified.
