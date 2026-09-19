@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import torch
 from assignment_01.task1  import utils
 
@@ -19,6 +20,13 @@ class TaskConfig:
         self.CUE_CONFLICT_DIR = os.path.join(self.TASK_DIR, 'cue_conflict')
         
         self.MODEL_WEIGHTS_DIR = os.path.join(self.TASK_DIR, 'model_weights')
+        # The three already-trained heads are committed in the repo itself
+        # (results/baseline/weights/), not on Drive. get_head_checkpoint_path
+        # checks MODEL_WEIGHTS_DIR first (for a fresh --mode train run) and
+        # falls back here.
+        self.PRETRAINED_HEADS_DIR = str(
+            Path(__file__).resolve().parent / 'results' / 'baseline' / 'weights'
+        )
         
         ## OPTIMIZATION HYPERPARAMETERS
         self.LEARNING_RATE = 1e-3

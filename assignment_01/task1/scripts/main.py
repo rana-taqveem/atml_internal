@@ -698,7 +698,24 @@ def run_conflict_inference(conflict_dir, models, text_features, logit_scale, pro
     print(f"Saved zero-shot conflict inference: {result_path}")
 
 def get_head_checkpoint_path(model_name):
-    return os.path.join(task_config.MODEL_WEIGHTS_DIR, task_config.HEAD_WEIGHT_FILES[model_name])
+    """Locate one trained head's weight file.
+
+    Checks task_config.MODEL_WEIGHTS_DIR first (where --mode train saves new
+    heads, on Drive on Colab), then falls back to the copies already
+    committed in the repo (task_config.PRETRAINED_HEADS_DIR). Returns the
+    Drive path if neither exists, so the caller's FileNotFoundError names
+    the primary expected location.
+    """
+    filename = task_config.HEAD_WEIGHT_FILES[model_name]
+    drive_path = os.path.join(task_config.MODEL_WEIGHTS_DIR, filename)
+    if os.path.isfile(drive_path):
+        return drive_path
+
+    repo_path = os.path.join(task_config.PRETRAINED_HEADS_DIR, filename)
+    if os.path.isfile(repo_path):
+        return repo_path
+
+    return drive_path
 
 def expected_validation_accuracy(model_name):
     """Validation accuracy recorded in the head filename, e.g. resnet50_97.30.pth."""
