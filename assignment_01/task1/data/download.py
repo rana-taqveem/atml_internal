@@ -2,7 +2,6 @@
 
 import shutil
 import tempfile
-import zipfile
 from pathlib import Path
 
 from torchvision.datasets import STL10
@@ -58,25 +57,46 @@ def prepare_stl10(root):
     print("STL-10 is ready.")
 
 
-def prepare_conflict_dataset(conflict_dir, zip_name="conflict_dataset.zip", staging_root=None):
+# Recognized archive suffixes, longest first so ".tar.gz" matches before ".gz".
+_ARCHIVE_SUFFIXES = (".tar.gz", ".tar.bz2", ".tar.xz", ".zip", ".tar", ".tgz")
+
+
+def _find_conflict_archive(conflict_dir):
+    """Look for an archive named after the folder, inside it or beside it.
+
+    Matches conflict_dir/conflict_dataset.zip (archive nested inside the
+    target folder) and conflict_dir.parent/conflict_dataset.tar (archive
+    sitting next to the folder it expands into), and the same for .tar,
+    .tar.gz, .tar.bz2, .tar.xz and .tgz.
+    """
+    name = conflict_dir.name
+    for parent in (conflict_dir, conflict_dir.parent):
+        for suffix in _ARCHIVE_SUFFIXES:
+            candidate = parent / f"{name}{suffix}"
+            if candidate.is_file():
+                return candidate
+    return None
+
+
+def prepare_conflict_dataset(conflict_dir, staging_root=None):
     """Return a folder that directly contains sampling_plan.json.
 
     conflict_dir is either already extracted (sampling_plan.json sits in it)
-    or holds a zip archive (conflict_dir/conflict_dataset.zip on this
-    project's Drive layout). Extraction targets local disk, not Drive, since
-    Drive is slow for 1000+ small files and a Colab runtime's local disk is
-    wiped every session, so this must run every time.
+    or an archive with the folder's name sits inside or beside it (zip or
+    tar, optionally gz/bz2/xz compressed). Extraction targets local disk,
+    not Drive, since Drive is slow for 1000+ small files and a Colab
+    runtime's local disk is wiped every session, so this must run every time.
 
-    If neither is found, conflict_dir is returned unchanged so the caller
-    (ConflictDataset / load_conflict_records) raises its own clear error.
+    If no archive is found either, conflict_dir is returned unchanged so the
+    caller (ConflictDataset / load_conflict_records) raises its own clear error.
     """
     conflict_dir = Path(conflict_dir).expanduser().resolve()
 
     if (conflict_dir / "sampling_plan.json").is_file():
         return conflict_dir
 
-    archive = conflict_dir / zip_name
-    if not archive.is_file():
+    archive = _find_conflict_archive(conflict_dir)
+    if archive is None:
         return conflict_dir
 
     staging_root = Path(staging_root) if staging_root else (
@@ -90,11 +110,10 @@ def prepare_conflict_dataset(conflict_dir, zip_name="conflict_dataset.zip", stag
 
     print(f"Extracting cue-conflict archive {archive} -> {extracted}")
     extracted.mkdir(parents=True, exist_ok=True)
-    with zipfile.ZipFile(archive) as zip_file:
-        zip_file.extractall(extracted)
+    shutil.unpack_archive(str(archive), str(extracted))
 
-    # Flatten a single top-level folder inside the zip, if the archive wraps
-    # its contents in one directory instead of storing them at its root.
+    # Flatten a single top-level folder inside the archive, if it wraps its
+    # contents in one directory instead of storing them at its root.
     if not (extracted / "sampling_plan.json").is_file():
         entries = list(extracted.iterdir())
         if len(entries) == 1 and entries[0].is_dir() and (entries[0] / "sampling_plan.json").is_file():
