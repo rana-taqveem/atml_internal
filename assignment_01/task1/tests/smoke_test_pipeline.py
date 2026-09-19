@@ -25,9 +25,12 @@ import torch.nn.functional as F
 from PIL import Image
 
 from assignment_01.task1.config import task_config
+from assignment_01.task1.utils import get_conflict_dataset_dir
 
 TASK1_DIR = Path(__file__).resolve().parents[1]
-REAL_CONFLICT_DIR = TASK1_DIR / "conflict_dataset"
+# Same default as config.TaskConfig: task1/data/conflict_dataset locally,
+# <Drive task dir>/conflict_dataset on Colab.
+REAL_CONFLICT_DIR = Path(get_conflict_dataset_dir(str(TASK1_DIR)))
 
 
 class FakeSTL10:
@@ -125,11 +128,13 @@ def run(work_dir, conflict_dir=REAL_CONFLICT_DIR):
     main.Torchvision_Vit_B_16_Backbone = make_stub(768, 1)
     main.Openai_Clip_Backbone = make_stub(512, 2, clip=True)
 
-    conflict_dir = Path(conflict_dir)
+    from assignment_01.task1.data.download import prepare_conflict_dataset
+    conflict_dir = prepare_conflict_dataset(conflict_dir)
     if not (conflict_dir / "sampling_plan.json").is_file():
         raise FileNotFoundError(
-            f"No sampling_plan.json under {conflict_dir}. Pass --conflict-dir pointing at "
-            "your extracted conflict_dataset folder (e.g. the folder you unzipped from Drive)."
+            f"No sampling_plan.json under {conflict_dir}, and no conflict_dataset.zip to extract there. "
+            "Pass --conflict-dir pointing at your conflict_dataset folder (extracted, or containing "
+            "conflict_dataset.zip)."
         )
 
     # Use the real 500 test IDs so conflicts pair with clean content rows.

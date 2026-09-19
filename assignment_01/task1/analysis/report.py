@@ -880,6 +880,9 @@ def run_all(results_dir, conflict_dir=None, output_dir=None, make_tsne=True):
     results_dir = Path(results_dir)
     output_dir = results_dir / "analysis" if output_dir is None else Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
+    if conflict_dir is not None:
+        from assignment_01.task1.data.download import prepare_conflict_dataset
+        conflict_dir = prepare_conflict_dataset(conflict_dir)
     conflict_metadata = load_conflict_metadata(conflict_dir)
 
     all_conditions = ["baseline", *INTERVENTIONS, *TRANSLATION_IDS, "cue_conflict"]

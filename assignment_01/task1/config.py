@@ -11,7 +11,7 @@ class TaskConfig:
         self.TASK_FEATURES_DIR = os.path.join(self.TASK_DIR, 'features')
         self.TASK_DATASET_DIR = os.path.join(self.TASK_DIR, 'dataset')
         self.TASK_RESULTS_DIR = os.path.join(self.TASK_DIR, 'results')
-        self.TASK_CONFLICT_DATASET_DIR = os.path.join(self.TASK_DIR, 'conflict_dataset')
+        self.TASK_CONFLICT_DATASET_DIR = utils.get_conflict_dataset_dir(self.TASK_DIR)
         self.TASK_TRAIN_DIR = os.path.join(self.TASK_DIR, 'train')
         self.TASK_TEST_DIR = os.path.join(self.TASK_DIR, 'test')
         

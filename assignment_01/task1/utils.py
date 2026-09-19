@@ -54,6 +54,17 @@ def get_data_dir(task_name: str):
     base_dir.mkdir(parents=True, exist_ok=True)
     return str(base_dir)
 
+def is_running_in_colab():
+    # Colab sets this environment variable in its runtime.
+    return bool(os.environ.get("COLAB_RELEASE_TAG"))
+
+def get_conflict_dataset_dir(task_dir):
+
+    if is_running_in_colab():
+        return os.path.join(task_dir, "conflict_dataset")
+
+    return str(Path(__file__).resolve().parent / "data" / "conflict_dataset")
+
 def save_checkpoint(state_dict, name):
     path = f'{DATA_DIR}/checkpoints/{name}.pt'
     torch.save(state_dict, path)

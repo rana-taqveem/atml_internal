@@ -18,7 +18,7 @@ from matplotlib import pyplot as plt
 
 from assignment_01.task1.data.conflict_dataset import ConflictDataset
 from assignment_01.task1.data.make_subset import get_test_subset
-from assignment_01.task1.data.download import prepare_stl10
+from assignment_01.task1.data.download import prepare_stl10, prepare_conflict_dataset
 from assignment_01.task1.config import task_config
 from assignment_01.task1.data.transforms import apply_universal_transforms
 from assignment_01.task1.models.backbones import (
@@ -650,7 +650,7 @@ def start_inference(steps=INFERENCE_STEPS, conflict_dir=None, check_heads=True):
 
 def run_conflict_inference(conflict_dir, models, text_features, logit_scale, prompts):
 
-    conflict_dir = conflict_dir or task_config.TASK_CONFLICT_DATASET_DIR
+    conflict_dir = prepare_conflict_dataset(conflict_dir or task_config.TASK_CONFLICT_DATASET_DIR)
     conflict_dateset = ConflictDataset(conflict_dir)
     print(f"Loaded {len(conflict_dateset)} selected conflicts from {conflict_dateset.dataset_dir}")
 
