@@ -369,7 +369,7 @@ def markdown_table(rows, columns, headers=None):
     lines = ["| " + " | ".join(headers) + " |", "|" + "---|" * len(columns)]
     names = {**METHOD_LABELS, **BACKBONE_LABELS}
     for row in rows:
-        cells = [names.get(row.get(c), row.get(c)) if c in ("model_name", "backbone") else row.get(c)
+        cells = [names.get(row.get(c), row.get(c)) if c in ("model_name", "backbone", "method") else row.get(c)
                  for c in columns]
         lines.append("| " + " | ".join(fmt(cell) for cell in cells) + " |")
     return "\n".join(lines)
@@ -650,6 +650,9 @@ def build_conflict_audit(conflict_dir, output_dir):
 
     reasons = {}
     reasons_path = conflict_dir / "rejection_reasons.csv"
+    if not reasons_path.is_file():
+        # Repo-tracked copy; survives the per-session re-extraction on Colab.
+        reasons_path = Path(__file__).resolve().parents[1] / "data" / "conflict_rejection_reasons.csv"
     if reasons_path.is_file():
         with reasons_path.open(encoding="utf-8") as file:
             for row in csv.DictReader(file):
@@ -750,6 +753,119 @@ def plot_cue_examples(examples, conflict_metadata, conflict_dir, output_path):
 
     fig.tight_layout()
     fig.savefig(output_path, dpi=170)
+    plt.close(fig)
+
+
+# ---------------------------------------------------------------------------
+# Cue conflicts below top-1: where does the texture class rank?
+# ---------------------------------------------------------------------------
+
+def _class_rank(logits, class_idx):
+    """1 = highest score. Ties count in the class's favour."""
+    return 1 + int((logits > logits[class_idx]).sum())
+
+
+def build_texture_rank_rows(results_dir):
+    """Rank and probability of the style (texture) class, conflict vs clean.
+
+    For every conflict, the same style class is also scored on the clean
+    content image. Clean pairs show how often that class ranks high from
+    class similarity alone (e.g. airplane/bird); the change to the conflict
+    image is the effect of the transferred texture. Probabilities are softmax
+    over each method's own logits, so compare them within a method only;
+    ranks are comparable across methods.
+    """
+    sample_rows, summary_rows = [], []
+
+    for model_name in DECISION_METHODS:
+        conflict = load_result(results_dir, model_name, "cue_conflict")
+        baseline = load_result(results_dir, model_name, "baseline")
+
+        row_of = {int(i): r for r, i in enumerate(torch.as_tensor(baseline["image_ids"]).tolist())}
+        clean_logits = torch.as_tensor(baseline["logits"], dtype=torch.float32)
+        clean_probs = torch.softmax(clean_logits, dim=1)
+        new_logits = torch.as_tensor(conflict["logits"], dtype=torch.float32)
+        new_probs = torch.softmax(new_logits, dim=1)
+        content = torch.as_tensor(conflict["content_labels"], dtype=torch.long).tolist()
+        style = torch.as_tensor(conflict["style_labels"], dtype=torch.long).tolist()
+        content_ids = torch.as_tensor(conflict["content_ids"], dtype=torch.long).tolist()
+
+        rows = []
+        for i, conflict_id in enumerate(conflict["conflict_ids"]):
+            if content_ids[i] not in row_of:
+                raise ValueError(f"{model_name}: content image {content_ids[i]} missing from baseline.")
+            j = row_of[content_ids[i]]
+            c, s = content[i], style[i]
+            prediction = int(new_logits[i].argmax())
+            rows.append({
+                "method": model_name,
+                "conflict_id": conflict_id,
+                "content_class": TaskConfig.STL10_CLASSES[c],
+                "style_class": TaskConfig.STL10_CLASSES[s],
+                "decision": decision_name(prediction, c, s),
+                "clean_prediction_is_content": int(clean_logits[j].argmax()) == c,
+                "texture_rank_clean": _class_rank(clean_logits[j], s),
+                "texture_rank_conflict": _class_rank(new_logits[i], s),
+                "texture_prob_clean": float(clean_probs[j, s]),
+                "texture_prob_conflict": float(new_probs[i, s]),
+                "shape_prob_clean": float(clean_probs[j, c]),
+                "shape_prob_conflict": float(new_probs[i, c]),
+            })
+        sample_rows.extend(rows)
+
+        def pct(values):
+            return 100 * float(np.mean(values)) if values else None
+
+        shape_rows = [r for r in rows if r["decision"] == "shape"]
+        summary_rows.append({
+            "method": model_name,
+            "n_conflicts": len(rows),
+            "mean_texture_rank_clean": float(np.mean([r["texture_rank_clean"] for r in rows])),
+            "mean_texture_rank_conflict": float(np.mean([r["texture_rank_conflict"] for r in rows])),
+            "texture_in_top2_clean_pct": pct([r["texture_rank_clean"] <= 2 for r in rows]),
+            "texture_in_top2_conflict_pct": pct([r["texture_rank_conflict"] <= 2 for r in rows]),
+            "mean_texture_prob_clean": float(np.mean([r["texture_prob_clean"] for r in rows])),
+            "mean_texture_prob_conflict": float(np.mean([r["texture_prob_conflict"] for r in rows])),
+            "mean_shape_prob_clean": float(np.mean([r["shape_prob_clean"] for r in rows])),
+            "mean_shape_prob_conflict": float(np.mean([r["shape_prob_conflict"] for r in rows])),
+            # Among conflicts decided by shape: is texture the runner-up?
+            "n_shape_decisions": len(shape_rows),
+            "texture_runner_up_given_shape_clean_pct": pct([r["texture_rank_clean"] == 2 for r in shape_rows]),
+            "texture_runner_up_given_shape_conflict_pct": pct([r["texture_rank_conflict"] == 2 for r in shape_rows]),
+            "runner_up_chance_pct": 100 / 9,
+        })
+
+    return sample_rows, summary_rows
+
+
+def plot_texture_rank(summary_rows, output_path):
+    """Texture class in the top 2, clean content image vs cue conflict."""
+    fig, ax = plt.subplots(figsize=(6.4, 2.9))
+    methods = [r["method"] for r in summary_rows]
+    y = np.arange(len(methods))
+    clean = [r["texture_in_top2_clean_pct"] for r in summary_rows]
+    conflict = [r["texture_in_top2_conflict_pct"] for r in summary_rows]
+
+    for yi, a, b in zip(y, clean, conflict):
+        ax.plot([a, b], [yi, yi], color="#bbbbbb", linewidth=1.5, zorder=1)
+    ax.scatter(clean, y, color="#2a78d6", marker="o", s=45, edgecolors="white", linewidths=0.8,
+               label="clean content image", zorder=3)
+    ax.scatter(conflict, y, color="#eb6834", marker="s", s=45, edgecolors="white", linewidths=0.8,
+               label="cue conflict", zorder=3)
+    for yi, b in zip(y, conflict):
+        ax.text(b + 1.5, yi, f"{b:.1f}", va="center", fontsize=7.5, color="#444444")
+
+    ax.axvline(100 * 2 / 10, color="#999999", linestyle=":", linewidth=1)
+    ax.text(100 * 2 / 10, len(methods) - 0.45, " chance (2/10)", fontsize=7, color="#777777", va="bottom")
+    ax.set_yticks(y)
+    ax.set_yticklabels([METHOD_LABELS[m] for m in methods], fontsize=8)
+    ax.invert_yaxis()
+    ax.set_xlim(0, 105)
+    ax.set_xlabel("Style (texture) class ranked 1st or 2nd (% of conflicts)", fontsize=8.5)
+    style_axis(ax)
+    ax.legend(frameon=False, fontsize=8, loc="lower right")
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=200)
     plt.close(fig)
 
 
@@ -978,6 +1094,23 @@ def run_all(results_dir, conflict_dir=None, output_dir=None, make_tsne=True):
                                                    "removed_with_documented_reason", "alpha"],
                                       ["content", "style", "generated", "selected", "removed",
                                        "removed w/ reason", "alpha"]), ""]
+
+    # Cue conflicts below top-1: texture-class rank, conflict vs clean
+    if section("texture_rank", DECISION_METHODS, ["baseline", "cue_conflict"]):
+        rank_samples, rank_summary = build_texture_rank_rows(results_dir)
+        write(rank_samples, "cue_conflict_texture_rank_samples.csv")
+        write(rank_summary, "cue_conflict_texture_rank.csv")
+        plot_texture_rank(rank_summary, output_dir / "cue_conflict_texture_rank.png")
+        completeness["written"].append("cue_conflict_texture_rank.png")
+        summary_md += ["## Texture class below top-1 (clean content image vs cue conflict)", "",
+                       markdown_table(rank_summary,
+                                      ["method", "mean_texture_rank_clean", "mean_texture_rank_conflict",
+                                       "texture_in_top2_clean_pct", "texture_in_top2_conflict_pct",
+                                       "texture_runner_up_given_shape_clean_pct",
+                                       "texture_runner_up_given_shape_conflict_pct"],
+                                      ["method", "mean rank clean", "mean rank conflict", "top-2 clean (%)",
+                                       "top-2 conflict (%)", "runner-up | shape, clean (%)",
+                                       "runner-up | shape, conflict (%)"]), ""]
 
     # RQ3: CLIP head vs zero-shot on shared features
     clip_conditions = [c for c in all_conditions
