@@ -25,12 +25,13 @@ import torch.nn.functional as F
 from PIL import Image
 
 from assignment_01.task1.config import task_config
-from assignment_01.task1.utils import get_conflict_dataset_dir
 
 TASK1_DIR = Path(__file__).resolve().parents[1]
-# Same default as config.TaskConfig: task1/data/conflict_dataset locally,
-# <Drive task dir>/conflict_dataset on Colab.
-REAL_CONFLICT_DIR = Path(get_conflict_dataset_dir(str(TASK1_DIR)))
+# task_config.TASK_CONFLICT_DATASET_DIR already resolves correctly for both
+# environments (it's built from task_config.TASK_DIR, which mounts Drive on
+# Colab). Capture it now, before point_config_to() below repoints it at the
+# temporary work directory for the rest of the test run.
+REAL_CONFLICT_DIR = Path(task_config.TASK_CONFLICT_DATASET_DIR)
 
 
 class FakeSTL10:
