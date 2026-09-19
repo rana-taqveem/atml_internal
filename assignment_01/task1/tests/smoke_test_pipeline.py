@@ -109,7 +109,7 @@ def check(condition, message):
     print(f"  ok  {message}")
 
 
-def run(work_dir):
+def run(work_dir, conflict_dir=REAL_CONFLICT_DIR):
     point_config_to(work_dir)
     task_config.init_env()
 
@@ -125,8 +125,15 @@ def run(work_dir):
     main.Torchvision_Vit_B_16_Backbone = make_stub(768, 1)
     main.Openai_Clip_Backbone = make_stub(512, 2, clip=True)
 
+    conflict_dir = Path(conflict_dir)
+    if not (conflict_dir / "sampling_plan.json").is_file():
+        raise FileNotFoundError(
+            f"No sampling_plan.json under {conflict_dir}. Pass --conflict-dir pointing at "
+            "your extracted conflict_dataset folder (e.g. the folder you unzipped from Drive)."
+        )
+
     # Use the real 500 test IDs so conflicts pair with clean content rows.
-    plan = json.loads((REAL_CONFLICT_DIR / "sampling_plan.json").read_text(encoding="utf-8"))
+    plan = json.loads((conflict_dir / "sampling_plan.json").read_text(encoding="utf-8"))
     np.save(task_config.SELECTED_INDICES_FILE, np.array(plan["selected_image_ids"], dtype=np.int64))
 
     # Random heads, saved under names carrying their own validation accuracy.
@@ -159,14 +166,14 @@ def run(work_dir):
     del baseline, patch_a, patch_b, grey
 
     print("\n== Inference")
-    main.start_inference(conflict_dir=str(REAL_CONFLICT_DIR), check_heads=True)
+    main.start_inference(conflict_dir=str(conflict_dir), check_heads=True)
 
     result_files = sorted(p.name for p in Path(task_config.TASK_RESULTS_DIR).glob("*_results.pt"))
     check(len(result_files) == 4 * 17, f"68 result files written (4 methods x 17 conditions), got {len(result_files)}")
 
     print("\n== Report")
     output_dir = Path(task_config.TASK_RESULTS_DIR) / "analysis"
-    completeness = report.run_all(task_config.TASK_RESULTS_DIR, REAL_CONFLICT_DIR, output_dir)
+    completeness = report.run_all(task_config.TASK_RESULTS_DIR, conflict_dir, output_dir)
     check(not completeness["skipped_sections"], "no report section skipped")
     check(not completeness["missing_result_files"], "no missing result files")
 
@@ -191,6 +198,10 @@ def run(work_dir):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--work-dir", default=None, help="Keep outputs here (default: temporary folder).")
+    parser.add_argument("--conflict-dir", default=str(REAL_CONFLICT_DIR),
+                        help="Your extracted conflict_dataset folder (must contain sampling_plan.json). "
+                             "Default assumes it lives in the repo at data/conflict_dataset, which is "
+                             "only true locally; on Colab pass the path to your unzipped Drive copy.")
     args = parser.parse_args()
 
     if args.work_dir:
@@ -198,7 +209,7 @@ if __name__ == "__main__":
         if work.exists():
             shutil.rmtree(work)
         work.mkdir(parents=True)
-        run(work)
+        run(work, conflict_dir=args.conflict_dir)
     else:
         with tempfile.TemporaryDirectory() as tmp:
-            run(Path(tmp))
+            run(Path(tmp), conflict_dir=args.conflict_dir)
