@@ -1,5 +1,8 @@
 import argparse
+import hashlib
+import json
 import os
+import platform
 import gc
 import numpy as np
 import torch
@@ -18,17 +21,15 @@ from assignment_01.task1.data.make_subset import get_test_subset
 from assignment_01.task1.data.download import prepare_stl10
 from assignment_01.task1.config import task_config
 from assignment_01.task1.data.transforms import apply_universal_transforms
-from assignment_01.task1.data.conflict_dataset import ConflictDataset
 from assignment_01.task1.models.backbones import (
-    Resnet50Backbone, 
-    Torchvision_Vit_B_16_Backbone, 
+    Resnet50Backbone,
+    Torchvision_Vit_B_16_Backbone,
     Openai_Clip_Backbone,
     LinearClassifier
 )
 from assignment_01.task1.data.translation_dataset import (
     TranslationDataset,
     get_translation_conditions,
-    get_translation_dataset,
 )
 
 import open_clip
@@ -235,33 +236,41 @@ def train(model, model_name, train_loader, val_loader, num_classes):
 
 def test_and_report(model, test_loader, criterion, results):
 
-  test_loss, test_acc = evaluate(model, test_loader, criterion)
-
   y_true = []
   y_pred = []
   all_image_ids = []
   all_features = []
   all_logits = []
-  
+
+  # One pass collects features and logits; loss and accuracy come from the
+  # same logits, so the backbone does not run twice per condition.
   model.eval()
   with torch.no_grad():
     for images, labels, image_ids in test_loader:
-      images = images.to(DEVICE)
-      labels = labels.to(DEVICE)
+      images = images.to(DEVICE).float()
 
       features = model[0](images)  # Extract features using the backbone
       outputs = model[1](features)  # Classify using the classifier head
-  
+
       _, predictions = torch.max(outputs.data, 1)
 
       y_true.extend(labels.cpu().tolist())
       y_pred.extend(predictions.cpu().tolist())
-      
+
       all_image_ids.append(image_ids.cpu())
       all_features.append(features.cpu())
       all_logits.append(outputs.cpu())
 
+  if not all_logits:
+    raise ValueError("No images were evaluated. Please check the data loader.")
+
+  label_tensor = torch.as_tensor(y_true, dtype=torch.long)
+  logit_tensor = torch.cat(all_logits, dim=0).float()
+  test_loss = criterion(logit_tensor, label_tensor).item()
+  test_acc = 100 * (logit_tensor.argmax(dim=1) == label_tensor).float().mean().item()
+
   print("-" * 30)
+  print(f"{results['model_name']} | {results['transformation']}")
   print(f"FINAL TEST RESULT")
   print(f"Test Loss: {test_loss:.4f}")
   print(f"Test Accuracy: {test_acc:.2f}%")
@@ -394,8 +403,8 @@ def infer_cue_conflicts(model, loader, model_name):
     }
     
     for batch in loader:
-        images = batch["image"].to(DEVICE)
-        
+        images = batch["image"].to(DEVICE).float()
+
         features = model[0](images)
         logits = model[1](features)
         
@@ -419,8 +428,8 @@ def infer_cue_conflicts(model, loader, model_name):
                 for key, batches in collected.items()
             }
     
-    checkpoint_path = os.path.join(task_config.TASK_CHECKPOINTS_DIR, f"{model_name}_head.pth")
-    
+    checkpoint_path = get_head_checkpoint_path(model_name)
+
     return {
         "model_name": model_name,
         "head_checkpoint": os.path.abspath(checkpoint_path),
@@ -436,10 +445,41 @@ def infer_cue_conflicts(model, loader, model_name):
         "y_pred": logits.argmax(dim=1).tolist(),
     }
        
+def run_condition_inference(loader, metadata, models, text_features, logit_scale, prompts):
+    """Evaluate every trained head and zero-shot CLIP on one image condition.
+
+    Each method writes {model_name}_{transformation}_results.pt. Zero-shot
+    CLIP reuses the CLIP head run's image embeddings, so both CLIP decision
+    methods see identical features.
+    """
+    clip_result = None
+
+    for model_name, model in models:
+        print(f"Starting inference on {metadata['transformations']} with {model_name} ...")
+        result = initialize_results(model_name, metadata)
+        result = test_and_report(model, loader, nn.CrossEntropyLoss(), result)
+
+        if model_name == task_config.CLIP_VIT_B_32:
+            clip_result = result
+
+    if clip_result is None:
+        raise RuntimeError(f"CLIP features are missing for {metadata['transformations']}.")
+
+    zero_shot_result = make_clip_zero_shot_predictions(clip_result, text_features, logit_scale, prompts)
+    results_file = f"{zero_shot_result['model_name']}_{zero_shot_result['transformation']}_results.pt"
+    torch.save(zero_shot_result, os.path.join(task_config.TASK_RESULTS_DIR, results_file))
+    print(f"zero-shot accuracy ({metadata['transformations']}): "
+          f"{zero_shot_result['accuracy_numbers']['accuracy']:.2f}%")
+
 def run_translation_inference(
     baseline_dataset, baseline_metadata, models,
     text_features, logit_scale, prompts,
 ):
+    """Twelve translated conditions: 8/16/32 px in four cardinal directions.
+
+    Zero displacement is the baseline run itself (apply_translation with a
+    zero offset returns the input crop unchanged), so it is not re-evaluated.
+    """
     for condition in get_translation_conditions():
         dataset = TranslationDataset(
             baseline_dataset=baseline_dataset,
@@ -460,34 +500,8 @@ def run_translation_inference(
             "transformations": condition["condition_id"],
         }
 
-        clip_result = None
+        run_condition_inference(loader, metadata, models, text_features, logit_scale, prompts)
 
-        for model_name, model in models:
-            result = initialize_results(model_name, metadata)
-            result = test_and_report(
-                model, loader, nn.CrossEntropyLoss(), result
-            )
-
-            if model_name == task_config.CLIP_VIT_B_32:
-                clip_result = result
-
-        if clip_result is None:
-            raise RuntimeError("CLIP translation features are missing.")
-
-        zero_shot_result = make_clip_zero_shot_predictions(
-            clip_result, text_features, logit_scale, prompts
-        )
-
-        filename = (
-            f"{zero_shot_result['model_name']}_"
-            f"{condition['condition_id']}_results.pt"
-        )
-
-        torch.save(
-            zero_shot_result,
-            os.path.join(task_config.TASK_RESULTS_DIR, filename),
-        )
-        
 @torch.no_grad()
 def make_clip_conflict_zero_shot(clip_result, text_features, logit_scale, prompts):
     image_features = F.normalize(clip_result["features"].float().cpu(), dim=1)
@@ -514,10 +528,19 @@ def make_clip_conflict_zero_shot(clip_result, text_features, logit_scale, prompt
     })
 
     return result
+INFERENCE_STEPS = ["baseline", "color", "translation", "patch", "conflict"]
+
 def main():
-    
+
     parser = argparse.ArgumentParser(description="Train and Evaluate Models on STL-10 Dataset")
     parser.add_argument("--mode", choices=["train", "infer", "dry-run"], required=True, help="Mode: 'train' to train models, 'infer' to run inference or 'dry-run' to check setup without training or inference")
+    parser.add_argument("--steps", nargs="+", choices=INFERENCE_STEPS, default=INFERENCE_STEPS,
+                        help="Inference steps to run (default: all). Translation reuses the baseline subset.")
+    parser.add_argument("--conflict-dir", default=None,
+                        help="Finalized cue-conflict folder containing manifest.json "
+                             "(default: task_config.TASK_CONFLICT_DATASET_DIR).")
+    parser.add_argument("--skip-head-check", action="store_true",
+                        help="Skip re-checking each head's validation accuracy before inference.")
     args = parser.parse_args()
 
     if args.mode == "train":
@@ -525,7 +548,8 @@ def main():
         start_training()
     elif args.mode == "infer":
         print("Starting inference...")
-        start_inference()
+        start_inference(steps=args.steps, conflict_dir=args.conflict_dir,
+                        check_heads=not args.skip_head_check)
     elif args.mode == "dry-run":
             print("All set! dry run passed. You can now run the script with --mode train or --mode infer to proceed.")
     else:
@@ -535,174 +559,118 @@ def main():
 def start_training():
     task_config.init_env()
     train_loader, val_loader = get_train_val_dataloaders()
-    
+
     resnet = Resnet50Backbone()
     vit = Torchvision_Vit_B_16_Backbone()
     clip = Openai_Clip_Backbone()
-    
+
     print("Starting training for ResNet50 ...")
     resnet_results = train(resnet, task_config.RESNET50, train_loader, val_loader, task_config.NUM_CLASSES)
-    
+
     print("Starting training for ViT-B/16 ...")
     vit_results = train(vit, task_config.VIT_B_16, train_loader, val_loader, task_config.NUM_CLASSES)
-    
+
     print("Starting training for CLIP ViT-B/32 ...")
     clip_results = train(clip, task_config.CLIP_VIT_B_32, train_loader, val_loader, task_config.NUM_CLASSES)
-    
+
     print("All models trained and evaluated.")
-    
 
-def start_inference():
+
+def start_inference(steps=INFERENCE_STEPS, conflict_dir=None, check_heads=True):
     task_config.init_env()
+    steps = list(steps)
 
-    org_testset, org_metadata     = get_test_subset(transformation_type='baseline')
-    gray_testset, gray_metadata   = get_test_subset(transformation_type='grey_scale')
-    hue_testset, hue_metadata     = get_test_subset(transformation_type='hue', hue_rotation_angle=30)
-    # trans_testset, trans_metadata = get_test_subset(transformation_type='translation', translation_x=8, translation_y=0)
-    patch_testset, patch_metadata = get_test_subset(transformation_type='patch_shuffle')
-    
-    orginal_loader = DataLoader(org_testset,   batch_size=task_config.BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
-    grey_loader    = DataLoader(gray_testset,  batch_size=task_config.BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
-    hue_loader     = DataLoader(hue_testset,   batch_size=task_config.BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
-    # trans_loader   = DataLoader(trans_testset, batch_size=task_config.BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
-    patch_loader   = DataLoader(patch_testset, batch_size=task_config.BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
-    
     resnet = get_classifier_head(Resnet50Backbone(), model_name=task_config.RESNET50)
     vit = get_classifier_head(Torchvision_Vit_B_16_Backbone(), model_name=task_config.VIT_B_16)
     clip = get_classifier_head(Openai_Clip_Backbone(), model_name=task_config.CLIP_VIT_B_32)
+
+    models = [
+        (task_config.RESNET50, resnet),
+        (task_config.VIT_B_16, vit),
+        (task_config.CLIP_VIT_B_32, clip),
+    ]
+
+    head_check = verify_heads_on_validation(models) if check_heads else None
 
     text_features, logit_scale, prompts = prepare_clip_text_features(clip[0])
     print("Text feature shape:", text_features.shape)
     print("Logit scale:", logit_scale)
     print("Prompts:", prompts)
-    
+
+    save_run_manifest(steps, conflict_dir, logit_scale, prompts, head_check)
+
+    def make_loader(dataset):
+        return DataLoader(dataset, batch_size=task_config.BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
+
+    org_testset, org_metadata = None, None
+    if {"baseline", "translation"} & set(steps):
+        org_testset, org_metadata = get_test_subset(transformation_type='baseline')
+
     ### baseline images
+    if "baseline" in steps:
+        run_condition_inference(make_loader(org_testset), org_metadata, models,
+                                text_features, logit_scale, prompts)
 
-    print("Starting inference on baseline with ResNet50 ...")
-    resnet_org_result = initialize_results(task_config.RESNET50, org_metadata)
-    test_and_report(resnet, orginal_loader, nn.CrossEntropyLoss(), resnet_org_result)
-    
-    print("Starting inference on baseline with ViT-B/16 ...")
-    vit_org_result = initialize_results(task_config.VIT_B_16, org_metadata)
-    test_and_report(vit, orginal_loader, nn.CrossEntropyLoss(), vit_org_result)
+    ### grey scale and hue-rotated images
+    if "color" in steps:
+        gray_testset, gray_metadata = get_test_subset(transformation_type='grey_scale')
+        run_condition_inference(make_loader(gray_testset), gray_metadata, models,
+                                text_features, logit_scale, prompts)
+        del gray_testset
 
-    print("Starting inference on baseline with CLIP ViT-B/32 ...")
-    clip_org_result = initialize_results(task_config.CLIP_VIT_B_32, org_metadata)
-    clip_org_result =  test_and_report(clip, orginal_loader, nn.CrossEntropyLoss(), clip_org_result)
-    
-    clip_zero_shot_result = make_clip_zero_shot_predictions(clip_org_result, text_features, logit_scale, prompts)
-    results_file = f"{clip_zero_shot_result["model_name"]}_{clip_zero_shot_result["transformation"]}_results.pt"
-    torch.save(clip_zero_shot_result, os.path.join(task_config.TASK_RESULTS_DIR, results_file))
-    
-    ### grey scale images
-    print("Starting inference on grayscale images with ResNet50 ...")
-    resnet_gray_result = initialize_results(task_config.RESNET50, gray_metadata)
-    resnet_gray_result = test_and_report(resnet, grey_loader, nn.CrossEntropyLoss(), resnet_gray_result)
-    
-    print("Starting inference on grayscale images with ViT-B/16 ...")
-    vit_gray_result = initialize_results(task_config.VIT_B_16, gray_metadata)
-    vit_gray_result = test_and_report(vit, grey_loader, nn.CrossEntropyLoss(), vit_gray_result)
+        hue_testset, hue_metadata = get_test_subset(transformation_type='hue',
+                                                    hue_rotation_angle=task_config.HUE_ROTATION_ANGLE)
+        run_condition_inference(make_loader(hue_testset), hue_metadata, models,
+                                text_features, logit_scale, prompts)
+        del hue_testset
 
-    print("Starting inference on grayscale images with CLIP ViT-B/32 ...")
-    clip_gray_result = initialize_results(task_config.CLIP_VIT_B_32, gray_metadata)
-    clip_gray_result = test_and_report(clip, grey_loader, nn.CrossEntropyLoss(), clip_gray_result)
+    ### translated images (12 conditions; 0 px is the baseline)
+    if "translation" in steps:
+        run_translation_inference(
+            baseline_dataset=org_testset,
+            baseline_metadata=org_metadata,
+            models=models,
+            text_features=text_features,
+            logit_scale=logit_scale,
+            prompts=prompts,
+        )
 
-    clip_zero_shot_result = make_clip_zero_shot_predictions(clip_gray_result, text_features, logit_scale, prompts)
-    results_file = f"{clip_zero_shot_result["model_name"]}_{clip_zero_shot_result["transformation"]}_results.pt"
-    torch.save(clip_zero_shot_result, os.path.join(task_config.TASK_RESULTS_DIR, results_file))
-    
-    
-    ### hue-rotated images
-    print("Starting inference on hue-rotated images with ResNet50 ...")
-    resnet_hue_result = initialize_results(task_config.RESNET50, hue_metadata)
-    resnet_hue_result = test_and_report(resnet, hue_loader, nn.CrossEntropyLoss(), resnet_hue_result)
-    
-    print("Starting inference on hue-rotated images with ViT-B/16 ...")
-    vit_hue_result = initialize_results(task_config.VIT_B_16, hue_metadata)
-    vit_hue_result = test_and_report(vit, hue_loader, nn.CrossEntropyLoss(), vit_hue_result)
-
-    print("Starting inference on hue-rotated images with CLIP ViT-B/32 ...")
-    clip_hue_result = initialize_results(task_config.CLIP_VIT_B_32, hue_metadata)
-    clip_hue_result = test_and_report(clip, hue_loader, nn.CrossEntropyLoss(), clip_hue_result)
-
-    clip_zero_shot_result = make_clip_zero_shot_predictions(clip_hue_result, text_features, logit_scale, prompts)
-    results_file = f"{clip_zero_shot_result["model_name"]}_{clip_zero_shot_result["transformation"]}_results.pt"
-    torch.save(clip_zero_shot_result, os.path.join(task_config.TASK_RESULTS_DIR, results_file))
-    
-    
-    ### translated images
-    # print("Starting inference on translated images with ResNet50 ...")
-    # resnet_trans_result = initialize_results(task_config.RESNET50, trans_metadata)
-    # resnet_trans_result = test_and_report(resnet, trans_loader, nn.CrossEntropyLoss(), resnet_trans_result)
-
-    # print("Starting inference on translated images with ViT-B/16 ...")
-    # vit_trans_result = initialize_results(task_config.VIT_B_16, trans_metadata)
-    # vit_trans_result = test_and_report(vit, trans_loader, nn.CrossEntropyLoss(), vit_trans_result)
-
-    # print("Starting inference on translated images with CLIP ViT-B/32 ...")
-    # clip_trans_result = initialize_results(task_config.CLIP_VIT_B_32, trans_metadata)
-    # clip_trans_result = test_and_report(clip, trans_loader, nn.CrossEntropyLoss(), clip_trans_result)
-
-    # clip_zero_shot_result = make_clip_zero_shot_predictions(clip_trans_result, text_features, logit_scale, prompts)
-    # results_file = f"{clip_zero_shot_result["model_name"]}_{clip_zero_shot_result["transformation"]}_results.pt"
-    # torch.save(clip_zero_shot_result, os.path.join(task_config.TASK_RESULTS_DIR, results_file))
-    
-    
-    run_translation_inference(
-        baseline_dataset=org_testset,
-        baseline_metadata=org_metadata,
-        models=[
-            (task_config.RESNET50, resnet),
-            (task_config.VIT_B_16, vit),
-            (task_config.CLIP_VIT_B_32, clip),
-        ],
-        text_features=text_features,
-        logit_scale=logit_scale,
-        prompts=prompts,
-    )
-        
     ### patch-shuffled images
-    print("Starting inference on patch-shuffled images with ResNet50 ...")
-    resnet_patch_result = initialize_results(task_config.RESNET50, patch_metadata)
-    resnet_patch_result = test_and_report(resnet, patch_loader, nn.CrossEntropyLoss(), resnet_patch_result)
+    if "patch" in steps:
+        patch_testset, patch_metadata = get_test_subset(transformation_type='patch_shuffle')
+        run_condition_inference(make_loader(patch_testset), patch_metadata, models,
+                                text_features, logit_scale, prompts)
+        del patch_testset
 
-    print("Starting inference on patch-shuffled images with ViT-B/16 ...")
-    vit_patch_result = initialize_results(task_config.VIT_B_16, patch_metadata)
-    vit_patch_result = test_and_report(vit, patch_loader, nn.CrossEntropyLoss(), vit_patch_result)
+    ### cue-conflict images
+    if "conflict" in steps:
+        run_conflict_inference(conflict_dir, models, text_features, logit_scale, prompts)
 
-    print("Starting inference on patch-shuffled images with CLIP ViT-B/32 ...")
-    clip_patch_result = initialize_results(task_config.CLIP_VIT_B_32, patch_metadata)
-    clip_patch_result = test_and_report(clip, patch_loader, nn.CrossEntropyLoss(), clip_patch_result)
+    print("All models evaluated.")
 
-    clip_zero_shot_result = make_clip_zero_shot_predictions(clip_patch_result, text_features, logit_scale, prompts)
-    results_file = f"{clip_zero_shot_result["model_name"]}_{clip_zero_shot_result["transformation"]}_results.pt"
-    torch.save(clip_zero_shot_result, os.path.join(task_config.TASK_RESULTS_DIR, results_file))
-    
+def run_conflict_inference(conflict_dir, models, text_features, logit_scale, prompts):
 
-    conflict_dateset = ConflictDataset(task_config.TASK_CONFLICTS_DIR)
-    
+    conflict_dir = conflict_dir or task_config.TASK_CONFLICT_DATASET_DIR
+    conflict_dateset = ConflictDataset(conflict_dir)
+    print(f"Loaded {len(conflict_dateset)} selected conflicts from {conflict_dateset.dataset_dir}")
+
     conflict_loader = DataLoader(conflict_dateset, batch_size=task_config.BATCH_SIZE, shuffle=False, num_workers=0)
 
-    conflict_models = [
-        (task_config.RESNET50, resnet),
-        (task_config.VIT_B_16, vit),
-        (task_config.CLIP_VIT_B_32, clip)
-    ]
-    
     clip_conflict_result = None
-    
-    for model_name, model in conflict_models:
-        
+
+    for model_name, model in models:
+
         result = infer_cue_conflicts(model, conflict_loader, model_name)
-        
+
         result["metadata"] = {
             "dataset_dir": str(conflict_dateset.dataset_dir.resolve()),
             "manifest_path": str(
                 (conflict_dateset.dataset_dir / "manifest.json").resolve()
             ),
             "n_conflicts": len(conflict_dateset),
+            "alphas": sorted({float(record["alpha"]) for record in conflict_dateset.records}),
         }
-        
+
         os.makedirs(task_config.TASK_RESULTS_DIR, exist_ok=True)
 
         result_path = os.path.join(
@@ -715,12 +683,12 @@ def start_inference():
             clip_conflict_result = result
 
         print(f"Saved conflict inference: {result_path}")
-        
+
     if clip_conflict_result is None:
         raise RuntimeError("CLIP conflict features were not collected.")
-    
-    zero_shot_result  = make_clip_conflict_zero_shot(clip_conflict_result, 
-                                                    text_features, logit_scale, 
+
+    zero_shot_result  = make_clip_conflict_zero_shot(clip_conflict_result,
+                                                    text_features, logit_scale,
                                                     prompts)
     result_path = os.path.join(
         task_config.TASK_RESULTS_DIR,
@@ -728,13 +696,102 @@ def start_inference():
     )
     torch.save(zero_shot_result, result_path)
     print(f"Saved zero-shot conflict inference: {result_path}")
-     
-    print("All models evaluated.")
+
+def get_head_checkpoint_path(model_name):
+    return os.path.join(task_config.MODEL_WEIGHTS_DIR, task_config.HEAD_WEIGHT_FILES[model_name])
+
+def expected_validation_accuracy(model_name):
+    """Validation accuracy recorded in the head filename, e.g. resnet50_97.30.pth."""
+    stem = os.path.splitext(task_config.HEAD_WEIGHT_FILES[model_name])[0]
+    return float(stem.rsplit("_", 1)[1])
+
+def verify_heads_on_validation(models, tolerance_pp=0.2):
+    """Re-evaluate backbone + head on the seed-6304 validation split.
+
+    This confirms that the loaded head file matches the current backbone
+    before any test-time evidence is produced. It fails when a head's
+    accuracy differs from the value in its filename by more than the tolerance.
+    """
+    _, val_loader = get_train_val_dataloaders()
+    report = {}
+
+    for model_name, model in models:
+        _, val_acc = evaluate(model, val_loader, nn.CrossEntropyLoss())
+        expected = expected_validation_accuracy(model_name)
+        report[model_name] = {"validation_accuracy_pct": val_acc, "expected_pct": expected}
+        print(f"Head check {model_name}: val acc {val_acc:.2f}% (expected {expected:.2f}%)")
+
+        if abs(val_acc - expected) > tolerance_pp:
+            raise RuntimeError(
+                f"{model_name}: validation accuracy {val_acc:.2f}% does not match the "
+                f"head file ({expected:.2f}%). Check HEAD_WEIGHT_FILES and the backbone."
+            )
+    return report
+
+def file_sha256(path):
+    digest = hashlib.sha256()
+    with open(path, "rb") as file:
+        for chunk in iter(lambda: file.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+def save_run_manifest(steps, conflict_dir, logit_scale, prompts, head_check):
+    """Record the settings and software behind this inference run."""
+    import sklearn
+    import torchvision
+
+    manifest = {
+        "steps": list(steps),
+        "seed": task_config.SEED,
+        "device": str(DEVICE),
+        "gpu": torch.cuda.get_device_name(0) if torch.cuda.is_available() else None,
+        "classes": list(task_config.STL10_CLASSES),
+        "test_subset": {
+            "selected_indices_file": task_config.SELECTED_INDICES_FILE,
+            "total_target_images": task_config.TOTAL_TARGET_IMAGES,
+        },
+        "heads": {
+            model_name: {
+                "path": get_head_checkpoint_path(model_name),
+                "sha256": file_sha256(get_head_checkpoint_path(model_name)),
+                "expected_validation_accuracy_pct": expected_validation_accuracy(model_name),
+            }
+            for model_name in task_config.HEAD_WEIGHT_FILES
+        },
+        "head_validation_check": head_check,
+        "backbones": {
+            task_config.RESNET50: "torchvision resnet50 ResNet50_Weights.IMAGENET1K_V2, global-average-pooled feature",
+            task_config.VIT_B_16: "torchvision vit_b_16 ViT_B_16_Weights.IMAGENET1K_V1, final class token",
+            task_config.CLIP_VIT_B_32: "open_clip ViT-B-32 pretrained=openai (quick_gelu), L2-normalized image embedding",
+        },
+        "interventions": {
+            "input": "224x224 RGB in [0, 1]; model normalization applied once inside each backbone",
+            "grey_scale": "ITU-R 601-2 luma replicated to 3 channels (torchvision Grayscale)",
+            "hue": {"rotation_degrees": task_config.HUE_ROTATION_ANGLE, "implementation": "torchvision adjust_hue"},
+            "translation": {"conditions": get_translation_conditions(), "padding": "reflect, 32 px, shifted crop"},
+            "patch_shuffle": {"grid": "4x4", "patch_size": task_config.PATCH_SIZE, "seed": task_config.SEED,
+                              "identity_permutation": "rejected and redrawn"},
+            "cue_conflict_dir": conflict_dir or task_config.TASK_CONFLICT_DATASET_DIR,
+        },
+        "zero_shot": {"prompts": list(prompts), "logit_scale": float(logit_scale)},
+        "software": {
+            "python": platform.python_version(),
+            "torch": torch.__version__,
+            "torchvision": torchvision.__version__,
+            "open_clip": open_clip.__version__,
+            "sklearn": sklearn.__version__,
+        },
+    }
+
+    path = os.path.join(task_config.TASK_RESULTS_DIR, "run_manifest.json")
+    with open(path, "w", encoding="utf-8") as file:
+        json.dump(manifest, file, indent=2)
+    print(f"Saved run manifest: {path}")
 
 def initialize_results(model_name, metadata):
-    
-    checkpoint_path = os.path.join(task_config.TASK_CHECKPOINTS_DIR, f"{model_name}_head.pth")
-    
+
+    checkpoint_path = get_head_checkpoint_path(model_name)
+
     return {
         "model_name": model_name,
         "head_checkpoint": os.path.abspath(checkpoint_path),
@@ -749,21 +806,21 @@ def initialize_results(model_name, metadata):
       "y_pred": None,
       "image_ids": None,
       "features": None,
-      "logits": None,  
+      "logits": None,
     }
 
 
 def get_classifier_head(backbone, model_name):
-    
-    checkpoint_dir = os.path.join(task_config.TASK_CHECKPOINTS_DIR, f"{model_name}_head.pth")
-    
+
+    checkpoint_dir = get_head_checkpoint_path(model_name)
+
     state = torch.load(checkpoint_dir, map_location=DEVICE, weights_only=True)
-    
+
     num_classes, in_features = state['weight'].shape
-    
+
     head_resent = nn.Linear(in_features, num_classes).to(DEVICE)
     head_resent.load_state_dict(state)
-    
+
     classifier_head = nn.Sequential(backbone, head_resent).to(DEVICE).eval()
     return classifier_head
 

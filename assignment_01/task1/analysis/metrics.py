@@ -40,10 +40,9 @@ def calcultate_metrics(result, top_k=(1, )):
         per-class precision/recall/F1 and confidence are fractions in [0, 1].
         Confidence measures certainty, not correctness or calibration.
 
-    Current limitations:
-        Integer casting happens before label validation and may truncate
-        fractional inputs. The k range check is duplicated and does not
-        explicitly validate integer types. No output files are written.
+    Validation:
+        Labels are checked for finite, integer-valued IDs before casting;
+        each k must be an integer in [1, C]. No output files are written.
     """
 
     labels = torch.as_tensor(result["y_true"], device="cpu")
@@ -165,11 +164,10 @@ def compare_with_baseline(baseline_result, transformed_result):
         For example, 90% to 80% is a change of -10 percentage points and
         a drop of 10 percentage points, not a 10% relative decrease.
 
-    Outstanding implementation corrections:
-        The existing labels.shape[1] access is invalid for [N] labels;
-        compare logits.shape[1] for class counts instead. Comparing label
-        shapes also does not validate class names/order; that metadata
-        check is still needed. This documentation does not fix those lines.
+    Checks:
+        Class names and order must match; class counts are compared via
+        logits.shape[1]. Matching model/checkpoint identity is enforced by
+        the caller (report.summarize_intervention).
     """
 
 

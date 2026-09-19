@@ -40,6 +40,22 @@ class TaskConfig:
         self.VIT_B_16 = "vit_b_16"
         self.CLIP_VIT_B_32 = "clip_vit_b_32"
         
+        ## INTERVENTION SETTINGS
+        self.HUE_ROTATION_ANGLE = 30          # degrees, the additional color intervention
+        self.PATCH_SIZE = 56                  # 4x4 grid on 224x224 images
+        self.TRANSLATION_DISPLACEMENTS = (8, 16, 32)
+
+        ## TRAINED CLASSIFIER HEADS (inside MODEL_WEIGHTS_DIR)
+        # The best-validation heads saved by train_model_head. The filename holds
+        # the validation accuracy that inference re-checks before evaluation.
+        # Note: the copies in checkpoints/*_head.pth reviewed locally on
+        # 2026-09-19 came from an earlier run (95.70/96.90/97.00% val acc).
+        self.HEAD_WEIGHT_FILES = {
+            self.RESNET50: "resnet50_97.30.pth",
+            self.VIT_B_16: "vit_b_16_97.90.pth",
+            self.CLIP_VIT_B_32: "clip_vit_b_32_98.40.pth",
+        }
+
         self.NUM_CONFLICT_IMAGES = 200
         # self.CLASS_PAIRS = [
         #     (0, 1), # e.g., airplane vs bird

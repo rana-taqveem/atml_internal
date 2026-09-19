@@ -44,8 +44,9 @@ def get_test_subset(
             if len(choosen) < task_config.TARGET_PER_CLASS:
                 print(f"Not enough samples for class {class_idx}. Required: {task_config.TARGET_PER_CLASS}, Available: {available_count}")
                 
-            selected_indices.extend(choosen)
-       
+            # Plain ints keep the saved result files loadable with weights_only=True.
+            selected_indices.extend(int(index) for index in choosen)
+
     np.save(task_config.SELECTED_INDICES_FILE, np.array(selected_indices))
     print(f"Saved selected indices to {task_config.SELECTED_INDICES_FILE}")
     
@@ -59,7 +60,7 @@ def get_test_subset(
         
     patch_shuffler = None
     if transformation_type == 'patch_shuffle':
-        patch_shuffler = PatchShuffler(patch_size=566, seed=task_config.SEED)
+        patch_shuffler = PatchShuffler(patch_size=task_config.PATCH_SIZE, seed=task_config.SEED)
     
     images = []
     labels = []
@@ -81,7 +82,7 @@ def get_test_subset(
                                         translation_y)
         
         elif transformation_type == 'patch_shuffle':
-            image, permutation = patch_shuffler.shuffle_patches(image)
+            image, permutation = patch_shuffler(image)
             permutations.append(permutation)
         
         images.append(image)
