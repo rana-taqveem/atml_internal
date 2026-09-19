@@ -27,7 +27,7 @@ from PIL import Image
 from assignment_01.task1.config import task_config
 
 TASK1_DIR = Path(__file__).resolve().parents[1]
-REAL_CONFLICT_DIR = TASK1_DIR / "data" / "conflict_dataset"
+REAL_CONFLICT_DIR = TASK1_DIR / "conflict_dataset"
 
 
 class FakeSTL10:
