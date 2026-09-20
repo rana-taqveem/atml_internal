@@ -1,27 +1,30 @@
-"""Prepare the PACS dataset without heavy work on Google Drive.
+"""Prepare PACS, following the same pattern as Task 1's prepare_stl10.
 
-PACS has no official torchvision downloader, so the dataset is supplied as an
-archive (the same pattern used for the Task 1 cue-conflict set): keep
-``pacs.zip`` / ``pacs.tar`` on Drive and this module extracts it once per
-session onto local disk, which is far faster than reading thousands of small
-files over Drive and survives a Colab runtime reset.
+prepare_stl10 could download and verify automatically because torchvision
+ships STL-10's URL, MD5 and file list. PACS has no torchvision dataset class,
+so those three constants have to be supplied here: set PACS_URL (and
+optionally PACS_MD5 and PACS_ARCHIVE_NAME) once and prepare_pacs behaves
+exactly like prepare_stl10 -- reuse valid data, otherwise stage the download
+on local disk, verify it, copy it to the destination and extract.
 
-The extraction helper is generalized from Task 1's ``prepare_conflict_dataset``.
-If a download URL is configured in ``PACS_URL`` the archive is fetched first.
+With PACS_URL left as None the download step is skipped and the archive is
+expected to be on Drive already, which is the flow used for the Task 1
+cue-conflict set.
 """
 
 import shutil
 import tempfile
 from pathlib import Path
 
-from torchvision.datasets.utils import download_url
+from torchvision.datasets.utils import check_integrity, download_url
 
 from assignment_01.task2.config import task_config
 
-# Set this if you have a direct archive link; otherwise place the archive on
-# Drive yourself. No default is provided because PACS has no stable official
-# download endpoint.
+# Fill these in to enable automatic download. No default is provided because
+# PACS has no stable official download endpoint; set the URL you were given.
 PACS_URL = None
+PACS_MD5 = None
+PACS_ARCHIVE_NAME = "pacs.zip"
 
 _ARCHIVE_SUFFIXES = (".tar.gz", ".tar.bz2", ".tar.xz", ".zip", ".tar", ".tgz")
 
@@ -33,34 +36,22 @@ DOMAIN_ALIASES = {
     "sketch": ("sketch", "S"),
 }
 
-
-def _find_archive(target_dir, name=None):
-    """Look for an archive named after the folder, inside it or beside it."""
-    target_dir = Path(target_dir)
-    name = name or target_dir.name
-    for parent in (target_dir, target_dir.parent):
-        for suffix in _ARCHIVE_SUFFIXES:
-            candidate = parent / f"{name}{suffix}"
-            if candidate.is_file():
-                return candidate
-    return None
+ALL_DOMAINS = tuple(task_config.SOURCE_DOMAINS) + (task_config.TARGET_DOMAIN,)
 
 
 def find_domain_root(root):
     """Return the directory that directly contains the PACS domain folders.
 
-    Distributions differ in how deeply they nest the data (``pacs_data/``,
-    ``kfold/``, ``PACS/`` and so on), so search for a directory holding at
-    least two recognised domain names.
+    Distributions nest the data differently (``pacs_data/``, ``kfold/``,
+    ``PACS/``), so search for a directory holding at least two recognised
+    domain names.
     """
     root = Path(root)
     if not root.is_dir():
         return None
 
     wanted = {alias.lower() for aliases in DOMAIN_ALIASES.values() for alias in aliases}
-    candidates = [root] + [p for p in root.rglob("*") if p.is_dir()]
-
-    for directory in candidates:
+    for directory in [root] + [p for p in root.rglob("*") if p.is_dir()]:
         names = {child.name.lower() for child in directory.iterdir() if child.is_dir()}
         if len(names & wanted) >= 2:
             return directory
@@ -80,58 +71,123 @@ def resolve_domain_dir(domain_root, domain):
     )
 
 
-def prepare_pacs(root=None, staging_root=None):
-    """Return the directory holding the PACS domain folders.
+def _extracted_files_valid(root, verbose=False):
+    """True when every domain folder holds every class folder with images.
 
-    Reuses an existing extraction when possible; otherwise extracts the
-    archive to local disk. Raises with an explanatory message when neither an
-    extracted copy nor an archive can be found.
+    The counterpart of Task 1's _extracted_files_valid, which checked STL-10's
+    published file list and checksums. PACS has no published checksums, so
+    this checks structure and reports the image counts instead.
     """
-    root = Path(root or task_config.TASK_DATASET_DIR)
+    domain_root = find_domain_root(root)
+    if domain_root is None:
+        return False
+
+    for domain in ALL_DOMAINS:
+        try:
+            domain_dir = resolve_domain_dir(domain_root, domain)
+        except FileNotFoundError:
+            return False
+
+        counts = {}
+        for class_name in task_config.PACS_CLASSES:
+            matches = [c for c in domain_dir.iterdir()
+                       if c.is_dir() and c.name.lower() == class_name.lower()]
+            if not matches:
+                return False
+            counts[class_name] = sum(1 for _ in matches[0].glob("*.*"))
+
+        if min(counts.values()) == 0:
+            return False
+        if verbose:
+            print(f"   {domain}: {sum(counts.values())} images across {len(counts)} classes")
+
+    return True
+
+
+def _find_archive(target_dir, name=None):
+    """Look for an archive named after the folder, inside it or beside it."""
+    target_dir = Path(target_dir)
+    stem = Path(name).stem if name else target_dir.name
+    for parent in (target_dir, target_dir.parent):
+        for suffix in _ARCHIVE_SUFFIXES:
+            candidate = parent / f"{stem}{suffix}"
+            if candidate.is_file():
+                return candidate
+    return None
+
+
+def prepare_pacs(root=None, staging_root=None, url=None, md5=None):
+    """Reuse valid data; otherwise stage, verify, copy and extract the archive.
+
+    Mirrors Task 1's prepare_stl10. Returns the directory that directly
+    contains the PACS domain folders.
+    """
+    root = Path(root or task_config.TASK_DATASET_DIR).expanduser().resolve()
     root.mkdir(parents=True, exist_ok=True)
+    print(f"PACS dataset directory: {root}")
 
-    existing = find_domain_root(root)
-    if existing is not None:
-        print(f"Reusing PACS at: {existing}")
-        return existing
+    if _extracted_files_valid(root, verbose=True):
+        print("Reusing verified PACS files.")
+        return find_domain_root(root)
 
-    archive = _find_archive(root, name="pacs") or _find_archive(root)
+    url = url or PACS_URL
+    md5 = md5 or PACS_MD5
+    archive = _find_archive(root, PACS_ARCHIVE_NAME) or _find_archive(root)
 
-    if archive is None and PACS_URL:
-        staging = Path(staging_root or ("/content" if Path("/content").is_dir()
-                                        else tempfile.gettempdir())) / "atml_pacs_download"
-        staging.mkdir(parents=True, exist_ok=True)
-        print(f"Downloading PACS into local storage: {staging}")
-        download_url(PACS_URL, str(staging))
-        archive = _find_archive(staging, name="pacs") or next(
-            (p for p in staging.iterdir() if p.suffix.lower() in {".zip", ".tar", ".tgz"}), None
+    if archive is None and url:
+        # Colab's /content and the OS temporary directory are local storage.
+        staging_base = Path(staging_root) if staging_root else (
+            Path("/content") if Path("/content").is_dir() else Path(tempfile.gettempdir())
         )
+        staging = staging_base / "atml_pacs_download"
+        staging.mkdir(parents=True, exist_ok=True)
+        local_archive = staging / PACS_ARCHIVE_NAME
+
+        print(f"Downloading/verifying PACS in local storage: {staging}")
+        download_url(url, str(staging), filename=PACS_ARCHIVE_NAME, md5=md5)
+        if md5 and not check_integrity(str(local_archive), md5):
+            raise RuntimeError("Downloaded PACS archive failed verification.")
+
+        # Verify the copy before replacing anything at the destination.
+        destination = root / PACS_ARCHIVE_NAME
+        pending = destination.with_name(destination.name + ".partial")
+        print(f"Copying verified archive to: {pending}")
+        shutil.copyfile(local_archive, pending)
+        if md5 and not check_integrity(str(pending), md5):
+            raise RuntimeError(f"Copied archive failed verification: {pending}")
+        pending.replace(destination)
+        archive = destination
 
     if archive is None:
         raise FileNotFoundError(
-            f"No PACS data under {root} and no archive to extract. Place pacs.zip "
-            f"(or .tar/.tar.gz) in {root} or beside it, or set PACS_URL in this module."
+            f"No PACS data under {root} and no archive to extract. Either place "
+            f"{PACS_ARCHIVE_NAME} (or .tar/.tar.gz) in {root} or beside it, pass "
+            f"--data-root pointing at an existing copy, or set PACS_URL in this module."
         )
 
-    staging_root = Path(staging_root) if staging_root else (
+    if md5 and not check_integrity(str(archive), md5):
+        raise RuntimeError(f"PACS archive failed verification: {archive}")
+
+    # Extract onto local disk: Drive is slow for thousands of small files and a
+    # Colab runtime is wiped between sessions, so this runs once per session.
+    staging_base = Path(staging_root) if staging_root else (
         Path("/content") if Path("/content").is_dir() else Path(tempfile.gettempdir())
     )
-    extracted = staging_root / "atml_pacs"
+    extracted = staging_base / "atml_pacs"
 
-    reused = find_domain_root(extracted)
-    if reused is not None:
-        print(f"Reusing extracted PACS: {reused}")
-        return reused
+    if _extracted_files_valid(extracted):
+        print(f"Reusing extracted PACS: {extracted}")
+        return find_domain_root(extracted)
 
     print(f"Extracting {archive} -> {extracted}")
     extracted.mkdir(parents=True, exist_ok=True)
     shutil.unpack_archive(str(archive), str(extracted))
 
-    domain_root = find_domain_root(extracted)
-    if domain_root is None:
+    if not _extracted_files_valid(extracted, verbose=True):
         raise RuntimeError(
-            f"Extracted {archive} but no PACS domain folders were found under {extracted}."
+            f"Extracted {archive} but the expected domain/class folders were not found "
+            f"under {extracted}."
         )
 
-    print(f"PACS is ready: {domain_root}")
-    return domain_root
+    print("PACS is ready.")
+    return find_domain_root(extracted)
