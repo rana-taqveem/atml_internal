@@ -308,6 +308,7 @@ from matplotlib import pyplot as plt
 from assignment_01.task1.data.translation_dataset import get_translation_conditions
 from assignment_01.task1.data.transforms import apply_translation
 from assignment_01.task1.analysis import feature_similarity as fs
+from assignment_01.task1.analysis import significance as sg
 from assignment_01.task1.analysis.representation import (
     DEFAULT_CONDITIONS as TSNE_CONDITIONS,
     build_projections,
@@ -856,11 +857,12 @@ def plot_texture_rank(summary_rows, output_path):
         ax.text(b + 1.5, yi, f"{b:.1f}", va="center", fontsize=7.5, color="#444444")
 
     ax.axvline(100 * 2 / 10, color="#999999", linestyle=":", linewidth=1)
-    ax.text(100 * 2 / 10, len(methods) - 0.45, " chance (2/10)", fontsize=7, color="#777777", va="bottom")
     ax.set_yticks(y)
     ax.set_yticklabels([METHOD_LABELS[m] for m in methods], fontsize=8)
     ax.invert_yaxis()
-    ax.set_xlim(0, 105)
+    ax.set_xlim(0, max(30, 10 * np.ceil(max(clean + conflict) / 10 + 0.5)))
+    ax.text(100 * 2 / 10, -0.6, "chance (2/10)", fontsize=7, color="#777777", ha="center", va="bottom")
+    ax.set_ylim(len(methods) - 0.5, -0.9)
     ax.set_xlabel("Style (texture) class ranked 1st or 2nd (% of conflicts)", fontsize=8.5)
     style_axis(ax)
     ax.legend(frameon=False, fontsize=8, loc="lower right")
@@ -981,6 +983,217 @@ def plot_representation_stability(summary_rows, output_path):
     fig.tight_layout()
     fig.savefig(output_path, dpi=200)
     plt.close(fig)
+
+
+
+
+# ---------------------------------------------------------------------------
+# Uncertainty: paired tests and confidence intervals
+# ---------------------------------------------------------------------------
+
+def _aligned_correct(result):
+    """Correctness flags [N] ordered by image ID, for paired comparisons."""
+    ids = torch.as_tensor(result["image_ids"], dtype=torch.long)
+    order = ids.argsort()
+    labels = torch.as_tensor(result["y_true"], dtype=torch.long)[order]
+    predictions = torch.as_tensor(result["logits"]).argmax(dim=1)[order]
+    return (predictions == labels).numpy(), ids[order].numpy()
+
+
+def _aligned_predictions(result):
+    ids = torch.as_tensor(result["image_ids"], dtype=torch.long)
+    order = ids.argsort()
+    return torch.as_tensor(result["logits"]).argmax(dim=1)[order].numpy()
+
+
+def _conflict_flags(result, conflict_ids):
+    """Shape/texture decision flags for a fixed conflict order."""
+    position = {cid: i for i, cid in enumerate(result["conflict_ids"])}
+    order = [position[cid] for cid in conflict_ids]
+    predictions = torch.as_tensor(result["logits"]).argmax(dim=1).numpy()[order]
+    content = torch.as_tensor(result["content_labels"], dtype=torch.long).numpy()[order]
+    style = torch.as_tensor(result["style_labels"], dtype=torch.long).numpy()[order]
+    return (predictions == content), (predictions == style)
+
+
+def build_significance_rows(results_dir, conditions=INTERVENTIONS):
+    """Paired tests: interventions vs their own baseline, and model vs model.
+
+    Families are corrected separately with Holm, because a correction is
+    only meaningful across tests that answer one question.
+    """
+    rows = []
+
+    # Each intervention against the same method's clean baseline.
+    for family, family_conditions in (("color_and_patch", list(conditions)),
+                                      ("translation", TRANSLATION_IDS)):
+        for model_name in DECISION_METHODS:
+            baseline = load_result(results_dir, model_name, "baseline")
+            clean_correct, clean_ids = _aligned_correct(baseline)
+            clean_predictions = _aligned_predictions(baseline)
+
+            for condition in family_conditions:
+                result = load_result(results_dir, model_name, condition)
+                correct, ids = _aligned_correct(result)
+                if not np.array_equal(ids, clean_ids):
+                    raise ValueError(f"{model_name} {condition}: image IDs differ from baseline.")
+
+                b = int((clean_correct & ~correct).sum())
+                c = int((~clean_correct & correct).sum())
+                test = sg.mcnemar(b, c)
+                change, low, high = sg.paired_proportion_diff_ci(b, c, len(correct))
+                unchanged = int((clean_predictions == _aligned_predictions(result)).sum())
+                consistency_low, consistency_high = sg.wilson_interval(unchanged, len(correct))
+
+                rows.append({
+                    "family": family, "comparison": "intervention vs own baseline",
+                    "method": model_name, "condition": condition, "n": len(correct),
+                    "broken_by_change": b, "fixed_by_change": c,
+                    "accuracy_change_pp": change,
+                    "change_ci_low_pp": low, "change_ci_high_pp": high,
+                    "consistency_pct": 100 * unchanged / len(correct),
+                    "consistency_ci_low": consistency_low, "consistency_ci_high": consistency_high,
+                    "test": test["test"], "p_value": test["p_value"],
+                })
+
+    # Method against method on the same images and condition.
+    for condition in ["baseline", *conditions]:
+        correct = {m: _aligned_correct(load_result(results_dir, m, condition))[0]
+                   for m in DECISION_METHODS}
+        for i, first in enumerate(DECISION_METHODS):
+            for second in DECISION_METHODS[i + 1:]:
+                b = int((correct[first] & ~correct[second]).sum())
+                c = int((~correct[first] & correct[second]).sum())
+                test = sg.mcnemar(b, c)
+                difference, low, high = sg.paired_proportion_diff_ci(b, c, len(correct[first]))
+                rows.append({
+                    "family": f"model_vs_model:{condition}", "comparison": f"{second} - {first}",
+                    "method": f"{first} vs {second}", "condition": condition,
+                    "n": len(correct[first]),
+                    "broken_by_change": b, "fixed_by_change": c,
+                    "accuracy_change_pp": difference,
+                    "change_ci_low_pp": low, "change_ci_high_pp": high,
+                    "consistency_pct": None, "consistency_ci_low": None, "consistency_ci_high": None,
+                    "test": test["test"], "p_value": test["p_value"],
+                })
+
+    return sg.apply_holm(rows)
+
+
+def build_cue_significance_rows(results_dir):
+    """Texture-rank shift under conflict, and shape-bias differences."""
+    rows = []
+    reference = load_result(results_dir, DECISION_METHODS[0], "cue_conflict")
+    conflict_ids = list(reference["conflict_ids"])
+    flags = {}
+
+    for model_name in DECISION_METHODS:
+        conflict = load_result(results_dir, model_name, "cue_conflict")
+        baseline = load_result(results_dir, model_name, "baseline")
+        flags[model_name] = _conflict_flags(conflict, conflict_ids)
+
+        # Does the texture class rank higher under conflict than on the clean image?
+        position = {cid: i for i, cid in enumerate(conflict["conflict_ids"])}
+        order = [position[cid] for cid in conflict_ids]
+        row_of = {int(i): r for r, i in enumerate(torch.as_tensor(baseline["image_ids"]).tolist())}
+        clean_logits = torch.as_tensor(baseline["logits"], dtype=torch.float32)
+        new_logits = torch.as_tensor(conflict["logits"], dtype=torch.float32)[order]
+        style = torch.as_tensor(conflict["style_labels"], dtype=torch.long).numpy()[order]
+        content_ids = torch.as_tensor(conflict["content_ids"], dtype=torch.long).numpy()[order]
+
+        clean_rank = np.array([_class_rank(clean_logits[row_of[int(cid)]], int(s))
+                               for cid, s in zip(content_ids, style)])
+        conflict_rank = np.array([_class_rank(new_logits[i], int(s)) for i, s in enumerate(style)])
+
+        clean_top2, conflict_top2 = clean_rank <= 2, conflict_rank <= 2
+        b = int((clean_top2 & ~conflict_top2).sum())
+        c = int((~clean_top2 & conflict_top2).sum())
+        test = sg.mcnemar(b, c)
+        change, low, high = sg.paired_proportion_diff_ci(b, c, len(clean_top2))
+        signed = sg.wilcoxon_signed_rank(clean_rank - conflict_rank)
+
+        rows.append({
+            "family": "texture_rank", "comparison": "texture class: conflict vs clean content image",
+            "method": model_name, "n": len(conflict_ids),
+            "left_only": b, "right_only": c,
+            "effect_pp": change, "ci_low": low, "ci_high": high,
+            "detail": (f"mean rank {clean_rank.mean():.2f} -> {conflict_rank.mean():.2f}; "
+                       f"Wilcoxon p={signed['p_value']:.3g} on {signed['n_nonzero']} changed"),
+            "test": test["test"], "p_value": test["p_value"],
+        })
+
+    # Shape bias differences between methods, resampling the same conflicts.
+    for i, first in enumerate(DECISION_METHODS):
+        for second in DECISION_METHODS[i + 1:]:
+            shape_a, texture_a = flags[first]
+            shape_b, texture_b = flags[second]
+            rng = np.random.default_rng(TaskConfig.SEED)
+            index = rng.integers(0, len(conflict_ids), size=(10000, len(conflict_ids)))
+
+            def bias(shape, texture):
+                covered = shape[index].sum(axis=1) + texture[index].sum(axis=1)
+                with np.errstate(invalid="ignore", divide="ignore"):
+                    return np.where(covered > 0, 100 * shape[index].sum(axis=1) / covered, np.nan)
+
+            difference = bias(shape_b, texture_b) - bias(shape_a, texture_a)
+            difference = difference[~np.isnan(difference)]
+            low, high = np.percentile(difference, (2.5, 97.5))
+            observed = (100 * shape_b.sum() / (shape_b.sum() + texture_b.sum())
+                        - 100 * shape_a.sum() / (shape_a.sum() + texture_a.sum()))
+            # Two-sided bootstrap p: how often the difference crosses zero.
+            p = 2 * min((difference <= 0).mean(), (difference >= 0).mean())
+
+            rows.append({
+                "family": "shape_bias_model_vs_model",
+                "comparison": f"shape bias: {second} - {first}",
+                "method": f"{first} vs {second}", "n": len(conflict_ids),
+                "left_only": None, "right_only": None,
+                "effect_pp": float(observed), "ci_low": float(low), "ci_high": float(high),
+                "detail": "paired bootstrap over conflicts, 10000 draws",
+                "test": "bootstrap", "p_value": float(min(max(p, 0.0), 1.0)),
+            })
+
+    return sg.apply_holm(rows)
+
+
+def build_estimate_ci_rows(results_dir):
+    """Point estimates with intervals: accuracy, coverage, shape bias, I_T."""
+    rows = []
+
+    for model_name in DECISION_METHODS:
+        for condition in ["baseline", *INTERVENTIONS]:
+            correct, _ = _aligned_correct(load_result(results_dir, model_name, condition))
+            low, high = sg.wilson_interval(int(correct.sum()), correct.size)
+            rows.append({"quantity": "top-1 accuracy (%)", "method": model_name, "condition": condition,
+                         "n": int(correct.size), "estimate": 100 * float(correct.mean()),
+                         "ci_low": low, "ci_high": high, "interval": "Wilson 95%"})
+
+    reference = load_result(results_dir, DECISION_METHODS[0], "cue_conflict")
+    conflict_ids = list(reference["conflict_ids"])
+    for model_name in DECISION_METHODS:
+        shape, texture = _conflict_flags(load_result(results_dir, model_name, "cue_conflict"), conflict_ids)
+        covered = int(shape.sum() + texture.sum())
+        low, high = sg.wilson_interval(covered, shape.size)
+        rows.append({"quantity": "coverage (%)", "method": model_name, "condition": "cue_conflict",
+                     "n": int(shape.size), "estimate": 100 * covered / shape.size,
+                     "ci_low": low, "ci_high": high, "interval": "Wilson 95%"})
+
+        bias_low, bias_high, _ = sg.bootstrap_shape_bias_ci(shape, texture)
+        rows.append({"quantity": "shape bias (%)", "method": model_name, "condition": "cue_conflict",
+                     "n": covered, "estimate": 100 * float(shape.sum()) / covered if covered else None,
+                     "ci_low": bias_low, "ci_high": bias_high, "interval": "bootstrap 95%"})
+
+    for backbone in BACKBONES:
+        baseline = load_result(results_dir, backbone, "baseline")
+        for condition in ("grey_scale", "hue", "patch_shuffle", "cue_conflict"):
+            cosine, _, _, _ = fs.paired_cosine(baseline, load_result(results_dir, backbone, condition))
+            values = cosine.numpy()
+            low, high = sg.bootstrap_ci(values)
+            rows.append({"quantity": "cosine stability I_T", "method": backbone, "condition": condition,
+                         "n": int(values.size), "estimate": float(values.mean()),
+                         "ci_low": low, "ci_high": high, "interval": "bootstrap 95%"})
+
+    return rows
 
 
 # ---------------------------------------------------------------------------
@@ -1111,6 +1324,30 @@ def run_all(results_dir, conflict_dir=None, output_dir=None, make_tsne=True):
                                       ["method", "mean rank clean", "mean rank conflict", "top-2 clean (%)",
                                        "top-2 conflict (%)", "runner-up | shape, clean (%)",
                                        "runner-up | shape, conflict (%)"]), ""]
+
+    # Uncertainty: paired tests and confidence intervals
+    if section("significance", DECISION_METHODS, ["baseline", *INTERVENTIONS, *TRANSLATION_IDS]):
+        test_rows = build_significance_rows(results_dir)
+        write(test_rows, "significance_tests.csv")
+        write(build_estimate_ci_rows(results_dir), "estimates_with_ci.csv")
+
+        summary_md += ["## Paired tests: interventions vs own baseline (Holm-corrected per family)", "",
+                       markdown_table([r for r in test_rows if r["family"] == "color_and_patch"],
+                                      ["method", "condition", "accuracy_change_pp",
+                                       "change_ci_low_pp", "change_ci_high_pp", "p_holm",
+                                       "significant_holm_0.05"],
+                                      ["method", "condition", "change (pp)", "CI low", "CI high",
+                                       "p (Holm)", "sig."]), ""]
+
+        if not missing_files(results_dir, DECISION_METHODS, ["cue_conflict"]):
+            cue_test_rows = build_cue_significance_rows(results_dir)
+            write(cue_test_rows, "cue_significance_tests.csv")
+            summary_md += ["## Cue-conflict tests (Holm-corrected per family)", "",
+                           markdown_table(cue_test_rows,
+                                          ["family", "comparison", "method", "effect_pp", "ci_low",
+                                           "ci_high", "p_holm", "significant_holm_0.05"],
+                                          ["family", "comparison", "method", "effect (pp)", "CI low",
+                                           "CI high", "p (Holm)", "sig."]), ""]
 
     # RQ3: CLIP head vs zero-shot on shared features
     clip_conditions = [c for c in all_conditions

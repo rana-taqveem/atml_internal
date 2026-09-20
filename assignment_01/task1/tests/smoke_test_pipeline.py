@@ -27,10 +27,6 @@ from PIL import Image
 from assignment_01.task1.config import task_config
 
 TASK1_DIR = Path(__file__).resolve().parents[1]
-# task_config.TASK_CONFLICT_DATASET_DIR already resolves correctly for both
-# environments (it's built from task_config.TASK_DIR, which mounts Drive on
-# Colab). Capture it now, before point_config_to() below repoints it at the
-# temporary work directory for the rest of the test run.
 REAL_CONFLICT_DIR = Path(task_config.TASK_CONFLICT_DATASET_DIR)
 
 
