@@ -293,7 +293,7 @@ def evaluate_final(model, validation_loaders, target_loader, criterion):
     return results
 
 
-def run_erm(num_workers=2, num_epochs=None, use_amp=None, data_root=None):
+def run_erm(num_workers=2, num_epochs=None, use_amp=None, data_root=None, download_hf=False):
     """Step 1: source-only ERM.
 
     Cross-entropy over the three labelled source domains with domain-balanced
@@ -307,7 +307,7 @@ def run_erm(num_workers=2, num_epochs=None, use_amp=None, data_root=None):
     from assignment_01.task2.models.backbones import build_model
 
     from assignment_01.task2.data.download import prepare_pacs
-    domain_root = prepare_pacs(data_root) if data_root else prepare_pacs()
+    domain_root = prepare_pacs(data_root, allow_huggingface=download_hf)
 
     source_loaders, validation_loaders = get_source_loaders(
         domain_root=domain_root, num_workers=num_workers)
@@ -359,6 +359,9 @@ def main():
     parser.add_argument("--data-root", default=None,
                         help="folder holding the PACS domain folders, or containing pacs.zip/.tar "
                              "(default: task_config.TASK_DATASET_DIR)")
+    parser.add_argument("--download-hf", action="store_true",
+                        help="if no local copy is found, download PACS from the Hugging Face hub "
+                             "(flwrlabs/pacs) and cache it back to the dataset folder as pacs.zip")
     parser.add_argument("--no-amp", action="store_true",
                         help="disable mixed precision (on by default on CUDA)")
     args = parser.parse_args()
@@ -372,7 +375,8 @@ def main():
 
     if args.mode == "train" and args.method == "erm":
         run_erm(num_workers=args.num_workers, num_epochs=args.epochs,
-                use_amp=False if args.no_amp else None, data_root=args.data_root)
+                use_amp=False if args.no_amp else None, data_root=args.data_root,
+                download_hf=args.download_hf)
         return
 
     raise SystemExit(f"TODO: --mode {args.mode} --method {args.method} is not implemented yet.")

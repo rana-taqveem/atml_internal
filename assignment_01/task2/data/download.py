@@ -116,7 +116,74 @@ def _find_archive(target_dir, name=None):
     return None
 
 
-def prepare_pacs(root=None, staging_root=None, url=None, md5=None):
+def prepare_pacs_from_huggingface(root=None, staging_root=None, repo_id="flwrlabs/pacs",
+                                  split="train", make_archive=True):
+    """Download PACS from the Hugging Face hub and write the folder layout.
+
+    The hub copy stores one table of (image, domain, label) rather than the
+    per-domain folders the rest of this task expects, so images are written
+    out as <domain>/<class>/<index>.jpg on local disk. When make_archive is
+    set, the result is zipped back to the dataset directory on Drive, so the
+    next session takes the fast archive path instead of downloading again.
+
+    Class and domain names come from the dataset itself, not from the config,
+    so a mismatch surfaces as a clear error rather than mislabelled data.
+    """
+    from datasets import load_dataset
+
+    root = Path(root or task_config.TASK_DATASET_DIR).expanduser().resolve()
+    root.mkdir(parents=True, exist_ok=True)
+
+    staging_base = Path(staging_root) if staging_root else (
+        Path("/content") if Path("/content").is_dir() else Path(tempfile.gettempdir())
+    )
+    output = staging_base / "atml_pacs" / "pacs_data"
+
+    if _extracted_files_valid(output.parent):
+        print(f"Reusing extracted PACS: {output}")
+        return find_domain_root(output.parent)
+
+    print(f"Downloading {repo_id} from the Hugging Face hub ...")
+    dataset = load_dataset(repo_id, split=split)
+
+    domain_names = dataset.features["domain"].names
+    class_names = dataset.features["label"].names
+    print(f"   domains: {domain_names}")
+    print(f"   classes: {class_names}")
+
+    output.mkdir(parents=True, exist_ok=True)
+    counts = {}
+    for index, example in enumerate(dataset):
+        domain = domain_names[example["domain"]]
+        class_name = class_names[example["label"]]
+        directory = output / domain / class_name
+        directory.mkdir(parents=True, exist_ok=True)
+        example["image"].convert("RGB").save(directory / f"{index:05d}.jpg", quality=95)
+        counts[domain] = counts.get(domain, 0) + 1
+
+        if (index + 1) % 2000 == 0:
+            print(f"   wrote {index + 1}/{len(dataset)} images")
+
+    print(f"   image counts per domain: {counts}")
+
+    expected = [c.lower() for c in task_config.PACS_CLASSES]
+    if sorted(c.lower() for c in class_names) != sorted(expected):
+        raise ValueError(
+            f"Hub class names {class_names} do not match task_config.PACS_CLASSES "
+            f"{task_config.PACS_CLASSES}. Update the config so label indices stay consistent."
+        )
+
+    if make_archive:
+        archive_base = root / Path(PACS_ARCHIVE_NAME).stem
+        print(f"Archiving to {archive_base}.zip for future sessions ...")
+        shutil.make_archive(str(archive_base), "zip", str(output.parent))
+        print("   done")
+
+    print("PACS is ready.")
+    return find_domain_root(output.parent)
+
+
+def prepare_pacs(root=None, staging_root=None, url=None, md5=None, allow_huggingface=False):
     """Reuse valid data; otherwise stage, verify, copy and extract the archive.
 
     Mirrors Task 1's prepare_stl10. Returns the directory that directly
@@ -158,11 +225,15 @@ def prepare_pacs(root=None, staging_root=None, url=None, md5=None):
         pending.replace(destination)
         archive = destination
 
+    if archive is None and allow_huggingface:
+        return prepare_pacs_from_huggingface(root=root, staging_root=staging_root)
+
     if archive is None:
         raise FileNotFoundError(
             f"No PACS data under {root} and no archive to extract. Either place "
             f"{PACS_ARCHIVE_NAME} (or .tar/.tar.gz) in {root} or beside it, pass "
-            f"--data-root pointing at an existing copy, or set PACS_URL in this module."
+            f"--data-root pointing at an existing copy, run with --download-hf to fetch "
+            f"it from the Hugging Face hub, or set PACS_URL in this module."
         )
 
     if md5 and not check_integrity(str(archive), md5):
