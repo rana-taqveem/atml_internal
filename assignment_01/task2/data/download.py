@@ -146,16 +146,26 @@ def prepare_pacs_from_huggingface(root=None, staging_root=None, repo_id="flwrlab
     print(f"Downloading {repo_id} from the Hugging Face hub ...")
     dataset = load_dataset(repo_id, split=split)
 
-    domain_names = dataset.features["domain"].names
-    class_names = dataset.features["label"].names
-    print(f"   domains: {domain_names}")
-    print(f"   classes: {class_names}")
+    # A column may be a ClassLabel (integer codes plus .names) or a plain
+    # string column, depending on how the hub copy was built. Support both.
+    def value_to_name(column):
+        names = getattr(dataset.features[column], "names", None)
+        if names is None:
+            return list(names or []), (lambda value: str(value))
+        return list(names), (lambda value: names[int(value)])
+
+    domain_names, domain_of = value_to_name("domain")
+    class_names, class_of = value_to_name("label")
+    print(f"   domains: {domain_names or 'string column'}")
+    print(f"   classes: {class_names or 'string column'}")
 
     output.mkdir(parents=True, exist_ok=True)
     counts = {}
+    observed_classes = set()
     for index, example in enumerate(dataset):
-        domain = domain_names[example["domain"]]
-        class_name = class_names[example["label"]]
+        domain = domain_of(example["domain"])
+        class_name = class_of(example["label"])
+        observed_classes.add(class_name)
         directory = output / domain / class_name
         directory.mkdir(parents=True, exist_ok=True)
         example["image"].convert("RGB").save(directory / f"{index:05d}.jpg", quality=95)
@@ -166,11 +176,12 @@ def prepare_pacs_from_huggingface(root=None, staging_root=None, repo_id="flwrlab
 
     print(f"   image counts per domain: {counts}")
 
-    expected = [c.lower() for c in task_config.PACS_CLASSES]
-    if sorted(c.lower() for c in class_names) != sorted(expected):
+    found = sorted(class_names or observed_classes)
+    expected = sorted(task_config.PACS_CLASSES)
+    if [c.lower() for c in found] != [c.lower() for c in expected]:
         raise ValueError(
-            f"Hub class names {class_names} do not match task_config.PACS_CLASSES "
-            f"{task_config.PACS_CLASSES}. Update the config so label indices stay consistent."
+            f"Hub class names {found} do not match task_config.PACS_CLASSES {expected}. "
+            "Update the config so label indices stay consistent."
         )
 
     if make_archive:
