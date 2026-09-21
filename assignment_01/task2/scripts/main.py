@@ -207,12 +207,15 @@ def mean_source_validation_f1(model, validation_loaders, criterion):
 
 def train_model(model, method_name, train_loader, validation_loaders, criterion, optimizer,
                 num_epochs=None, early_stopping_patience=None, extra_loss_fn=None, use_amp=None,
-                grad_clip=None, epoch_fn=None):
+                grad_clip=None, epoch_fn=None, weights_dir=None, results_dir=None):
     """Fine-tune with early stopping on mean source-validation macro-F1.
 
     The best checkpoint and the history are written as soon as they improve,
     so a disconnected Colab session still leaves a usable model on Drive.
     Returns the per-epoch history; the model is left holding the best weights.
+
+    weights_dir/results_dir default to Task 2's directories. Task 3 passes its
+    own, so its runs are written under task3/ rather than beside Task 2's.
     """
     num_epochs = num_epochs or task_config.NUM_EPOCHS
     early_stopping_patience = early_stopping_patience or task_config.EARLY_STOPPING_PATIENCE
@@ -220,10 +223,12 @@ def train_model(model, method_name, train_loader, validation_loaders, criterion,
     use_amp = DEVICE.type == "cuda" if use_amp is None else use_amp
     scaler = torch.amp.GradScaler(DEVICE.type) if use_amp else None
 
-    os.makedirs(task_config.MODEL_WEIGHTS_DIR, exist_ok=True)
-    os.makedirs(task_config.TASK_RESULTS_DIR, exist_ok=True)
-    checkpoint_path = os.path.join(task_config.MODEL_WEIGHTS_DIR, f"{method_name}_best.pth")
-    history_path = os.path.join(task_config.TASK_RESULTS_DIR, f"{method_name}_history.json")
+    weights_dir = weights_dir or task_config.MODEL_WEIGHTS_DIR
+    results_dir = results_dir or task_config.TASK_RESULTS_DIR
+    os.makedirs(weights_dir, exist_ok=True)
+    os.makedirs(results_dir, exist_ok=True)
+    checkpoint_path = os.path.join(weights_dir, f"{method_name}_best.pth")
+    history_path = os.path.join(results_dir, f"{method_name}_history.json")
 
     # Task 3's SAM needs two forward/backward passes per step, so it supplies
     # its own epoch function and reuses everything else here.
