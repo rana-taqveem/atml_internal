@@ -216,6 +216,7 @@ def train_model(model, method_name, train_loader, validation_loaders, criterion,
     """
     num_epochs = num_epochs or task_config.NUM_EPOCHS
     early_stopping_patience = early_stopping_patience or task_config.EARLY_STOPPING_PATIENCE
+    grad_clip = task_config.GRAD_CLIP_NORM if grad_clip is None else grad_clip
     use_amp = DEVICE.type == "cuda" if use_amp is None else use_amp
     scaler = torch.amp.GradScaler(DEVICE.type) if use_amp else None
 
@@ -512,7 +513,8 @@ def main():
                         help="DANN/CDAN only: cap the gradient-reversal strength "
                              "(study uses 0.25, 0.5, 1)")
     parser.add_argument("--grad-clip", type=float, default=None,
-                        help="clip gradient norm (try 1.0 if adversarial training diverges)")
+                        help=f"gradient-norm clip (default {task_config.GRAD_CLIP_NORM}, "
+                             "applied to every method; 0 disables)")
     parser.add_argument("--no-amp", action="store_true",
                         help="disable mixed precision (on by default on CUDA)")
     args = parser.parse_args()

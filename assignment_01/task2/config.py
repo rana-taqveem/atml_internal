@@ -42,6 +42,12 @@ class TaskConfig:
         self.RESIZE = 256
         self.CROP = 224
 
+        # Applied identically to every method so the comparison stays fair.
+        # Adversarial alignment maximizes an unbounded cross-entropy, which
+        # AdamW climbs quickly enough to blow up the shared backbone; clipping
+        # bounds each update without changing any objective.
+        self.GRAD_CLIP_NORM = 1.0
+
         ## DAN (MMD alignment)
         self.DAN_LAMBDA_MMD = 1.0                    # main comparison; study varies {0.1, 1, 10}
         self.MMD_BANDWIDTH_MULTIPLIERS = (0.5, 1.0, 2.0)  # x median pairwise squared distance
