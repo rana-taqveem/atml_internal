@@ -54,3 +54,6 @@ logs/
 # Task 1: generated/downloaded data, not checked into Git (stored on Google Drive)
 assignment_01/task1/local_runs/
 assignment_01/task1/data/conflict_dataset/
+assignment_01/task2/local_runs/
+assignment_01/task3/local_runs/
+assignment_01/task2/checkpoints/

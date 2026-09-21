@@ -207,7 +207,7 @@ def mean_source_validation_f1(model, validation_loaders, criterion):
 
 def train_model(model, method_name, train_loader, validation_loaders, criterion, optimizer,
                 num_epochs=None, early_stopping_patience=None, extra_loss_fn=None, use_amp=None,
-                grad_clip=None):
+                grad_clip=None, epoch_fn=None):
     """Fine-tune with early stopping on mean source-validation macro-F1.
 
     The best checkpoint and the history are written as soon as they improve,
@@ -225,6 +225,10 @@ def train_model(model, method_name, train_loader, validation_loaders, criterion,
     checkpoint_path = os.path.join(task_config.MODEL_WEIGHTS_DIR, f"{method_name}_best.pth")
     history_path = os.path.join(task_config.TASK_RESULTS_DIR, f"{method_name}_history.json")
 
+    # Task 3's SAM needs two forward/backward passes per step, so it supplies
+    # its own epoch function and reuses everything else here.
+    epoch_fn = epoch_fn or train_one_epoch
+
     history = {"method": method_name, "train_loss": [], "train_acc": [],
                "classification_loss": [], "alignment_loss": [], "domain_accuracy": [],
                "val_macro_f1": [], "val_per_domain": [], "epoch_seconds": [],
@@ -238,7 +242,7 @@ def train_model(model, method_name, train_loader, validation_loaders, criterion,
 
     for epoch in range(num_epochs):
         started = time.time()
-        stats = train_one_epoch(
+        stats = epoch_fn(
             model, train_loader, criterion, optimizer, extra_loss_fn=extra_loss_fn, scaler=scaler,
             epoch=epoch, num_epochs=num_epochs, grad_clip=grad_clip,
         )
