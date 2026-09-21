@@ -56,8 +56,12 @@ def freeze_batchnorm_statistics(model):
             module.eval()
 
 
+def _all_parameters(optimizer):
+    return [p for group in optimizer.param_groups for p in group["params"]]
+
+
 def train_one_epoch(model, loader, criterion, optimizer, extra_loss_fn=None, scaler=None,
-                    epoch=0, num_epochs=1):
+                    epoch=0, num_epochs=1, grad_clip=None):
     """One pass over a labelled loader.
 
     extra_loss_fn(model, batch, source_features, progress) may return an extra
@@ -79,6 +83,8 @@ def train_one_epoch(model, loader, criterion, optimizer, extra_loss_fn=None, sca
     totals = {"loss": 0.0, "classification_loss": 0.0, "alignment_loss": 0.0}
     accurate_predictions = 0
     sample_count = 0
+    nonfinite_steps = 0
+    domain_accuracies = []
     steps = max(len(loader), 1)
 
     for step, batch in enumerate(loader):
@@ -103,24 +109,60 @@ def train_one_epoch(model, loader, criterion, optimizer, extra_loss_fn=None, sca
                                       progress=progress)
             loss = classification_loss if extra is None else classification_loss + extra
 
+        if not torch.isfinite(loss):
+            nonfinite_steps += 1
+            # Tolerate a few transient overflows, but stop quickly if the run
+            # is genuinely diverging (short epochs must not hide it).
+            if nonfinite_steps >= max(1, min(5, steps // 2)):
+                raise RuntimeError(
+                    f"Loss became non-finite at epoch {epoch + 1}, step {step + 1} "
+                    f"(classification {classification_loss.item():.4f}). Adversarial training "
+                    "can overflow in float16: rerun with --no-amp, and consider "
+                    "--grad-clip 1.0 if it persists."
+                )
+            optimizer.zero_grad(set_to_none=True)
+            continue
+
         if scaler is not None:
             scaler.scale(loss).backward()
+            if grad_clip:
+                scaler.unscale_(optimizer)
+                torch.nn.utils.clip_grad_norm_(_all_parameters(optimizer), grad_clip)
             scaler.step(optimizer)
             scaler.update()
         else:
             loss.backward()
+            if grad_clip:
+                torch.nn.utils.clip_grad_norm_(_all_parameters(optimizer), grad_clip)
             optimizer.step()
+
+        # DANN/CDAN expose how well the discriminator separates the domains;
+        # near 50% means it is confused (or undertrained, or features collapsed).
+        if extra_loss_fn is not None and hasattr(extra_loss_fn, "last_domain_accuracy"):
+            domain_accuracies.append(extra_loss_fn.last_domain_accuracy)
 
         _, predicted_classes = torch.max(outputs.data, 1)   # [24,7] -> [24]
         accurate_predictions += (predicted_classes == labels).sum().item()
         batch_size = images.size(0)
         totals["loss"] += loss.item() * batch_size
         totals["classification_loss"] += classification_loss.item() * batch_size
-        totals["alignment_loss"] += (float(extra) if extra is not None else 0.0) * batch_size
+        # detach: `extra` still carries grad_fn, and float() on it warns.
+        totals["alignment_loss"] += (
+            float(extra.detach()) if extra is not None else 0.0) * batch_size
         sample_count += batch_size
+
+    if sample_count == 0:
+        raise RuntimeError(
+            f"Every step in epoch {epoch + 1} produced a non-finite loss. Adversarial "
+            "training can overflow in float16: rerun with --no-amp, and consider "
+            "--grad-clip 1.0 if it persists."
+        )
 
     result = {key: value / sample_count for key, value in totals.items()}
     result["accuracy"] = 100 * accurate_predictions / sample_count
+    result["domain_accuracy"] = (
+        float(np.mean(domain_accuracies)) if domain_accuracies else None)
+    result["nonfinite_steps"] = nonfinite_steps
     return result
 
 
@@ -164,7 +206,8 @@ def mean_source_validation_f1(model, validation_loaders, criterion):
 
 
 def train_model(model, method_name, train_loader, validation_loaders, criterion, optimizer,
-                num_epochs=None, early_stopping_patience=None, extra_loss_fn=None, use_amp=None):
+                num_epochs=None, early_stopping_patience=None, extra_loss_fn=None, use_amp=None,
+                grad_clip=None):
     """Fine-tune with early stopping on mean source-validation macro-F1.
 
     The best checkpoint and the history are written as soon as they improve,
@@ -182,9 +225,10 @@ def train_model(model, method_name, train_loader, validation_loaders, criterion,
     history_path = os.path.join(task_config.TASK_RESULTS_DIR, f"{method_name}_history.json")
 
     history = {"method": method_name, "train_loss": [], "train_acc": [],
-               "classification_loss": [], "alignment_loss": [],
+               "classification_loss": [], "alignment_loss": [], "domain_accuracy": [],
                "val_macro_f1": [], "val_per_domain": [], "epoch_seconds": [],
-               "checkpoint": checkpoint_path, "mixed_precision": bool(scaler)}
+               "checkpoint": checkpoint_path, "mixed_precision": bool(scaler),
+               "grad_clip": grad_clip}
     best_score = -1.0
     epochs_since_improvement = 0
 
@@ -195,7 +239,7 @@ def train_model(model, method_name, train_loader, validation_loaders, criterion,
         started = time.time()
         stats = train_one_epoch(
             model, train_loader, criterion, optimizer, extra_loss_fn=extra_loss_fn, scaler=scaler,
-            epoch=epoch, num_epochs=num_epochs,
+            epoch=epoch, num_epochs=num_epochs, grad_clip=grad_clip,
         )
         val_macro_f1, per_domain = mean_source_validation_f1(model, validation_loaders, criterion)
         elapsed = time.time() - started
@@ -204,6 +248,7 @@ def train_model(model, method_name, train_loader, validation_loaders, criterion,
         history["train_acc"].append(stats["accuracy"])
         history["classification_loss"].append(stats["classification_loss"])
         history["alignment_loss"].append(stats["alignment_loss"])
+        history["domain_accuracy"].append(stats["domain_accuracy"])
         history["val_macro_f1"].append(val_macro_f1)
         history["val_per_domain"].append(per_domain)
         history["epoch_seconds"].append(elapsed)
@@ -212,6 +257,8 @@ def train_model(model, method_name, train_loader, validation_loaders, criterion,
         remaining = (num_epochs - epoch - 1) * elapsed / 60
         alignment = (f", align {stats['alignment_loss']:.4f}"
                      if extra_loss_fn is not None else "")
+        if stats["domain_accuracy"] is not None:
+            alignment += f", disc acc {stats['domain_accuracy']:.1f}%"
         print(f"Epoch {epoch + 1}/{num_epochs} | cls loss {stats['classification_loss']:.4f}"
               f"{alignment}, train acc {stats['accuracy']:.2f}% | "
               f"mean source val macro-F1 {val_macro_f1:.2f}% ({detail}) | "
@@ -325,7 +372,8 @@ def evaluate_final(model, validation_loaders, target_loader, criterion):
 
 
 def run_method(method="erm", num_workers=2, num_epochs=None, use_amp=None,
-               data_root=None, download_hf=False, lambda_mmd=None, max_alpha=None):
+               data_root=None, download_hf=False, lambda_mmd=None, max_alpha=None,
+               grad_clip=None):
     """Train one Task 2 method and evaluate it once on the target.
 
     All methods share the loaders, the model, the optimizer settings and the
@@ -404,9 +452,17 @@ def run_method(method="erm", num_workers=2, num_epochs=None, use_amp=None,
         weight_decay=task_config.WEIGHT_DECAY,
     )
 
+    if use_amp is None and method in ("dann", "cdan"):
+        # Gradient reversal grows feature magnitudes, which overflows float16
+        # and turns the loss into NaN. Adversarial runs default to float32.
+        use_amp = False
+        print(f"{method.upper()}: mixed precision disabled (float16 overflows under "
+              "gradient reversal)")
+
     history = train_model(
         model, run_name, train_batches, validation_loaders, criterion, optimizer,
         num_epochs=num_epochs, use_amp=use_amp, extra_loss_fn=extra_loss_fn,
+        grad_clip=grad_clip,
     )
     history["settings"] = settings
 
@@ -455,6 +511,8 @@ def main():
     parser.add_argument("--max-alpha", type=float, default=None,
                         help="DANN/CDAN only: cap the gradient-reversal strength "
                              "(study uses 0.25, 0.5, 1)")
+    parser.add_argument("--grad-clip", type=float, default=None,
+                        help="clip gradient norm (try 1.0 if adversarial training diverges)")
     parser.add_argument("--no-amp", action="store_true",
                         help="disable mixed precision (on by default on CUDA)")
     args = parser.parse_args()
@@ -470,7 +528,7 @@ def main():
         run_method(args.method, num_workers=args.num_workers, num_epochs=args.epochs,
                    use_amp=False if args.no_amp else None, data_root=args.data_root,
                    download_hf=args.download_hf, lambda_mmd=args.lambda_mmd,
-                   max_alpha=args.max_alpha)
+                   max_alpha=args.max_alpha, grad_clip=args.grad_clip)
         return
 
     raise SystemExit(f"TODO: --mode {args.mode} --method {args.method} is not implemented yet.")
