@@ -56,33 +56,48 @@ def freeze_batchnorm_statistics(model):
             module.eval()
 
 
-def train_one_epoch(model, loader, criterion, optimizer, extra_loss_fn=None, scaler=None):
-    """One pass over a labelled loader, returning mean loss and accuracy.
+def train_one_epoch(model, loader, criterion, optimizer, extra_loss_fn=None, scaler=None,
+                    epoch=0, num_epochs=1):
+    """One pass over a labelled loader.
 
-    extra_loss_fn(model, batch) may return an additional scalar loss term
-    (for example an MMD penalty or a domain-adversarial loss) that is added
-    to the classification loss before the backward pass.
+    extra_loss_fn(model, batch, source_features, progress) may return an extra
+    scalar loss (an MMD penalty, a domain-adversarial loss) added to the
+    classification loss before the backward pass. It receives the source
+    features already computed here, so the backbone runs once per batch, and
+    `progress`, the fraction of training completed, which the DANN schedule
+    needs.
 
     scaler enables mixed precision on CUDA, which roughly halves the time per
     epoch for this model with no change to the objective.
+
+    Returns a dict with the mean total, classification and alignment losses
+    and the training accuracy, so the two loss curves can be reported apart.
     """
     model.train()
     freeze_batchnorm_statistics(model)
 
-    total_loss = 0.0
+    totals = {"loss": 0.0, "classification_loss": 0.0, "alignment_loss": 0.0}
     accurate_predictions = 0
     sample_count = 0
+    steps = max(len(loader), 1)
 
-    for batch in loader:
+    for step, batch in enumerate(loader):
         images, labels = batch[0].to(DEVICE).float(), batch[1].to(DEVICE)
+        progress = min(max((epoch + step / steps) / max(num_epochs, 1), 0.0), 1.0)
 
         optimizer.zero_grad(set_to_none=True)
 
         with torch.autocast(device_type=DEVICE.type, enabled=scaler is not None):
-            outputs = model(images)
-            loss = criterion(outputs, labels)
-            if extra_loss_fn is not None:
-                loss = loss + extra_loss_fn(model, batch)
+            if extra_loss_fn is None:
+                outputs = model(images)
+                classification_loss = criterion(outputs, labels)
+                extra = None
+            else:
+                outputs, features = model(images, return_features=True)
+                classification_loss = criterion(outputs, labels)
+                extra = extra_loss_fn(model=model, batch=batch, source_features=features,
+                                      progress=progress)
+            loss = classification_loss if extra is None else classification_loss + extra
 
         if scaler is not None:
             scaler.scale(loss).backward()
@@ -94,10 +109,15 @@ def train_one_epoch(model, loader, criterion, optimizer, extra_loss_fn=None, sca
 
         _, predicted_classes = torch.max(outputs.data, 1)
         accurate_predictions += (predicted_classes == labels).sum().item()
-        total_loss += loss.item() * images.size(0)
-        sample_count += images.size(0)
+        batch_size = images.size(0)
+        totals["loss"] += loss.item() * batch_size
+        totals["classification_loss"] += classification_loss.item() * batch_size
+        totals["alignment_loss"] += (float(extra) if extra is not None else 0.0) * batch_size
+        sample_count += batch_size
 
-    return total_loss / sample_count, 100 * accurate_predictions / sample_count
+    result = {key: value / sample_count for key, value in totals.items()}
+    result["accuracy"] = 100 * accurate_predictions / sample_count
+    return result
 
 
 @torch.no_grad()
@@ -158,6 +178,7 @@ def train_model(model, method_name, train_loader, validation_loaders, criterion,
     history_path = os.path.join(task_config.TASK_RESULTS_DIR, f"{method_name}_history.json")
 
     history = {"method": method_name, "train_loss": [], "train_acc": [],
+               "classification_loss": [], "alignment_loss": [],
                "val_macro_f1": [], "val_per_domain": [], "epoch_seconds": [],
                "checkpoint": checkpoint_path, "mixed_precision": bool(scaler)}
     best_score = -1.0
@@ -168,23 +189,29 @@ def train_model(model, method_name, train_loader, validation_loaders, criterion,
 
     for epoch in range(num_epochs):
         started = time.time()
-        train_loss, train_acc = train_one_epoch(
-            model, train_loader, criterion, optimizer, extra_loss_fn=extra_loss_fn, scaler=scaler
+        stats = train_one_epoch(
+            model, train_loader, criterion, optimizer, extra_loss_fn=extra_loss_fn, scaler=scaler,
+            epoch=epoch, num_epochs=num_epochs,
         )
         val_macro_f1, per_domain = mean_source_validation_f1(model, validation_loaders, criterion)
         elapsed = time.time() - started
 
-        history["train_loss"].append(train_loss)
-        history["train_acc"].append(train_acc)
+        history["train_loss"].append(stats["loss"])
+        history["train_acc"].append(stats["accuracy"])
+        history["classification_loss"].append(stats["classification_loss"])
+        history["alignment_loss"].append(stats["alignment_loss"])
         history["val_macro_f1"].append(val_macro_f1)
         history["val_per_domain"].append(per_domain)
         history["epoch_seconds"].append(elapsed)
 
         detail = ", ".join(f"{d}: {s:.2f}" for d, s in per_domain.items())
         remaining = (num_epochs - epoch - 1) * elapsed / 60
-        print(f"Epoch {epoch + 1}/{num_epochs} | train loss {train_loss:.4f}, "
-              f"train acc {train_acc:.2f}% | mean source val macro-F1 {val_macro_f1:.2f}% "
-              f"({detail}) | {elapsed:.0f}s, ~{remaining:.0f} min left")
+        alignment = (f", align {stats['alignment_loss']:.4f}"
+                     if extra_loss_fn is not None else "")
+        print(f"Epoch {epoch + 1}/{num_epochs} | cls loss {stats['classification_loss']:.4f}"
+              f"{alignment}, train acc {stats['accuracy']:.2f}% | "
+              f"mean source val macro-F1 {val_macro_f1:.2f}% ({detail}) | "
+              f"{elapsed:.0f}s, ~{remaining:.0f} min left")
 
         if val_macro_f1 > best_score:
             best_score = val_macro_f1
@@ -293,29 +320,46 @@ def evaluate_final(model, validation_loaders, target_loader, criterion):
     return results
 
 
-def run_erm(num_workers=2, num_epochs=None, use_amp=None, data_root=None, download_hf=False):
-    """Step 1: source-only ERM.
+def run_method(method="erm", num_workers=2, num_epochs=None, use_amp=None,
+               data_root=None, download_hf=False, lambda_mmd=None):
+    """Train one Task 2 method and evaluate it once on the target.
 
-    Cross-entropy over the three labelled source domains with domain-balanced
-    batches, no target data in the objective. This is the control every
-    adaptation method is compared against, and Task 3 reuses this checkpoint
-    unchanged as its ERM baseline.
+    All methods share the loaders, the model, the optimizer settings and the
+    checkpoint-selection rule; they differ only in the extra loss term and in
+    whether target images are drawn during training:
+
+      erm  source-only, no target data in the objective (the control)
+      dan  + lambda_MMD * MMD^2 between source and target features
     """
     from assignment_01.task2.data.pacs import (
         DomainBalancedBatches, get_source_loaders, get_target_loaders,
     )
     from assignment_01.task2.models.backbones import build_model
-
     from assignment_01.task2.data.download import prepare_pacs
+
     domain_root = prepare_pacs(data_root, allow_huggingface=download_hf)
 
     source_loaders, validation_loaders = get_source_loaders(
         domain_root=domain_root, num_workers=num_workers)
-    _, target_eval_loader = get_target_loaders(
+    target_train_loader, target_eval_loader = get_target_loaders(
         domain_root=domain_root, num_workers=num_workers)
 
-    # No target loader here: ERM never sees the target domain during training.
-    train_batches = DomainBalancedBatches(source_loaders, target_loader=None)
+    extra_loss_fn = None
+    settings = {}
+    if method == "erm":
+        # ERM never sees the target domain during training.
+        target_train_loader = None
+    elif method == "dan":
+        from assignment_01.task2.methods.dan import make_dan_loss
+        extra_loss_fn = make_dan_loss(lambda_mmd=lambda_mmd)
+        settings = {"lambda_mmd": extra_loss_fn.lambda_value,
+                    "bandwidth_multipliers": list(task_config.MMD_BANDWIDTH_MULTIPLIERS)}
+        print(f"DAN: lambda_MMD = {extra_loss_fn.lambda_value}, "
+              f"bandwidths = {settings['bandwidth_multipliers']} x median squared distance")
+    else:
+        raise SystemExit(f"Unknown method '{method}'.")
+
+    train_batches = DomainBalancedBatches(source_loaders, target_loader=target_train_loader)
 
     model = build_model()
     criterion = nn.CrossEntropyLoss()
@@ -325,12 +369,18 @@ def run_erm(num_workers=2, num_epochs=None, use_amp=None, data_root=None, downlo
         weight_decay=task_config.WEIGHT_DECAY,
     )
 
+    run_name = method
+    if method == "dan" and extra_loss_fn.lambda_value != task_config.DAN_LAMBDA_MMD:
+        run_name = f"dan_lambda{extra_loss_fn.lambda_value:g}"   # keeps study runs separate
+
     history = train_model(
-        model, "erm", train_batches, validation_loaders, criterion, optimizer,
-        num_epochs=num_epochs, use_amp=use_amp,
+        model, run_name, train_batches, validation_loaders, criterion, optimizer,
+        num_epochs=num_epochs, use_amp=use_amp, extra_loss_fn=extra_loss_fn,
     )
+    history["settings"] = settings
 
     results = evaluate_final(model, validation_loaders, target_eval_loader, criterion)
+
     print(f"\nMean source validation macro-F1: "
           f"{results['mean_source_validation_macro_f1_pct']:.2f}%")
     print(f"Target ({results['target']['domain']}) macro-F1: "
@@ -339,20 +389,26 @@ def run_erm(num_workers=2, num_epochs=None, use_amp=None, data_root=None, downlo
     print(f"Domain gap: {results['domain_gap_pp']:.2f} percentage points")
 
     os.makedirs(task_config.TASK_RESULTS_DIR, exist_ok=True)
-    results_path = os.path.join(task_config.TASK_RESULTS_DIR, "erm_results.json")
+    results_path = os.path.join(task_config.TASK_RESULTS_DIR, f"{run_name}_results.json")
     with open(results_path, "w", encoding="utf-8") as file:
-        json.dump({"history": history, "results": results}, file, indent=2)
+        json.dump({"method": run_name, "settings": settings,
+                   "history": history, "results": results}, file, indent=2)
     print(f"Saved results: {results_path}")
 
-    save_run_manifest({"erm": history["checkpoint"]})
+    save_run_manifest({run_name: history["checkpoint"]}, extra={"settings": settings})
     return history, results
+
+
+def run_erm(**kwargs):
+    """Step 1: source-only ERM (kept as a named entry point)."""
+    return run_method("erm", **kwargs)
 
 
 def main():
     parser = argparse.ArgumentParser(description="Task 2: unsupervised domain adaptation on PACS")
     parser.add_argument("--mode", choices=["train", "infer", "dry-run"], required=True)
-    parser.add_argument("--method", default="erm", choices=["erm"],
-                        help="erm (source-only); dan and dann to follow")
+    parser.add_argument("--method", default="erm", choices=["erm", "dan"],
+                        help="erm (source-only baseline) or dan (MMD alignment)")
     parser.add_argument("--num-workers", type=int, default=2)
     parser.add_argument("--epochs", type=int, default=None,
                         help="override config.NUM_EPOCHS; use --epochs 1 for a quick check")
@@ -362,6 +418,8 @@ def main():
     parser.add_argument("--download-hf", action="store_true",
                         help="if no local copy is found, download PACS from the Hugging Face hub "
                              "(flwrlabs/pacs) and cache it back to the dataset folder as pacs.zip")
+    parser.add_argument("--lambda-mmd", type=float, default=None,
+                        help="DAN only: override lambda_MMD (study uses 0.1, 1, 10)")
     parser.add_argument("--no-amp", action="store_true",
                         help="disable mixed precision (on by default on CUDA)")
     args = parser.parse_args()
@@ -373,10 +431,10 @@ def main():
         print("Setup ready. Run --mode train --method erm to train the source-only baseline.")
         return
 
-    if args.mode == "train" and args.method == "erm":
-        run_erm(num_workers=args.num_workers, num_epochs=args.epochs,
-                use_amp=False if args.no_amp else None, data_root=args.data_root,
-                download_hf=args.download_hf)
+    if args.mode == "train":
+        run_method(args.method, num_workers=args.num_workers, num_epochs=args.epochs,
+                   use_amp=False if args.no_amp else None, data_root=args.data_root,
+                   download_hf=args.download_hf, lambda_mmd=args.lambda_mmd)
         return
 
     raise SystemExit(f"TODO: --mode {args.mode} --method {args.method} is not implemented yet.")
