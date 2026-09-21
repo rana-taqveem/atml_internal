@@ -82,8 +82,10 @@ def train_one_epoch(model, loader, criterion, optimizer, extra_loss_fn=None, sca
     steps = max(len(loader), 1)
 
     for step, batch in enumerate(loader):
+        # batch = (images [24,3,224,224], labels [24], domain_ids [24],
+        #          target_images [24,3,224,224] or None)
         images, labels = batch[0].to(DEVICE).float(), batch[1].to(DEVICE)
-        progress = min(max((epoch + step / steps) / max(num_epochs, 1), 0.0), 1.0)
+        progress = min(max((epoch + step / steps) / max(num_epochs, 1), 0.0), 1.0)  # scalar 0..1
 
         optimizer.zero_grad(set_to_none=True)
 
@@ -93,7 +95,9 @@ def train_one_epoch(model, loader, criterion, optimizer, extra_loss_fn=None, sca
                 classification_loss = criterion(outputs, labels)
                 extra = None
             else:
-                outputs, features = model(images, return_features=True)
+                # features [24, 512] are reused by the adaptation loss, so the
+                # backbone runs once per batch rather than twice.
+                outputs, features = model(images, return_features=True)   # [24,7], [24,512]
                 classification_loss = criterion(outputs, labels)
                 extra = extra_loss_fn(model=model, batch=batch, source_features=features,
                                       progress=progress)
@@ -107,7 +111,7 @@ def train_one_epoch(model, loader, criterion, optimizer, extra_loss_fn=None, sca
             loss.backward()
             optimizer.step()
 
-        _, predicted_classes = torch.max(outputs.data, 1)
+        _, predicted_classes = torch.max(outputs.data, 1)   # [24,7] -> [24]
         accurate_predictions += (predicted_classes == labels).sum().item()
         batch_size = images.size(0)
         totals["loss"] += loss.item() * batch_size
@@ -321,15 +325,17 @@ def evaluate_final(model, validation_loaders, target_loader, criterion):
 
 
 def run_method(method="erm", num_workers=2, num_epochs=None, use_amp=None,
-               data_root=None, download_hf=False, lambda_mmd=None):
+               data_root=None, download_hf=False, lambda_mmd=None, max_alpha=None):
     """Train one Task 2 method and evaluate it once on the target.
 
     All methods share the loaders, the model, the optimizer settings and the
     checkpoint-selection rule; they differ only in the extra loss term and in
     whether target images are drawn during training:
 
-      erm  source-only, no target data in the objective (the control)
-      dan  + lambda_MMD * MMD^2 between source and target features
+      erm   source-only, no target data in the objective (the control)
+      dan   + lambda_MMD * MMD^2 between source and target features
+      dann  + domain discriminator on the feature, via gradient reversal
+      cdan  + domain discriminator on vec(feature (x) class probabilities)
     """
     from assignment_01.task2.data.pacs import (
         DomainBalancedBatches, get_source_loaders, get_target_loaders,
@@ -344,8 +350,13 @@ def run_method(method="erm", num_workers=2, num_epochs=None, use_amp=None,
     target_train_loader, target_eval_loader = get_target_loaders(
         domain_root=domain_root, num_workers=num_workers)
 
+    model = build_model()
+
     extra_loss_fn = None
+    extra_parameters = []
     settings = {}
+    run_name = method
+
     if method == "erm":
         # ERM never sees the target domain during training.
         target_train_loader = None
@@ -354,24 +365,44 @@ def run_method(method="erm", num_workers=2, num_epochs=None, use_amp=None,
         extra_loss_fn = make_dan_loss(lambda_mmd=lambda_mmd)
         settings = {"lambda_mmd": extra_loss_fn.lambda_value,
                     "bandwidth_multipliers": list(task_config.MMD_BANDWIDTH_MULTIPLIERS)}
+        if extra_loss_fn.lambda_value != task_config.DAN_LAMBDA_MMD:
+            run_name = f"dan_lambda{extra_loss_fn.lambda_value:g}"
         print(f"DAN: lambda_MMD = {extra_loss_fn.lambda_value}, "
               f"bandwidths = {settings['bandwidth_multipliers']} x median squared distance")
+    elif method in ("dann", "cdan"):
+        if method == "dann":
+            from assignment_01.task2.methods.dann import make_dann_loss as make_loss
+            extra_loss_fn, discriminator = make_loss(
+                feature_dim=model.feature_dim, max_alpha=max_alpha)
+        else:
+            from assignment_01.task2.methods.cdan import make_cdan_loss as make_loss
+            extra_loss_fn, discriminator = make_loss(
+                feature_dim=model.feature_dim, num_classes=task_config.NUM_CLASSES,
+                max_alpha=max_alpha)
+
+        # The discriminator learns normally; only the backbone sees the
+        # reversed gradient, so its parameters must reach the optimizer.
+        extra_parameters = list(discriminator.parameters())
+        settings = {"max_alpha": extra_loss_fn.max_alpha,
+                    "domain_loss_weight": task_config.DOMAIN_LOSS_WEIGHT,
+                    "discriminator_hidden": task_config.DISCRIMINATOR_HIDDEN,
+                    "discriminator_dropout": task_config.DISCRIMINATOR_DROPOUT,
+                    "discriminator_input_dim": discriminator.net[0].in_features}
+        if extra_loss_fn.max_alpha != task_config.DANN_MAX_ALPHA:
+            run_name = f"{method}_alpha{extra_loss_fn.max_alpha:g}"
+        print(f"{method.upper()}: discriminator input {settings['discriminator_input_dim']}, "
+              f"hidden {settings['discriminator_hidden']}, max alpha {extra_loss_fn.max_alpha}")
     else:
         raise SystemExit(f"Unknown method '{method}'.")
 
     train_batches = DomainBalancedBatches(source_loaders, target_loader=target_train_loader)
 
-    model = build_model()
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.AdamW(
-        model.parameters(),
+        list(model.parameters()) + extra_parameters,
         lr=task_config.LEARNING_RATE,
         weight_decay=task_config.WEIGHT_DECAY,
     )
-
-    run_name = method
-    if method == "dan" and extra_loss_fn.lambda_value != task_config.DAN_LAMBDA_MMD:
-        run_name = f"dan_lambda{extra_loss_fn.lambda_value:g}"   # keeps study runs separate
 
     history = train_model(
         model, run_name, train_batches, validation_loaders, criterion, optimizer,
@@ -407,8 +438,9 @@ def run_erm(**kwargs):
 def main():
     parser = argparse.ArgumentParser(description="Task 2: unsupervised domain adaptation on PACS")
     parser.add_argument("--mode", choices=["train", "infer", "dry-run"], required=True)
-    parser.add_argument("--method", default="erm", choices=["erm", "dan"],
-                        help="erm (source-only baseline) or dan (MMD alignment)")
+    parser.add_argument("--method", default="erm", choices=["erm", "dan", "dann", "cdan"],
+                        help="erm (source-only), dan (MMD), dann (adversarial), "
+                             "cdan (class-conditional adversarial)")
     parser.add_argument("--num-workers", type=int, default=2)
     parser.add_argument("--epochs", type=int, default=None,
                         help="override config.NUM_EPOCHS; use --epochs 1 for a quick check")
@@ -420,6 +452,9 @@ def main():
                              "(flwrlabs/pacs) and cache it back to the dataset folder as pacs.zip")
     parser.add_argument("--lambda-mmd", type=float, default=None,
                         help="DAN only: override lambda_MMD (study uses 0.1, 1, 10)")
+    parser.add_argument("--max-alpha", type=float, default=None,
+                        help="DANN/CDAN only: cap the gradient-reversal strength "
+                             "(study uses 0.25, 0.5, 1)")
     parser.add_argument("--no-amp", action="store_true",
                         help="disable mixed precision (on by default on CUDA)")
     args = parser.parse_args()
@@ -434,7 +469,8 @@ def main():
     if args.mode == "train":
         run_method(args.method, num_workers=args.num_workers, num_epochs=args.epochs,
                    use_amp=False if args.no_amp else None, data_root=args.data_root,
-                   download_hf=args.download_hf, lambda_mmd=args.lambda_mmd)
+                   download_hf=args.download_hf, lambda_mmd=args.lambda_mmd,
+                   max_alpha=args.max_alpha)
         return
 
     raise SystemExit(f"TODO: --mode {args.mode} --method {args.method} is not implemented yet.")

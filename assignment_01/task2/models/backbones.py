@@ -32,12 +32,17 @@ class PacsResNet18(nn.Module):
         self.classifier = nn.Linear(self.feature_dim, num_classes)
 
     def forward_features(self, x):
-        """512-dimensional feature immediately before the classifier."""
+        """512-dimensional feature immediately before the classifier.
+
+        x        [N, 3, 224, 224]   normalized image batch
+        returns  [N, 512]           one feature vector per image
+        """
         return self.backbone(x)
 
     def forward(self, x, return_features=False):
-        features = self.forward_features(x)
-        logits = self.classifier(features)
+        """x [N, 3, 224, 224] -> logits [N, 7], optionally with features [N, 512]."""
+        features = self.forward_features(x)          # [N, 512]
+        logits = self.classifier(features)           # [N, 7]  (7 = PACS classes)
         return (logits, features) if return_features else logits
 
 
