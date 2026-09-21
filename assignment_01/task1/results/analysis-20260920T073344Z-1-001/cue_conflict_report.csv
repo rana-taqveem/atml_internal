@@ -1,0 +1,5 @@
+model_name             , n_total, n_shape, n_texture, n_other, shape_bias_pct   , coverage_pct
+resnet50               ,     200,     139,        21,      40, 86.875           ,         80.0
+vit_b_16               ,     200,     179,         4,      17, 97.81420765027322,         91.5
+clip_vit_b_32          ,     200,     171,        11,      18, 93.95604395604396,         91.0
+clip_vit_b_32_zero_shot,     200,     172,         8,      20, 95.55555555555556,         90.0

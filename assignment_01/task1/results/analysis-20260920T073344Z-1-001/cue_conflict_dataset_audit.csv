@@ -1,0 +1,12 @@
+content_class,style_class,generated_candidates,accepted_selected,removed_not_selected,removed_with_documented_reason,reason_counts,alpha
+airplane,bird,25,20,5,5,shape_lost_or_background_dominates=5,0.7
+bird,airplane,25,20,5,5,shape_lost_or_background_dominates=5,0.7
+bird,car,25,20,5,5,shape_lost_or_background_dominates=5,0.7
+bird,cat,25,20,5,5,shape_lost_or_background_dominates=5,0.7
+car,bird,25,20,5,5,shape_lost_or_background_dominates=5,0.7
+car,deer,25,20,5,5,shape_lost_or_background_dominates=5,0.7
+cat,bird,25,20,5,5,shape_lost_or_background_dominates=5,0.7
+deer,car,25,20,5,5,shape_lost_or_background_dominates=5,0.7
+monkey,truck,25,20,5,5,shape_lost_or_background_dominates=5,0.7
+truck,monkey,25,20,5,5,shape_lost_or_background_dominates=5,0.7
+ALL,ALL,250,200,50,50,shape_lost_or_background_dominates=50,0.7

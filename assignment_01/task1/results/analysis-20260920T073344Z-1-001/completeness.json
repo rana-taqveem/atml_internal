@@ -1,0 +1,229 @@
+{
+  "results_dir": "/content/drive/MyDrive/ATML/assignment_01/task1/results",
+  "missing_result_files": [],
+  "zero_translation_is_identity": true,
+  "skipped_sections": {},
+  "written": [
+    "baseline_classification_report.csv",
+    "intervention_comparison_long.csv",
+    "intervention_comparison_compact.csv",
+    "translation_directions.csv",
+    "translation_summary.csv",
+    "translation_curves.png",
+    "translation_directions.png",
+    "cue_conflict_report.csv",
+    "cue_conflict_directions.csv",
+    "cue_conflict_decisions.csv",
+    "cue_conflict_pairs.csv",
+    "cue_conflict_examples.csv",
+    "cue_conflict_examples.png",
+    "cue_conflict_dataset_audit.csv",
+    "cue_conflict_texture_rank_samples.csv",
+    "cue_conflict_texture_rank.csv",
+    "cue_conflict_texture_rank.png",
+    "significance_tests.csv",
+    "estimates_with_ci.csv",
+    "cue_significance_tests.csv",
+    "clip_head_vs_zero_shot.csv",
+    "representation_stability.csv",
+    "representation_samples.csv",
+    "prediction_vs_feature.csv",
+    "representation_stability.png",
+    "tsne_points.csv",
+    "tsne_all_backbones.png",
+    "tsne_settings.json",
+    "tsne_resnet50.png",
+    "tsne_vit_b_16.png",
+    "tsne_clip_vit_b_32.png"
+  ],
+  "run_manifest": {
+    "steps": [
+      "baseline",
+      "color",
+      "translation",
+      "patch",
+      "conflict"
+    ],
+    "seed": 6304,
+    "device": "cuda",
+    "gpu": "Tesla T4",
+    "classes": [
+      "airplane",
+      "bird",
+      "car",
+      "cat",
+      "deer",
+      "dog",
+      "horse",
+      "monkey",
+      "ship",
+      "truck"
+    ],
+    "test_subset": {
+      "selected_indices_file": "/content/drive/MyDrive/ATML/assignment_01/task1/selected_indices.npy",
+      "total_target_images": 500
+    },
+    "heads": {
+      "resnet50": {
+        "path": "/content/atml_internal/assignment_01/task1/results/baseline/weights/resnet50_97.30.pth",
+        "sha256": "98981af2216733e8f564815538947efdb3888d0bc865193c49acec01712bb216",
+        "expected_validation_accuracy_pct": 97.3
+      },
+      "vit_b_16": {
+        "path": "/content/drive/MyDrive/ATML/assignment_01/task1/model_weights/vit_b_16_97.90.pth",
+        "sha256": "e460a070280444980ea90aa997ee4fee1170ab11eb9233acad23896eed5e7924",
+        "expected_validation_accuracy_pct": 97.9
+      },
+      "clip_vit_b_32": {
+        "path": "/content/atml_internal/assignment_01/task1/results/baseline/weights/clip_vit_b_32_98.40.pth",
+        "sha256": "740771f97efbe57916e059cc3e5f241f2b449db5af1764a6d9d84578d8441399",
+        "expected_validation_accuracy_pct": 98.4
+      }
+    },
+    "head_validation_check": {
+      "resnet50": {
+        "validation_accuracy_pct": 97.3,
+        "expected_pct": 97.3
+      },
+      "vit_b_16": {
+        "validation_accuracy_pct": 97.9,
+        "expected_pct": 97.9
+      },
+      "clip_vit_b_32": {
+        "validation_accuracy_pct": 98.3,
+        "expected_pct": 98.4
+      }
+    },
+    "backbones": {
+      "resnet50": "torchvision resnet50 ResNet50_Weights.IMAGENET1K_V2, global-average-pooled feature",
+      "vit_b_16": "torchvision vit_b_16 ViT_B_16_Weights.IMAGENET1K_V1, final class token",
+      "clip_vit_b_32": "open_clip ViT-B-32 pretrained=openai (quick_gelu), L2-normalized image embedding"
+    },
+    "interventions": {
+      "input": "224x224 RGB in [0, 1]; model normalization applied once inside each backbone",
+      "grey_scale": "ITU-R 601-2 luma replicated to 3 channels (torchvision Grayscale)",
+      "hue": {
+        "rotation_degrees": 30,
+        "implementation": "torchvision adjust_hue"
+      },
+      "translation": {
+        "conditions": [
+          {
+            "condition_id": "translation_right_8",
+            "displacement": 8,
+            "direction": "right",
+            "translation_x": 8,
+            "translation_y": 0
+          },
+          {
+            "condition_id": "translation_left_8",
+            "displacement": 8,
+            "direction": "left",
+            "translation_x": -8,
+            "translation_y": 0
+          },
+          {
+            "condition_id": "translation_down_8",
+            "displacement": 8,
+            "direction": "down",
+            "translation_x": 0,
+            "translation_y": 8
+          },
+          {
+            "condition_id": "translation_up_8",
+            "displacement": 8,
+            "direction": "up",
+            "translation_x": 0,
+            "translation_y": -8
+          },
+          {
+            "condition_id": "translation_right_16",
+            "displacement": 16,
+            "direction": "right",
+            "translation_x": 16,
+            "translation_y": 0
+          },
+          {
+            "condition_id": "translation_left_16",
+            "displacement": 16,
+            "direction": "left",
+            "translation_x": -16,
+            "translation_y": 0
+          },
+          {
+            "condition_id": "translation_down_16",
+            "displacement": 16,
+            "direction": "down",
+            "translation_x": 0,
+            "translation_y": 16
+          },
+          {
+            "condition_id": "translation_up_16",
+            "displacement": 16,
+            "direction": "up",
+            "translation_x": 0,
+            "translation_y": -16
+          },
+          {
+            "condition_id": "translation_right_32",
+            "displacement": 32,
+            "direction": "right",
+            "translation_x": 32,
+            "translation_y": 0
+          },
+          {
+            "condition_id": "translation_left_32",
+            "displacement": 32,
+            "direction": "left",
+            "translation_x": -32,
+            "translation_y": 0
+          },
+          {
+            "condition_id": "translation_down_32",
+            "displacement": 32,
+            "direction": "down",
+            "translation_x": 0,
+            "translation_y": 32
+          },
+          {
+            "condition_id": "translation_up_32",
+            "displacement": 32,
+            "direction": "up",
+            "translation_x": 0,
+            "translation_y": -32
+          }
+        ],
+        "padding": "reflect, 32 px, shifted crop"
+      },
+      "patch_shuffle": {
+        "grid": "4x4",
+        "patch_size": 56,
+        "seed": 6304,
+        "identity_permutation": "rejected and redrawn"
+      },
+      "cue_conflict_dir": "/content/drive/MyDrive/ATML/assignment_01/task1/conflict_dataset"
+    },
+    "zero_shot": {
+      "prompts": [
+        "a photo of a airplane.",
+        "a photo of a bird.",
+        "a photo of a car.",
+        "a photo of a cat.",
+        "a photo of a deer.",
+        "a photo of a dog.",
+        "a photo of a horse.",
+        "a photo of a monkey.",
+        "a photo of a ship.",
+        "a photo of a truck."
+      ],
+      "logit_scale": 100.0
+    },
+    "software": {
+      "python": "3.13.15",
+      "torch": "2.11.0+cu128",
+      "torchvision": "0.26.0+cu128",
+      "open_clip": "3.3.0",
+      "sklearn": "1.6.1"
+    }
+  }
+}

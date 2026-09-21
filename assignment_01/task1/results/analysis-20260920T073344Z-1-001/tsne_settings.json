@@ -1,0 +1,67 @@
+{
+  "conditions": [
+    "grey_scale",
+    "cue_conflict",
+    "translation_right_32",
+    "patch_shuffle"
+  ],
+  "backbones": {
+    "resnet50": {
+      "method": "t-SNE (scikit-learn)",
+      "n_components": 2,
+      "perplexity": 30.0,
+      "init": "pca",
+      "learning_rate": "auto",
+      "metric": "euclidean",
+      "random_state": 6304,
+      "preprocessing": "L2 normalization, PCA to 50 dimensions",
+      "feature_dim": 2048,
+      "points_per_condition": {
+        "baseline": 500,
+        "grey_scale": 500,
+        "cue_conflict": 200,
+        "translation_right_32": 500,
+        "patch_shuffle": 500
+      },
+      "note": "Coordinates are only comparable within one backbone's fit."
+    },
+    "vit_b_16": {
+      "method": "t-SNE (scikit-learn)",
+      "n_components": 2,
+      "perplexity": 30.0,
+      "init": "pca",
+      "learning_rate": "auto",
+      "metric": "euclidean",
+      "random_state": 6304,
+      "preprocessing": "L2 normalization, PCA to 50 dimensions",
+      "feature_dim": 768,
+      "points_per_condition": {
+        "baseline": 500,
+        "grey_scale": 500,
+        "cue_conflict": 200,
+        "translation_right_32": 500,
+        "patch_shuffle": 500
+      },
+      "note": "Coordinates are only comparable within one backbone's fit."
+    },
+    "clip_vit_b_32": {
+      "method": "t-SNE (scikit-learn)",
+      "n_components": 2,
+      "perplexity": 30.0,
+      "init": "pca",
+      "learning_rate": "auto",
+      "metric": "euclidean",
+      "random_state": 6304,
+      "preprocessing": "L2 normalization, PCA to 50 dimensions",
+      "feature_dim": 512,
+      "points_per_condition": {
+        "baseline": 500,
+        "grey_scale": 500,
+        "cue_conflict": 200,
+        "translation_right_32": 500,
+        "patch_shuffle": 500
+      },
+      "note": "Coordinates are only comparable within one backbone's fit."
+    }
+  }
+}

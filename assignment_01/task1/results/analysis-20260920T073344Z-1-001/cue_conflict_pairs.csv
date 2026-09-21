@@ -1,0 +1,21 @@
+model_name             , pair          , n_total, n_shape, n_texture, n_other, shape_bias_pct    , coverage_pct
+resnet50               , airplane__bird,      40,      24,        12,       4,  66.66666666666667,         90.0
+resnet50               , bird__car     ,      40,      35,         2,       3,  94.5945945945946 ,         92.5
+resnet50               , bird__cat     ,      40,      30,         4,       6,  88.23529411764706,         85.0
+resnet50               , car__deer     ,      40,      29,         1,      10,  96.66666666666667,         75.0
+resnet50               , monkey__truck ,      40,      21,         2,      17,  91.30434782608695,         57.5
+vit_b_16               , airplane__bird,      40,      37,         3,       0,  92.5             ,        100.0
+vit_b_16               , bird__car     ,      40,      37,         0,       3, 100.0             ,         92.5
+vit_b_16               , bird__cat     ,      40,      37,         0,       3, 100.0             ,         92.5
+vit_b_16               , car__deer     ,      40,      35,         0,       5, 100.0             ,         87.5
+vit_b_16               , monkey__truck ,      40,      33,         1,       6,  97.05882352941177,         85.0
+clip_vit_b_32          , airplane__bird,      40,      37,         3,       0,  92.5             ,        100.0
+clip_vit_b_32          , bird__car     ,      40,      38,         1,       1,  97.43589743589743,         97.5
+clip_vit_b_32          , bird__cat     ,      40,      35,         2,       3,  94.5945945945946 ,         92.5
+clip_vit_b_32          , car__deer     ,      40,      30,         0,      10, 100.0             ,         75.0
+clip_vit_b_32          , monkey__truck ,      40,      31,         5,       4,  86.11111111111111,         90.0
+clip_vit_b_32_zero_shot, airplane__bird,      40,      36,         3,       1,  92.3076923076923 ,         97.5
+clip_vit_b_32_zero_shot, bird__car     ,      40,      38,         1,       1,  97.43589743589743,         97.5
+clip_vit_b_32_zero_shot, bird__cat     ,      40,      32,         1,       7,  96.96969696969697,         82.5
+clip_vit_b_32_zero_shot, car__deer     ,      40,      36,         0,       4, 100.0             ,         90.0
+clip_vit_b_32_zero_shot, monkey__truck ,      40,      30,         3,       7,  90.9090909090909 ,         82.5

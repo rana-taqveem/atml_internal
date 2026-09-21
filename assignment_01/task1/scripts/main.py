@@ -614,12 +614,18 @@ def start_inference(steps=INFERENCE_STEPS, conflict_dir=None, check_heads=True):
     ### grey scale and hue-rotated images
     if "color" in steps:
         gray_testset, gray_metadata = get_test_subset(transformation_type='grey_scale')
-        run_condition_inference(make_loader(gray_testset), gray_metadata, models,
-                                text_features, logit_scale, prompts)
+        
+        run_condition_inference(make_loader(gray_testset), 
+                                gray_metadata, 
+                                models,
+                                text_features, 
+                                logit_scale, 
+                                prompts)
         del gray_testset
 
         hue_testset, hue_metadata = get_test_subset(transformation_type='hue',
                                                     hue_rotation_angle=task_config.HUE_ROTATION_ANGLE)
+        
         run_condition_inference(make_loader(hue_testset), hue_metadata, models,
                                 text_features, logit_scale, prompts)
         del hue_testset

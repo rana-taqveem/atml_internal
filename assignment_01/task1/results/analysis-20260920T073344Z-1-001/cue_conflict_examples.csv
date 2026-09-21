@@ -1,0 +1,9 @@
+category,conflict_id,pair,content_class,style_class,content_id,style_id,alpha,resnet50_prediction,resnet50_decision,vit_b_16_prediction,vit_b_16_decision,clip_vit_b_32_prediction,clip_vit_b_32_decision,clip_vit_b_32_zero_shot_prediction,clip_vit_b_32_zero_shot_decision
+All methods follow shape,c1_s0_0024_225_3999,airplane__bird,bird,airplane,225,3999,0.7,bird,shape,bird,shape,bird,shape,bird,shape
+All methods follow shape,c9_s7_0010_5621_2773,monkey__truck,truck,monkey,5621,2773,0.7,truck,shape,truck,shape,truck,shape,truck,shape
+All methods follow texture,c0_s1_0009_5067_5093,airplane__bird,airplane,bird,5067,5093,0.7,bird,texture,bird,texture,bird,texture,bird,texture
+All methods follow texture,c0_s1_0022_1463_3834,airplane__bird,airplane,bird,1463,3834,0.7,bird,texture,bird,texture,bird,texture,bird,texture
+Methods split between shape and texture,c2_s1_0007_1731_4709,bird__car,car,bird,1731,4709,0.7,bird,texture,car,shape,car,shape,car,shape
+Methods split between shape and texture,c3_s1_0023_1187_1218,bird__cat,cat,bird,1187,1218,0.7,bird,texture,cat,shape,cat,shape,cat,shape
+Some method predicts another class,c7_s9_0004_2581_3200,monkey__truck,monkey,truck,2581,3200,0.7,bird,other,monkey,shape,monkey,shape,monkey,shape
+Some method predicts another class,c9_s7_0009_4049_6322,monkey__truck,truck,monkey,4049,6322,0.7,car,other,car,other,truck,shape,truck,shape

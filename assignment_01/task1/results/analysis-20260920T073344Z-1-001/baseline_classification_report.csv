@@ -1,0 +1,5 @@
+model_name             , transformation, n_images, top_1_accuracy_pct, macro_f1_pct     , mean_max_confidence
+resnet50               , baseline      ,      500,  97.79999852180481, 97.80768189664106,  0.9745194315910339
+vit_b_16               , baseline      ,      500,  98.7999975681305 , 98.79987876338653,  0.9741754531860352
+clip_vit_b_32          , baseline      ,      500,  97.79999852180481, 97.7816225681602 ,  0.5429311990737915
+clip_vit_b_32_zero_shot, baseline      ,      500,  96.79999947547913, 96.7547188294365 ,  0.9493024945259094
