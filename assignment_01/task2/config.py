@@ -46,8 +46,11 @@ class TaskConfig:
         self.DAN_LAMBDA_MMD = 1.0                    # main comparison; study varies {0.1, 1, 10}
         self.MMD_BANDWIDTH_MULTIPLIERS = (0.5, 1.0, 2.0)  # x median pairwise squared distance
 
-        ## TODO: DANN / CDAN settings (discriminator width, dropout, gradient-reversal
-        ## schedule) when those methods are implemented.
+        ## DANN / CDAN (adversarial alignment)
+        self.DISCRIMINATOR_HIDDEN = 256
+        self.DISCRIMINATOR_DROPOUT = 0.5
+        self.DOMAIN_LOSS_WEIGHT = 1.0                # unit weight, per the assignment
+        self.DANN_MAX_ALPHA = 1.0                    # study varies {0.25, 0.5, 1}
 
     def init_env(self):
         for directory in (self.TASK_DIR, self.TASK_CHECKPOINTS_DIR, self.TASK_FEATURES_DIR,

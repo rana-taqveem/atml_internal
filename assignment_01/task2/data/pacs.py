@@ -159,10 +159,16 @@ def cycle(loader):
 class DomainBalancedBatches:
     """Iterator giving one batch from every source domain plus one target batch.
 
-    Each step returns (images, labels, domain_ids, target_images): the source
-    images concatenated across domains with their labels and domain indices,
-    and an unlabelled target batch of matching total size. Shorter loaders are
-    cycled so every domain contributes equally to each update.
+    Each step returns (images, labels, domain_ids, target_images):
+
+        images         [B_s, 3, 224, 224]   B_s = 8 per domain x 3 domains = 24
+        labels         [B_s]                class index 0..6
+        domain_ids     [B_s]                0, 1, 2 in SOURCE_DOMAINS order
+        target_images  [B_t, 3, 224, 224]   B_t = 24, or None for ERM
+
+    Shorter loaders are cycled so every domain contributes equally to each
+    update. Target labels are never returned: the target batch is unlabelled
+    as far as training is concerned.
     """
 
     def __init__(self, source_loaders, target_loader=None, steps_per_epoch=None):
@@ -181,10 +187,13 @@ class DomainBalancedBatches:
         for _ in range(self.steps_per_epoch):
             images, labels, domain_ids = [], [], []
             for index, domain in enumerate(self.domains):
+                # one batch per domain: [8, 3, 224, 224] and [8]
                 batch_images, batch_labels = next(sources[domain])[:2]
                 images.append(batch_images)
                 labels.append(batch_labels)
                 domain_ids.append(torch.full((batch_images.size(0),), index, dtype=torch.long))
 
+            # [0] keeps only the images: the target's labels must not be used.
             target_images = next(target)[0] if target is not None else None
+            # cat over the 3 domains: 3 x [8, ...] -> [24, ...]
             yield (torch.cat(images), torch.cat(labels), torch.cat(domain_ids), target_images)
