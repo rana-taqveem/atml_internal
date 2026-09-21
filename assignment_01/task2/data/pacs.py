@@ -43,10 +43,13 @@ EVAL_TRANSFORMS = T.Compose([
 
 def get_domain_dataset(domain, transform=EVAL_TRANSFORMS, domain_root=None):
     """ImageFolder for one PACS domain, with a fixed class order."""
+    
     domain_root = domain_root or prepare_pacs()
-    dataset = ImageFolder(str(resolve_domain_dir(domain_root, domain)), transform=transform)
+    dataset = ImageFolder(str(resolve_domain_dir(domain_root, domain)), 
+                          transform=transform)
 
     expected = list(task_config.PACS_CLASSES)
+    
     if [c.lower() for c in dataset.classes] != [c.lower() for c in expected]:
         raise ValueError(
             f"Class order for '{domain}' is {dataset.classes}, expected {expected}. "
@@ -62,8 +65,10 @@ def split_domain(domain, domain_root=None, seed=task_config.SEED):
     objects over the same folder are indexed by the same split.
     """
     domain_root = domain_root or prepare_pacs()
+    
     train_view = get_domain_dataset(domain, TRAIN_TRANSFORMS, domain_root)
     eval_view = get_domain_dataset(domain, EVAL_TRANSFORMS, domain_root)
+    
     labels = [label for _, label in train_view.samples]
 
     train_indices, val_indices = train_test_split(
@@ -72,6 +77,7 @@ def split_domain(domain, domain_root=None, seed=task_config.SEED):
         stratify=labels,
         random_state=seed,
     )
+    
     return Subset(train_view, train_indices), Subset(eval_view, val_indices)
 
 

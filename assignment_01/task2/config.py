@@ -42,8 +42,12 @@ class TaskConfig:
         self.RESIZE = 256
         self.CROP = 224
 
-        ## TODO: method-specific settings (DAN lambda_mmd, kernel bandwidths, DANN
-        ## gradient-reversal schedule) once those methods are implemented.
+        ## DAN (MMD alignment)
+        self.DAN_LAMBDA_MMD = 1.0                    # main comparison; study varies {0.1, 1, 10}
+        self.MMD_BANDWIDTH_MULTIPLIERS = (0.5, 1.0, 2.0)  # x median pairwise squared distance
+
+        ## TODO: DANN / CDAN settings (discriminator width, dropout, gradient-reversal
+        ## schedule) when those methods are implemented.
 
     def init_env(self):
         for directory in (self.TASK_DIR, self.TASK_CHECKPOINTS_DIR, self.TASK_FEATURES_DIR,
