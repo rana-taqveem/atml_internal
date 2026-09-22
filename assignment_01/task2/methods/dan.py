@@ -41,14 +41,28 @@ def median_bandwidth(features):
     """Median pairwise squared distance over the combined batch.
 
     Self-distances are excluded: they are all zero and would drag the median
-    down. The value is detached because it is a scale statistic, not a
-    quantity we want gradients to flow through.
+    down.
+
+    The median is deliberately kept in the autograd graph. Detaching it looks
+    harmless - it is only a scale statistic - but it breaks the invariance the
+    median heuristic exists to provide. With a detached bandwidth the backward
+    pass treats the kernel width as a constant, so contracting every feature
+    drives exp(-d / bandwidth) towards 1 and the discrepancy towards zero: the
+    penalty can be minimised by mapping every image to the same vector instead
+    of by matching the distributions. Keeping the median differentiable means a
+    uniform contraction shrinks the bandwidth by the same factor and buys
+    nothing, which is what makes the collapse unprofitable.
+
+    Measured at 8 examples per domain (Task 3's pairwise source alignment,
+    lambda = 1): with the detach, per-dimension feature spread fell from 0.776
+    to 0.003 within 30 steps and the classification loss sat at ln 7; without
+    it, the spread grew to 1.242 and the loss fell to 0.64.
     """
     distances = _squared_distances(features, features)   # [N, N], N = B_s + B_t
     n = distances.size(0)
     # Drop the N zero self-distances: [N, N] -> [N*(N-1)] off-diagonal entries.
     off_diagonal = distances[~torch.eye(n, dtype=torch.bool, device=distances.device)]
-    median = off_diagonal.median().detach()             # scalar
+    median = off_diagonal.median()                      # scalar, differentiable
     return torch.clamp(median, min=1e-8)
 
 

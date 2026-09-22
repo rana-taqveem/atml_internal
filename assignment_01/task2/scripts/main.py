@@ -208,6 +208,7 @@ def mean_source_validation_f1(model, validation_loaders, criterion):
 def train_model(model, method_name, train_loader, validation_loaders, criterion, optimizer,
                 num_epochs=None, early_stopping_patience=None, extra_loss_fn=None, use_amp=None,
                 grad_clip=None, epoch_fn=None, weights_dir=None, results_dir=None):
+    
     """Fine-tune with early stopping on mean source-validation macro-F1.
 
     The best checkpoint and the history are written as soon as they improve,
@@ -225,8 +226,10 @@ def train_model(model, method_name, train_loader, validation_loaders, criterion,
 
     weights_dir = weights_dir or task_config.MODEL_WEIGHTS_DIR
     results_dir = results_dir or task_config.TASK_RESULTS_DIR
+    
     os.makedirs(weights_dir, exist_ok=True)
     os.makedirs(results_dir, exist_ok=True)
+    
     checkpoint_path = os.path.join(weights_dir, f"{method_name}_best.pth")
     history_path = os.path.join(results_dir, f"{method_name}_history.json")
 
@@ -395,18 +398,14 @@ def run_method(method="erm", num_workers=2, num_epochs=None, use_amp=None,
       dann  + domain discriminator on the feature, via gradient reversal
       cdan  + domain discriminator on vec(feature (x) class probabilities)
     """
-    from assignment_01.task2.data.pacs import (
-        DomainBalancedBatches, get_source_loaders, get_target_loaders,
-    )
+    from assignment_01.task2.data.pacs import (DomainBalancedBatches, get_source_loaders, get_target_loaders,)
     from assignment_01.task2.models.backbones import build_model
     from assignment_01.task2.data.download import prepare_pacs
 
     domain_root = prepare_pacs(data_root, allow_huggingface=download_hf)
 
-    source_loaders, validation_loaders = get_source_loaders(
-        domain_root=domain_root, num_workers=num_workers)
-    target_train_loader, target_eval_loader = get_target_loaders(
-        domain_root=domain_root, num_workers=num_workers)
+    source_loaders, validation_loaders = get_source_loaders(domain_root=domain_root, num_workers=num_workers)
+    target_train_loader, target_eval_loader = get_target_loaders(domain_root=domain_root, num_workers=num_workers)
 
     model = build_model()
 
@@ -420,23 +419,26 @@ def run_method(method="erm", num_workers=2, num_epochs=None, use_amp=None,
         target_train_loader = None
     elif method == "dan":
         from assignment_01.task2.methods.dan import make_dan_loss
+        
         extra_loss_fn = make_dan_loss(lambda_mmd=lambda_mmd)
         settings = {"lambda_mmd": extra_loss_fn.lambda_value,
                     "bandwidth_multipliers": list(task_config.MMD_BANDWIDTH_MULTIPLIERS)}
+        
         if extra_loss_fn.lambda_value != task_config.DAN_LAMBDA_MMD:
             run_name = f"dan_lambda{extra_loss_fn.lambda_value:g}"
+        
         print(f"DAN: lambda_MMD = {extra_loss_fn.lambda_value}, "
               f"bandwidths = {settings['bandwidth_multipliers']} x median squared distance")
+    
     elif method in ("dann", "cdan"):
         if method == "dann":
             from assignment_01.task2.methods.dann import make_dann_loss as make_loss
-            extra_loss_fn, discriminator = make_loss(
-                feature_dim=model.feature_dim, max_alpha=max_alpha)
+            extra_loss_fn, discriminator = make_loss(feature_dim=model.feature_dim, max_alpha=max_alpha)
         else:
             from assignment_01.task2.methods.cdan import make_cdan_loss as make_loss
-            extra_loss_fn, discriminator = make_loss(
-                feature_dim=model.feature_dim, num_classes=task_config.NUM_CLASSES,
-                max_alpha=max_alpha)
+            extra_loss_fn, discriminator = make_loss(feature_dim=model.feature_dim, 
+                                                     num_classes=task_config.NUM_CLASSES,
+                                                     max_alpha=max_alpha)
 
         # The discriminator learns normally; only the backbone sees the
         # reversed gradient, so its parameters must reach the optimizer.
@@ -456,10 +458,9 @@ def run_method(method="erm", num_workers=2, num_epochs=None, use_amp=None,
     train_batches = DomainBalancedBatches(source_loaders, target_loader=target_train_loader)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.AdamW(
-        list(model.parameters()) + extra_parameters,
-        lr=task_config.LEARNING_RATE,
-        weight_decay=task_config.WEIGHT_DECAY,
+    optimizer = torch.optim.AdamW(list(model.parameters()) + extra_parameters,
+                                  lr=task_config.LEARNING_RATE,
+                                  weight_decay=task_config.WEIGHT_DECAY,
     )
 
     if use_amp is None and method in ("dann", "cdan"):
@@ -469,11 +470,17 @@ def run_method(method="erm", num_workers=2, num_epochs=None, use_amp=None,
         print(f"{method.upper()}: mixed precision disabled (float16 overflows under "
               "gradient reversal)")
 
-    history = train_model(
-        model, run_name, train_batches, validation_loaders, criterion, optimizer,
-        num_epochs=num_epochs, use_amp=use_amp, extra_loss_fn=extra_loss_fn,
-        grad_clip=grad_clip,
-    )
+    history = train_model(model, 
+                          run_name, 
+                          train_batches, 
+                          validation_loaders, 
+                          criterion, 
+                          optimizer,
+                          num_epochs=num_epochs,
+                          use_amp=use_amp,
+                          extra_loss_fn=extra_loss_fn,
+                          grad_clip=grad_clip,
+                          )
     history["settings"] = settings
 
     results = evaluate_final(model, validation_loaders, target_eval_loader, criterion)
