@@ -5,7 +5,8 @@ selection and the source-side diagnostics happen in train.py, which never
 touches the target domain; keeping the Sketch load in a separate file is how
 that separation is enforced rather than merely intended.
 
-For each of ERM, DAN-DG and SAM this reports:
+For ERM, DAN-DG, SAM and the configured DAN-DG strength-study checkpoints,
+this reports:
 
   * accuracy and macro-F1 on each source validation domain, with mean and
     worst-domain values (recomputed here so one table holds everything)
@@ -14,6 +15,12 @@ For each of ERM, DAN-DG and SAM this reports:
     and Cartoon features, so chance is 33.3%, not 50%
   * the shared local sharpness proxy, measured on one fixed validation batch
   * per-class Sketch accuracy, the change against ERM, and dominant confusions
+
+It writes three report-ready files:
+
+  * task3_final_results.json - complete nested diagnostics
+  * task3_method_comparison.csv - one compact aggregate row per method
+  * task3_per_class_sketch.csv - class-level changes against ERM
 
     python -m assignment_01.task3.scripts.evaluate_sketch
 """
@@ -37,7 +44,24 @@ from assignment_01.task2.models.backbones import build_model
 from assignment_01.task2.scripts.main import DEVICE, evaluate, set_seed
 from assignment_01.task3.config import task_config
 
-DEFAULT_METHODS = ["erm", "dan_dg", "sam"]
+DEFAULT_METHODS = [
+    "erm",
+    "dan_dg",
+    "sam",
+    "dan_dg_lambda0.1",
+    "dan_dg_lambda10",
+]
+
+
+def method_settings(method):
+    """Return the controlled setting represented by a checkpoint name."""
+    if method == "dan_dg":
+        return {"lambda_dg": task_config.LAMBDA_DG}
+    if method.startswith("dan_dg_lambda"):
+        return {"lambda_dg": float(method.removeprefix("dan_dg_lambda"))}
+    if method == "sam":
+        return {"rho": task_config.SAM_RHO}
+    return {}
 
 
 def checkpoint_for(method):
@@ -47,7 +71,7 @@ def checkpoint_for(method):
     return os.path.join(task_config.MODEL_WEIGHTS_DIR, f"{method}_best.pth")
 
 
-def run(methods=None, num_workers=2, data_root=None, results_dir=None):
+def run(methods=None, num_workers=2, data_root=None, results_dir=None, strict=False):
     task_config.init_env()
     set_seed(task_config.SEED)
 
@@ -68,10 +92,21 @@ def run(methods=None, num_workers=2, data_root=None, results_dir=None):
     report = {}
     target_predictions = {}
 
-    for method in methods or DEFAULT_METHODS:
+    selected_methods = methods or DEFAULT_METHODS
+    if strict:
+        missing = [
+            (method, checkpoint_for(method))
+            for method in selected_methods
+            if not os.path.isfile(checkpoint_for(method))
+        ]
+        if missing:
+            details = "\n".join(f"  {method}: {path}" for method, path in missing)
+            raise FileNotFoundError(f"Required Task 3 checkpoints are missing:\n{details}")
+
+    for method in selected_methods:
         path = checkpoint_for(method)
         if not os.path.isfile(path):
-            print(f"  skipping {method}: no checkpoint at {path}")
+            print(f"  missing {method}: no checkpoint at {path}")
             continue
 
         print(f"\n=== {method}")
@@ -101,6 +136,7 @@ def run(methods=None, num_workers=2, data_root=None, results_dir=None):
 
         report[method] = {
             "checkpoint": path,
+            "settings": method_settings(method),
             "source_validation": source,
             "mean_source_accuracy_pct": sum(accuracies) / len(accuracies),
             "mean_source_macro_f1_pct": sum(macro_f1s) / len(macro_f1s),
@@ -120,6 +156,11 @@ def run(methods=None, num_workers=2, data_root=None, results_dir=None):
               f"(chance {probe['chance_pct']:.1f}%)")
         print(f"   sharpness proxy {sharp['delta_sharp']:+.4f} "
               f"(loss {sharp['loss']:.4f} -> {sharp['perturbed_loss']:.4f})")
+
+    if "erm" not in report:
+        raise RuntimeError(
+            "The ERM checkpoint is required to calculate aggregate and per-class changes."
+        )
 
     # Changes against ERM, including the per-class view.
     per_class_rows = []
@@ -142,6 +183,43 @@ def run(methods=None, num_workers=2, data_root=None, results_dir=None):
         json.dump(report, file, indent=2)
     print(f"\nSaved {results_dir / 'task3_final_results.json'}")
 
+    comparison_rows = []
+    for method, entry in report.items():
+        source = entry["source_validation"]
+        settings = entry["settings"]
+        comparison_rows.append({
+            "method": method,
+            "lambda_dg": settings.get("lambda_dg", ""),
+            "rho": settings.get("rho", ""),
+            "photo_accuracy_pct": source["photo"]["accuracy_pct"],
+            "photo_macro_f1_pct": source["photo"]["macro_f1_pct"],
+            "art_painting_accuracy_pct": source["art_painting"]["accuracy_pct"],
+            "art_painting_macro_f1_pct": source["art_painting"]["macro_f1_pct"],
+            "cartoon_accuracy_pct": source["cartoon"]["accuracy_pct"],
+            "cartoon_macro_f1_pct": source["cartoon"]["macro_f1_pct"],
+            "mean_source_accuracy_pct": entry["mean_source_accuracy_pct"],
+            "mean_source_macro_f1_pct": entry["mean_source_macro_f1_pct"],
+            "worst_source_macro_f1_pct": entry["worst_source_macro_f1_pct"],
+            "worst_source_domain": entry["worst_source_domain"],
+            "target_accuracy_pct": entry["target_accuracy_pct"],
+            "target_macro_f1_pct": entry["target_macro_f1_pct"],
+            "target_accuracy_change_pp": entry["target_accuracy_change_pp"],
+            "target_macro_f1_change_pp": entry["target_macro_f1_change_pp"],
+            "source_domain_separability_pct": entry["source_domain_separability_pct"],
+            "separability_chance_pct": entry["separability_chance_pct"],
+            "sharpness_loss": entry["sharpness"]["loss"],
+            "sharpness_perturbed_loss": entry["sharpness"]["perturbed_loss"],
+            "sharpness_delta": entry["sharpness"]["delta_sharp"],
+            "sharpness_radius": entry["sharpness"]["radius"],
+        })
+
+    comparison_path = results_dir / "task3_method_comparison.csv"
+    with comparison_path.open("w", newline="", encoding="utf-8") as file:
+        writer = csv.DictWriter(file, fieldnames=list(comparison_rows[0].keys()))
+        writer.writeheader()
+        writer.writerows(comparison_rows)
+    print(f"Saved {comparison_path}")
+
     if per_class_rows:
         path = results_dir / "task3_per_class_sketch.csv"
         with path.open("w", newline="", encoding="utf-8") as file:
@@ -159,9 +237,14 @@ def main():
     parser.add_argument("--num-workers", type=int, default=2)
     parser.add_argument("--data-root", default=None)
     parser.add_argument("--results-dir", default=None)
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="fail instead of skipping a requested checkpoint that is missing",
+    )
     args = parser.parse_args()
     run(methods=args.methods, num_workers=args.num_workers,
-        data_root=args.data_root, results_dir=args.results_dir)
+        data_root=args.data_root, results_dir=args.results_dir, strict=args.strict)
 
 
 if __name__ == "__main__":
