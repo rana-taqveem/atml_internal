@@ -60,7 +60,7 @@
   },
   "dan": {
     "checkpoint": "/content/drive/MyDrive/ATML/assignment_01/task2/model_weights/dan_best.pth",
-    "domain_separability_pct": 85.85164835164835,
+    "domain_separability_pct": 89.6978021978022,
     "separability_chance_pct": 50.0,
     "separability_settings": {
       "seed": 6304,
@@ -69,31 +69,31 @@
       "class_weight": "balanced"
     },
     "separability_n_per_group": 1213,
-    "target_accuracy_pct": 72.79205904810384,
-    "target_macro_f1_pct": 67.04247578103768,
+    "target_accuracy_pct": 67.80351234410792,
+    "target_macro_f1_pct": 66.83589910387934,
     "per_class_summary": {
       "n_classes_improved": 5,
       "n_classes_degraded": 2,
-      "mean_change_pp": 16.92285278921039
+      "mean_change_pp": 15.81754856510823
     },
     "largest_degradations": [
-      {
-        "class": "person",
-        "support": 160,
-        "baseline_accuracy_pct": 98.75,
-        "method_accuracy_pct": 75.625,
-        "change_pp": -23.125,
-        "confused_with": "house",
-        "confused_count": 39
-      },
       {
         "class": "elephant",
         "support": 740,
         "baseline_accuracy_pct": 88.78378378378379,
-        "method_accuracy_pct": 80.0,
-        "change_pp": -8.78378378378379,
+        "method_accuracy_pct": 87.16216216216216,
+        "change_pp": -1.6216216216216282,
+        "confused_with": "person",
+        "confused_count": 60
+      },
+      {
+        "class": "person",
+        "support": 160,
+        "baseline_accuracy_pct": 98.75,
+        "method_accuracy_pct": 97.5,
+        "change_pp": -1.25,
         "confused_with": "house",
-        "confused_count": 77
+        "confused_count": 4
       }
     ],
     "largest_improvements": [
@@ -110,10 +110,10 @@
         "class": "giraffe",
         "support": 753,
         "baseline_accuracy_pct": 23.50597609561753,
-        "method_accuracy_pct": 73.83798140770253,
-        "change_pp": 50.332005312085,
-        "confused_with": "dog",
-        "confused_count": 65
+        "method_accuracy_pct": 51.39442231075697,
+        "change_pp": 27.888446215139442,
+        "confused_with": "person",
+        "confused_count": 166
       }
     ]
   },

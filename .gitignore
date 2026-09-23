@@ -56,4 +56,10 @@ assignment_01/task1/local_runs/
 assignment_01/task1/data/conflict_dataset/
 assignment_01/task2/local_runs/
 assignment_01/task3/local_runs/
+assignment_01/task4/local_runs/
 assignment_01/task2/checkpoints/
+
+# Trained weights and cached features: too large for Git, reproducible from
+# the training scripts. Small JSON/CSV results stay tracked.
+assignment_01/*/model_weights/
+assignment_01/task4/cache/

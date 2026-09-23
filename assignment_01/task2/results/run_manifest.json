@@ -30,9 +30,9 @@
   },
   "batchnorm_policy": "running statistics frozen at pretrained values; affine parameters trainable",
   "methods": {
-    "dann_alpha0.25": {
-      "checkpoint": "/content/drive/MyDrive/ATML/assignment_01/task2/model_weights/dann_alpha0.25_best.pth",
-      "sha256": "fa5ffe4b022f81d62a3e0002456142c12e951f78ffcf47eb025b111b4da95ea4"
+    "dan": {
+      "checkpoint": "/content/drive/MyDrive/ATML/assignment_01/task2/model_weights/dan_best.pth",
+      "sha256": "a7645965c328bb99afe026fd099d28cfff58c39257948652504d02808e0e89c5"
     }
   },
   "software": {
@@ -42,10 +42,11 @@
     "sklearn": "1.6.1"
   },
   "settings": {
-    "max_alpha": 0.25,
-    "domain_loss_weight": 1.0,
-    "discriminator_hidden": 256,
-    "discriminator_dropout": 0.5,
-    "discriminator_input_dim": 512
+    "lambda_mmd": 1.0,
+    "bandwidth_multipliers": [
+      0.5,
+      1.0,
+      2.0
+    ]
   }
 }

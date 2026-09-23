@@ -1,0 +1,8 @@
+method        , class   , support, baseline_accuracy_pct, method_accuracy_pct , change_pp          , confused_with, confused_count
+erm           , dog     ,     772,    36.787564766839374,  36.787564766839374 , 0.0                , person       ,            238
+erm           , elephant,     740,    88.78378378378379 ,  88.78378378378379  , 0.0                , person       ,             71
+erm           , giraffe ,     753,    23.50597609561753 ,  23.50597609561753  , 0.0                , person       ,            394
+erm           , guitar  ,     608,    83.05921052631578 ,  83.05921052631578  , 0.0                , person       ,             79
+erm           , horse   ,     816,    45.588235294117645,  45.588235294117645 , 0.0                , person       ,            297
+erm           , house   ,      80,    45.0              ,  45.0               , 0.0                , person       ,             37
+erm           , person  ,     160,    98.75             ,  98.75              , 0.0                , elephant     ,              2
