@@ -71,14 +71,18 @@ def checkpoint_for(method):
     return os.path.join(task_config.MODEL_WEIGHTS_DIR, f"{method}_best.pth")
 
 
-def run(methods=None, num_workers=2, data_root=None, results_dir=None, strict=False):
+def run(methods=None, num_workers=2, data_root=None, results_dir=None, strict=False,
+        download_hf=False):
     task_config.init_env()
     set_seed(task_config.SEED)
 
     results_dir = Path(results_dir or task_config.TASK_RESULTS_DIR)
     results_dir.mkdir(parents=True, exist_ok=True)
 
-    domain_root = prepare_pacs(data_root or task_config.TASK_DATASET_DIR)
+    # download_hf lets a machine without the prepared archive (Kaggle, a fresh
+    # VM) fetch PACS from the hub instead of failing.
+    domain_root = prepare_pacs(data_root or task_config.TASK_DATASET_DIR,
+                               allow_huggingface=download_hf)
     _, validation_loaders = get_source_loaders(domain_root=domain_root, num_workers=num_workers)
     _, target_loader = get_target_loaders(domain_root=domain_root, num_workers=num_workers)
 
@@ -242,9 +246,15 @@ def main():
         action="store_true",
         help="fail instead of skipping a requested checkpoint that is missing",
     )
+    parser.add_argument(
+        "--download-hf",
+        action="store_true",
+        help="fetch PACS from the Hugging Face hub when no prepared archive is present",
+    )
     args = parser.parse_args()
     run(methods=args.methods, num_workers=args.num_workers,
-        data_root=args.data_root, results_dir=args.results_dir, strict=args.strict)
+        data_root=args.data_root, results_dir=args.results_dir, strict=args.strict,
+        download_hf=args.download_hf)
 
 
 if __name__ == "__main__":

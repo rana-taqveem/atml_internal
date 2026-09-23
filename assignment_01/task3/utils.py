@@ -7,11 +7,17 @@ Only the results and checkpoints live here; PACS itself is shared with Task 2.
 import os
 from pathlib import Path
 
-from assignment_01.task2.utils import is_running_in_colab
+from assignment_01.task2.utils import is_running_in_colab, is_running_in_kaggle
 
 
 def get_data_dir(task_name: str):
-    if is_running_in_colab():
+    if is_running_in_kaggle():
+        # /kaggle/working is the only writable location that survives to the
+        # session's output; anything written elsewhere is lost when the kernel
+        # stops.
+        base_dir = Path("/kaggle/working") / "atml" / task_name
+
+    elif is_running_in_colab():
         from google.colab import drive
 
         mount_point = "/content/drive"

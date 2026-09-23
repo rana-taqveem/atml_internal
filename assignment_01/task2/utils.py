@@ -4,11 +4,22 @@ import os
 from pathlib import Path
 
 
+def is_running_in_kaggle():
+    """Kaggle sets this in notebook and batch runtimes alike."""
+    return bool(os.environ.get("KAGGLE_KERNEL_RUN_TYPE")) or os.path.isdir("/kaggle/working")
+
+
 def get_data_dir(task_name: str):
     # Colab sets this environment variable in its runtime.
     running_in_colab = bool(os.environ.get("COLAB_RELEASE_TAG"))
 
-    if running_in_colab:
+    if is_running_in_kaggle():
+        # /kaggle/working is the only writable location that survives to the
+        # session's output; anything written elsewhere is lost when the kernel
+        # stops.
+        base_dir = Path("/kaggle/working") / "atml" / task_name
+
+    elif running_in_colab:
         from google.colab import drive
 
         mount_point = "/content/drive"
