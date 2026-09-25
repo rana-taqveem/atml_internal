@@ -1,11 +1,4 @@
-"""Generate ten candidates for every ordered STL-10 class pair.
-
-This is exploratory data for visual pair selection, not the final evaluation
-set. No classifier predictions or automatic acceptance decisions are used.
-
-The same content examples are reused across style classes for comparability.
-Each class also supplies a fixed, independently sampled set of style images.
-"""
+"""Generate exploratory candidates for every ordered STL-10 class pair."""
 
 import argparse
 import json

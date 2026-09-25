@@ -14,6 +14,8 @@ from pathlib import Path
 import numpy as np
 from matplotlib import pyplot as plt
 
+from assignment_01.figure_style import print_ready
+
 TEXT_WIDTH = 5.5
 
 METHODS = ["resnet50", "vit_b_16", "clip_vit_b_32", "clip_vit_b_32_zero_shot"]
@@ -56,6 +58,7 @@ def tidy(ax):
 
 
 def save(fig, out_dir, name):
+    print_ready(fig, width_in=TEXT_WIDTH)
     for suffix in ("pdf", "png"):
         fig.savefig(Path(out_dir) / f"{name}.{suffix}")
     plt.close(fig)
@@ -341,6 +344,86 @@ def figure_tsne(analysis_dir, out_dir, conditions=("cue_conflict", "patch_shuffl
     save(fig, out_dir, "fig4_tsne")
 
 
+def figure_cue_examples_compact(analysis_dir, conflict_dir, out_dir, per_case=1, seed=6304):
+    """Space-saving fig3: one column per decision pattern, conflict image only.
+
+    Same seeded selection as figure_cue_examples, so the examples are identical;
+    the content and style classes move into the panel title.
+    """
+    from PIL import Image
+
+    conflict_dir = Path(conflict_dir)
+    decisions = read(Path(analysis_dir) / "cue_conflict_decisions.csv")
+    records = load_conflict_records(conflict_dir)
+
+    chosen = []
+    rng = np.random.default_rng(seed)
+    for title, pool in case_pools(decisions).items():
+        if not pool:
+            continue
+        for index in rng.choice(len(pool), size=min(per_case, len(pool)), replace=False):
+            chosen.append((title, pool[int(index)]))
+
+    short = {"resnet50": "R50", "vit_b_16": "ViT", "clip_vit_b_32": "CLIP",
+             "clip_vit_b_32_zero_shot": "CLIP-ZS"}
+    fig, axes = plt.subplots(1, len(chosen), figsize=(TEXT_WIDTH, 2.25), squeeze=False)
+    for axis, (title, row) in zip(axes[0], chosen):
+        record = records[row["conflict_id"]]
+        with Image.open(conflict_dir / record["image_path"]) as image:
+            axis.imshow(image.convert("RGB"))
+        axis.set_title(f"{title}\nshape: {row['content_class']}, texture: {row['style_class']}",
+                       fontsize=6.2, pad=3)
+        lines = [f"{short[m]}: {row[f'{m}_prediction']} ({row[f'{m}_decision']})" for m in METHODS]
+        axis.text(0.5, -0.05, "\n".join(lines), transform=axis.transAxes, fontsize=6.0,
+                  va="top", ha="center", linespacing=1.35)
+        axis.set_xticks([])
+        axis.set_yticks([])
+        for spine in axis.spines.values():
+            spine.set_visible(False)
+
+    fig.tight_layout(w_pad=0.6)
+    save(fig, out_dir, "fig3_cue_examples_compact")
+
+
+def figure_tsne_strip(analysis_dir, out_dir, conditions=("cue_conflict", "patch_shuffle")):
+    """Space-saving fig4: the same projections as figure_tsne in a single row."""
+    points = read(Path(analysis_dir) / "tsne_points.csv")
+    titles = {"cue_conflict": "cue conflict", "patch_shuffle": "patch shuffle"}
+    panels = [(c, b) for c in conditions for b in BACKBONES]
+
+    fig, axes = plt.subplots(1, len(panels), figsize=(TEXT_WIDTH, 1.25), squeeze=False)
+    for axis, (condition, backbone) in zip(axes[0], panels):
+        clean = [p for p in points if p["backbone"] == backbone and p["condition"] == "baseline"]
+        moved = [p for p in points if p["backbone"] == backbone and p["condition"] == condition]
+        for group, size, alpha, marker, width in ((clean, 1.2, 0.28, "o", 0), (moved, 2.6, 0.9, "x", 0.4)):
+            xs = np.array([float(p["x"]) for p in group])
+            ys = np.array([float(p["y"]) for p in group])
+            labels = np.array([int(p["label"]) for p in group])
+            for class_idx in range(10):
+                mask = labels == class_idx
+                if mask.any():
+                    axis.scatter(xs[mask], ys[mask], s=size, alpha=alpha, marker=marker,
+                                 c=CLASS_COLOURS[class_idx], linewidths=width)
+        axis.set_title(f"{BACKBONE_LABELS[backbone]}\n{titles.get(condition, condition)}",
+                       fontsize=6.3, pad=2)
+        axis.set_xticks([])
+        axis.set_yticks([])
+        for spine in axis.spines.values():
+            spine.set_color("#cccccc")
+            spine.set_visible(True)
+
+    handles = [plt.Line2D([], [], marker="o", linestyle="", color=CLASS_COLOURS[i], markersize=3,
+                          label=name) for i, name in enumerate(STL10_CLASSES)]
+    handles += [plt.Line2D([], [], marker="x", linestyle="", color="#555555", markersize=3.5,
+                           label="transformed"),
+                plt.Line2D([], [], marker="o", linestyle="", color="#555555", alpha=0.35,
+                           markersize=3, label="clean")]
+    fig.legend(handles=handles, loc="lower center", ncol=12, frameon=False, fontsize=6,
+               bbox_to_anchor=(0.5, -0.16), handletextpad=0.1, columnspacing=0.6)
+    fig.tight_layout(w_pad=0.3)
+    save(fig, out_dir, "fig4_tsne_strip")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("analysis_dir")
@@ -374,10 +457,13 @@ def main():
         conflict_dir = task_config.TASK_CONFLICT_DATASET_DIR
     if (Path(conflict_dir) / "manifest.json").is_file():
         figure_cue_examples(args.analysis_dir, conflict_dir, out_dir, conflict_ids=args.cue_ids)
+        if not args.cue_ids:
+            figure_cue_examples_compact(args.analysis_dir, conflict_dir, out_dir)
     else:
         print(f"  skipped fig3: no manifest.json under {conflict_dir}")
 
     figure_tsne(args.analysis_dir, out_dir)
+    figure_tsne_strip(args.analysis_dir, out_dir)
 
     print(f"\nFigures in {out_dir}")
 

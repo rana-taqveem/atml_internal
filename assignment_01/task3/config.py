@@ -1,17 +1,6 @@
-"""Task 3 settings: domain generalization on PACS.
+"""Task 3 domain-generalization settings inherited from Task 2.
 
-The assignment requires reusing the Task 2 PACS protocol unchanged: the same
-source splits, ResNet-18 initialization, seven-class head, domain-balanced
-sampling, optimizer settings, epoch budget, early stopping rule and seed 6304.
-Those values are therefore imported from the Task 2 config rather than
-restated here, so the two tasks cannot drift apart.
-
-Only the output directories and the two method-specific settings are new.
-
-Sketch is the unseen target: no Sketch image may be loaded during training,
-source-side diagnostics, checkpoint selection or hyperparameter selection.
-Checkpoints are selected on mean macro-F1 over the three source validation
-domains, exactly as in Task 2.
+Sketch is reserved for final evaluation.
 """
 
 import os
@@ -28,12 +17,11 @@ class Task3Config:
         self.TASK_RESULTS_DIR = os.path.join(self.TASK_DIR, "results")
         self.MODEL_WEIGHTS_DIR = os.path.join(self.TASK_DIR, "model_weights")
 
-        # PACS lives with Task 2; Task 3 reuses the same copy and the same splits.
         self.TASK_DATASET_DIR = task2_config.TASK_DATASET_DIR
         self.TASK2_WEIGHTS_DIR = task2_config.MODEL_WEIGHTS_DIR
         self.ERM_CHECKPOINT = os.path.join(self.TASK2_WEIGHTS_DIR, "erm_best.pth")
 
-        ## Inherited protocol (do not change without changing Task 2 as well)
+        ## Inherited protocol
         self.SEED = task2_config.SEED
         self.DEVICE = task2_config.DEVICE
         self.NUM_CLASSES = task2_config.NUM_CLASSES

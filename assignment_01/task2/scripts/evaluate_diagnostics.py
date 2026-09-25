@@ -1,21 +1,4 @@
-"""Task 2 Step 5 diagnostics: run after every checkpoint is fixed.
-
-For each trained method this loads the saved checkpoint and computes:
-
-  * domain separability - freeze the backbone, take equal numbers of
-    source-validation and target features, seed 6304, a 70/30 split and a
-    balanced logistic regression with C = 1. Held-out accuracy is the score;
-    50% is chance.
-  * per-class target accuracy, the change against ERM, and each class's
-    dominant confusion.
-
-This is the stage where target labels are allowed, because all training and
-model selection is already complete. Writes diagnostics.json and
-per_class_target.csv next to the run results, which evaluation/report.py
-then merges into the comparison table.
-
-    python -m assignment_01.task2.scripts.evaluate_diagnostics
-"""
+"""Compute Task 2 post-training separability and per-class diagnostics."""
 
 import argparse
 import csv

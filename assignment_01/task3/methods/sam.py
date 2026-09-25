@@ -1,22 +1,4 @@
-"""SAM: Sharpness-Aware Minimization (standard, non-adaptive).
-
-    min_theta  max_{||eps|| <= rho}  L_ERM(theta + eps)
-
-Ordinary training finds parameters with low loss. SAM looks for parameters
-whose whole neighbourhood has low loss, on the argument that a locally stable
-solution transfers better to an unseen domain. It does not remove domain
-information; it changes where in parameter space the optimizer settles.
-
-Each step costs two forward/backward passes:
-
-  1. compute the gradient at theta, and step to the worst nearby point
-         eps = rho * grad / ||grad||          (normalized ascent, non-adaptive)
-  2. compute the gradient at theta + eps, restore theta, and let the optimizer
-     apply that gradient
-
-The BatchNorm policy from Task 2 (running statistics frozen) applies to both
-passes, so the perturbation cannot be absorbed by shifting BatchNorm statistics.
-"""
+"""Standard non-adaptive Sharpness-Aware Minimization."""
 
 import torch
 
@@ -87,11 +69,7 @@ class SAM(torch.optim.Optimizer):
 
 def train_one_epoch_sam(model, loader, criterion, optimizer, epoch=0, num_epochs=1,
                         grad_clip=None):
-    """One SAM epoch. Mirrors Task 2's train_one_epoch, with the extra pass.
-
-    Mixed precision is not used: the two-pass update interacts badly with loss
-    scaling, and SAM is already the slower option.
-    """
+    """Run one two-pass SAM training epoch without mixed precision."""
     model.train()
     freeze_batchnorm_statistics(model)
 

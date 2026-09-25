@@ -637,12 +637,7 @@ def build_cue_conflict_details(results_dir, conflict_metadata):
 
 
 def build_conflict_audit(conflict_dir, output_dir):
-    """Generated / selected / removed counts per direction, from the dataset files.
-
-    Rejection reasons for removed candidates are read from an optional
-    rejection_reasons.csv (conflict_id,rejection_reason) in the conflict
-    folder. A template listing the removed IDs is written when it is absent.
-    """
+    """Summarize generated, selected, and removed conflicts per direction."""
     conflict_dir = Path(conflict_dir)
     records = load_conflict_metadata(conflict_dir)
     summary_path = conflict_dir / "selection_summary.json"
@@ -767,15 +762,7 @@ def _class_rank(logits, class_idx):
 
 
 def build_texture_rank_rows(results_dir):
-    """Rank and probability of the style (texture) class, conflict vs clean.
-
-    For every conflict, the same style class is also scored on the clean
-    content image. Clean pairs show how often that class ranks high from
-    class similarity alone (e.g. airplane/bird); the change to the conflict
-    image is the effect of the transferred texture. Probabilities are softmax
-    over each method's own logits, so compare them within a method only;
-    ranks are comparable across methods.
-    """
+    """Compare texture-class rank and probability on conflict and clean images."""
     sample_rows, summary_rows = [], []
 
     for model_name in DECISION_METHODS:

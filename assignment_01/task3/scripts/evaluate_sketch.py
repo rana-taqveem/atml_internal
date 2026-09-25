@@ -1,29 +1,4 @@
-"""Task 3 final evaluation: the only script that loads Sketch.
-
-Run this after every Task 3 configuration is frozen. Training, checkpoint
-selection and the source-side diagnostics happen in train.py, which never
-touches the target domain; keeping the Sketch load in a separate file is how
-that separation is enforced rather than merely intended.
-
-For ERM, DAN-DG, SAM and the configured DAN-DG strength-study checkpoints,
-this reports:
-
-  * accuracy and macro-F1 on each source validation domain, with mean and
-    worst-domain values (recomputed here so one table holds everything)
-  * accuracy and macro-F1 on Sketch, and the change relative to ERM
-  * source-domain separability: a three-class probe over Photo, Art Painting
-    and Cartoon features, so chance is 33.3%, not 50%
-  * the shared local sharpness proxy, measured on one fixed validation batch
-  * per-class Sketch accuracy, the change against ERM, and dominant confusions
-
-It writes three report-ready files:
-
-  * task3_final_results.json - complete nested diagnostics
-  * task3_method_comparison.csv - one compact aggregate row per method
-  * task3_per_class_sketch.csv - class-level changes against ERM
-
-    python -m assignment_01.task3.scripts.evaluate_sketch
-"""
+"""Final Task 3 evaluation; the only Task 3 script that loads Sketch."""
 
 import argparse
 import csv

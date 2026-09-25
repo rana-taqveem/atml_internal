@@ -1,21 +1,4 @@
-"""CDAN: class-conditional adversarial alignment.
-
-DANN matches the overall source and target feature distributions. That can
-succeed while mixing classes: the domains become indistinguishable, but a
-target dog lands where source guitars live. CDAN conditions the discriminator
-on the predicted class as well as the feature, through the outer product
-
-    g(x) = vec(f (x) p),   f = 512-d feature,  p = classifier softmax,
-
-which gives a 512 x 7 = 3584-dimensional input. The discriminator therefore
-sees "which region of feature space" together with "which class the model
-thinks this is", so confusing the domains requires aligning semantically
-corresponding regions rather than only the marginal distributions.
-
-Everything else matches DANN exactly: hidden width, activation, dropout,
-gradient-reversal schedule and loss weight. Per the assignment, neither f nor
-p is detached, and no entropy conditioning is used.
-"""
+"""CDAN class-conditional adversarial alignment."""
 
 import torch
 import torch.nn as nn
@@ -30,16 +13,7 @@ from assignment_01.task2.methods.dann import (
 
 
 def multilinear_map(features, probabilities):
-    """Outer product of feature and class probabilities, flattened per example.
-
-    features       [N, D]        D = 512
-    probabilities  [N, C]        C = 7, rows sum to 1
-    returns        [N, D*C]      D*C = 3584
-
-    bmm does a per-example matrix product:
-        [N, C, 1] x [N, 1, D] -> [N, C, D],  entry (n, c, d) = p[n,c] * f[n,d]
-    then view flattens the last two axes into one 3584-long vector.
-    """
+    """Flatten each feature-probability outer product to shape [N, D*C]."""
     outer = torch.bmm(probabilities.unsqueeze(2), features.unsqueeze(1))   # [N, C, D]
     return outer.view(features.size(0), -1)                                # [N, C*D]
 

@@ -1,15 +1,4 @@
-"""PACS datasets, stratified splits and domain-balanced loaders.
-
-Split policy follows the assignment: within each source domain, a stratified
-80/20 train/validation split with seed 6304 (same approach as Task 1, which
-used sklearn's train_test_split with stratification on the labels). The target
-domain is never split and never contributes labels to training.
-
-Transforms follow the assignment: resize to 256, random 224 crop with
-horizontal flipping for training, 224 centre crop for validation and
-evaluation, and the normalization associated with the pretrained ImageNet
-weights (the same constants used by the Task 1 ResNet wrapper).
-"""
+"""PACS datasets, stratified splits, and domain-balanced loaders."""
 
 from pathlib import Path
 
@@ -59,11 +48,7 @@ def get_domain_dataset(domain, transform=EVAL_TRANSFORMS, domain_root=None):
 
 
 def split_domain(domain, domain_root=None, seed=task_config.SEED):
-    """Stratified 80/20 train/validation split within one source domain.
-
-    Train and validation views use different transforms, so two dataset
-    objects over the same folder are indexed by the same split.
-    """
+    """Create a stratified train/validation split with separate transforms."""
     domain_root = domain_root or prepare_pacs()
     
     train_view = get_domain_dataset(domain, TRAIN_TRANSFORMS, domain_root)
@@ -82,12 +67,7 @@ def split_domain(domain, domain_root=None, seed=task_config.SEED):
 
 
 def get_train_val_dataloaders(domain, domain_root=None, batch_per_domain=None, num_workers=2):
-    """Train and validation loaders for one source domain.
-
-    Same shape as the Task 1 helper of this name (stratified split, Subset,
-    two DataLoaders, printed sizes); the domain is a parameter here because
-    PACS is split per source domain rather than once for the whole dataset.
-    """
+    """Return train and validation loaders for one source domain."""
     batch_per_domain = batch_per_domain or task_config.SOURCE_BATCH_PER_DOMAIN
     train_subset, val_subset = split_domain(domain, domain_root)
 
@@ -108,12 +88,7 @@ def get_train_val_dataloaders(domain, domain_root=None, batch_per_domain=None, n
 
 
 def get_source_loaders(domains=None, domain_root=None, batch_per_domain=None, num_workers=2):
-    """Per-domain train and validation loaders for the three source domains.
-
-    Each source train loader uses batch_per_domain images, so drawing one
-    batch from each of the three domains gives the 24 source images per
-    update that the assignment specifies.
-    """
+    """Return per-domain train and validation loaders for source domains."""
     domains = domains or task_config.SOURCE_DOMAINS
     domain_root = domain_root or prepare_pacs()
 
@@ -127,11 +102,7 @@ def get_source_loaders(domains=None, domain_root=None, batch_per_domain=None, nu
 
 
 def get_target_loaders(domain=None, domain_root=None, batch_size=None, num_workers=2):
-    """Unlabelled-style training loader and evaluation loader for the target.
-
-    Both read the same images; the training loader exists to supply target
-    batches to the adaptation objective, whose labels must never be used.
-    """
+    """Return adaptation and evaluation loaders for the target domain."""
     domain = domain or task_config.TARGET_DOMAIN
     batch_size = batch_size or task_config.TARGET_BATCH_SIZE
     domain_root = domain_root or prepare_pacs()
@@ -157,19 +128,7 @@ def cycle(loader):
 
 
 class DomainBalancedBatches:
-    """Iterator giving one batch from every source domain plus one target batch.
-
-    Each step returns (images, labels, domain_ids, target_images):
-
-        images         [B_s, 3, 224, 224]   B_s = 8 per domain x 3 domains = 24
-        labels         [B_s]                class index 0..6
-        domain_ids     [B_s]                0, 1, 2 in SOURCE_DOMAINS order
-        target_images  [B_t, 3, 224, 224]   B_t = 24, or None for ERM
-
-    Shorter loaders are cycled so every domain contributes equally to each
-    update. Target labels are never returned: the target batch is unlabelled
-    as far as training is concerned.
-    """
+    """Yield balanced source batches and optional unlabeled target images."""
 
     def __init__(self, source_loaders, target_loader=None, steps_per_epoch=None):
         self.source_loaders = source_loaders

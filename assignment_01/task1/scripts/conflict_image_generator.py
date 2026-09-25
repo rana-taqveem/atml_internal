@@ -1,11 +1,4 @@
-"""Generate cue-conflict candidates for visual review.
-
-Production: 25 candidates in each direction, 50 per pair, 250 across five
-pairs. Each pair has one flat folder. Filenames identify direction and
-candidate; content, style, conflict, preview and metadata are saved together.
-Select 20 valid images per direction for 200 total, generating more if needed.
-Pilot mode retains the alpha-comparison workflow and its separate layout.
-"""
+"""Generate cue-conflict candidates for visual review."""
 
 import argparse
 import json
@@ -40,14 +33,7 @@ def save_json(path, data):
 
 def generate_alpha_pilot(dataset, stylizer, groups, output_dir,
                          selected_ids, class_names, candidates_per_direction):
-    """Compare fixed source pairs across strengths without selecting a winner.
-
-    Each candidate folder contains baseline content/style images, four variant
-    folders with independent review metadata, and a labeled comparison PNG.
-    The pilot reuses the production sampling order. Review five candidates
-    per direction, select a direction-level alpha, and record it before
-    production inference. No model predictions participate in this process.
-    """
+    """Generate fixed source pairs at several strengths for manual review."""
     from PIL import Image, ImageDraw
 
     strengths = [0.5, 0.7, 0.85, 1.0]
@@ -130,17 +116,7 @@ def generate_alpha_pilot(dataset, stylizer, groups, output_dir,
 
 
 def main():
-    """Prepare inputs, save a seeded sampling plan, then generate candidates.
-
-    Each direction samples distinct content/style combinations without
-    replacement. Individual source images may occur in several combinations.
-
-    The complete randomized combination order is saved so future generation
-    can extend a direction that has too few visually accepted candidates.
-
-    This script does not resume interrupted runs. Existing run directories
-    cause an error to prevent overwriting images or review decisions.
-    """
+    """Save a seeded sampling plan and generate cue-conflict candidates."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mode", choices=("pilot", "production"), default="production")
     parser.add_argument("--run-version", default=RUN_VERSION)

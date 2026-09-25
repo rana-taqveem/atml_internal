@@ -1,17 +1,4 @@
-"""Uncertainty for the Task 1 evidence: paired tests and confidence intervals.
-
-Every condition is evaluated on the same images, so comparisons are paired:
-an image that is correct in both conditions carries no information about the
-change. McNemar's test uses only the disagreements. The same logic applies to
-two methods scored on one condition, and to each cue conflict compared with
-its own clean content image.
-
-Intervals accompany the tests. Proportions use Wilson intervals; ratios such
-as shape bias and means such as cosine stability use a seeded bootstrap.
-
-These functions take plain arrays so they can be checked on known inputs.
-The report layer supplies the loaded results.
-"""
+"""Paired tests and confidence intervals for Task 1 results."""
 
 import numpy as np
 from scipy import stats
@@ -20,12 +7,7 @@ Z_95 = 1.959963984540054
 
 
 def mcnemar(b, c):
-    """Paired test on discordant counts.
-
-    b = correct before and wrong after, c = wrong before and right after.
-    Exact binomial while the discordant total is small, otherwise the
-    chi-square approximation with continuity correction.
-    """
+    """Run McNemar's test on discordant counts b and c."""
     b, c = int(b), int(c)
     n_discordant = b + c
 

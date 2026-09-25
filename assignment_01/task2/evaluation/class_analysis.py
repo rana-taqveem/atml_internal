@@ -1,10 +1,4 @@
-"""Per-class accuracy, changes against a baseline, and dominant confusions.
-
-Both tasks require this: an aggregate gain can hide class-specific negative
-transfer, where a method lifts the average while destroying one class. The
-comparison is always against the ERM baseline, and it uses target labels, so
-it belongs strictly to the final analysis stage.
-"""
+"""Per-class accuracy, baseline changes, and dominant confusions."""
 
 import numpy as np
 
@@ -42,12 +36,7 @@ def dominant_confusion(labels, predictions, class_index, class_names=None):
 
 
 def compare_to_baseline(baseline, method, class_names=None):
-    """Per-class change between two (labels, predictions) pairs on the same set.
-
-    baseline, method   dicts with "labels" and "predictions"
-    returns            one row per class: both accuracies, the change, and the
-                       method's dominant confusion for that class
-    """
+    """Compare class accuracy and confusions for predictions on the same set."""
     class_names = class_names or task_config.PACS_CLASSES
     if not np.array_equal(baseline["labels"], method["labels"]):
         raise ValueError("Baseline and method must be evaluated on the same images in order.")

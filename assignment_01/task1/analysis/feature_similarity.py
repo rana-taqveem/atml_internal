@@ -1,19 +1,4 @@
-"""Representation stability: cosine similarity between clean and transformed features.
-
-For each backbone and intervention,
-
-    I_T = (1/N) * sum_i  f(x_i)^T f(T(x_i)) / (||f(x_i)|| ||f(T(x_i))||)
-
-Ordinary interventions pair rows by image ID. Cue conflicts pair each conflict
-with the clean features of its content image; one content image may serve
-several conflicts, so repeated clean rows are expected there.
-
-Per-sample similarities are kept next to each decision method's clean and
-transformed predictions. That makes it possible to check whether a prediction
-flip coincides with a large feature change, or a stable prediction hides one.
-CLIP's trained head and zero-shot classifier share one representation, so the
-three backbones give three similarity sets and four sets of decisions.
-"""
+"""Cosine similarity between clean and transformed feature representations."""
 
 import torch
 import torch.nn.functional as F
@@ -35,12 +20,7 @@ def _features(result, name):
 
 
 def pair_rows(baseline_result, transformed_result):
-    """Return (baseline_rows, transformed_rows, sample_ids) index tensors.
-
-    Ordinary conditions: every transformed image ID must appear exactly once
-    in the baseline. Cue conflicts: each conflict's content ID must appear in
-    the baseline; the conflict ID identifies the sample.
-    """
+    """Pair ordinary samples by ID and cue conflicts by content ID."""
     baseline_ids = torch.as_tensor(baseline_result["image_ids"], dtype=torch.long, device="cpu")
 
     if baseline_ids.unique().numel() != baseline_ids.numel():
@@ -132,11 +112,7 @@ def sample_rows(method_name, condition, cosine, sample_ids, baseline_rows, trans
 
 
 def prediction_feature_agreement(rows):
-    """Compare feature change for samples whose prediction did / did not change.
-
-    Input rows share one method and condition. For cue conflicts the "clean"
-    prediction is the prediction on the conflict's content image.
-    """
+    """Compare feature similarity for changed and unchanged predictions."""
     unchanged = torch.tensor([row["cosine"] for row in rows if row["prediction_unchanged"]], dtype=torch.float64)
     changed = torch.tensor([row["cosine"] for row in rows if not row["prediction_unchanged"]], dtype=torch.float64)
 

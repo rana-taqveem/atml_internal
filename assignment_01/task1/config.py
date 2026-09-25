@@ -20,10 +20,7 @@ class TaskConfig:
         self.CUE_CONFLICT_DIR = os.path.join(self.TASK_DIR, 'cue_conflict')
         
         self.MODEL_WEIGHTS_DIR = os.path.join(self.TASK_DIR, 'model_weights')
-        # The three already-trained heads are committed in the repo itself
-        # (results/baseline/weights/), not on Drive. get_head_checkpoint_path
-        # checks MODEL_WEIGHTS_DIR first (for a fresh --mode train run) and
-        # falls back here.
+        # Repository fallback for pretrained classifier heads.
         self.PRETRAINED_HEADS_DIR = str(
             Path(__file__).resolve().parent / 'results' / 'baseline' / 'weights'
         )
@@ -54,10 +51,7 @@ class TaskConfig:
         self.TRANSLATION_DISPLACEMENTS = (8, 16, 32)
 
         ## TRAINED CLASSIFIER HEADS (inside MODEL_WEIGHTS_DIR)
-        # The best-validation heads saved by train_model_head. The filename holds
-        # the validation accuracy that inference re-checks before evaluation.
-        # Note: the copies in checkpoints/*_head.pth reviewed locally on
-        # 2026-09-19 came from an earlier run (95.70/96.90/97.00% val acc).
+        # Filenames record the validation accuracy checked before inference.
         self.HEAD_WEIGHT_FILES = {
             self.RESNET50: "resnet50_97.30.pth",
             self.VIT_B_16: "vit_b_16_97.90.pth",
@@ -65,14 +59,6 @@ class TaskConfig:
         }
 
         self.NUM_CONFLICT_IMAGES = 200
-        # self.CLASS_PAIRS = [
-        #     (0, 1), # e.g., airplane vs bird
-        #     (2, 3), # e.g., car vs cat
-        #     (4, 5), # e.g., deer vs dog
-        #     (6, 7), # e.g., horse vs monkey
-        #     (8, 9)  # e.g., ship vs truck
-        # ]
-
         self.CLASS_PAIRS = [
             (0, 1),  # airplane / bird
             (1, 2),  # bird / car

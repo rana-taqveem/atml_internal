@@ -1,24 +1,4 @@
-"""Per-unknown-class rejection behaviour, for the semantic-similarity question.
-
-The failure table lists a handful of individual mistakes. This answers the
-wider version of the same question: across all sixteen CIFAR-100 classes used
-as unknowns, which ones does the model accept as known, and which CIFAR-10
-label absorbs them.
-
-Two artifacts:
-
-  unknown_class_analysis.csv   one row per unknown class: acceptance rate under
-                               the validation-calibrated threshold, mean
-                               unknownness, the CIFAR-10 class that absorbs the
-                               most of its images, and how many
-  figure_unknown_classes.png   the same result as a figure, near and far shown
-                               together and ordered by acceptance rate
-
-Reads the cached outputs written by extract_outputs.py, so no model is loaded
-and every number matches the tables produced by evaluate_osr.py.
-
-    python -m assignment_01.task4.scripts.unknown_analysis --method vanilla
-"""
+"""Summarize acceptance and dominant predictions by unknown class."""
 
 import argparse
 import collections
@@ -113,6 +93,8 @@ def figure(rows, results_dir, method, score_name):
     axis.grid(alpha=0.25, linewidth=0.6, axis="y")
 
     fig.tight_layout()
+    from assignment_01.figure_style import print_ready
+    print_ready(fig, min_height_in=2.8)
     path = os.path.join(results_dir, "figure_unknown_classes.png")
     fig.savefig(path, dpi=200, bbox_inches="tight")
     fig.savefig(path.replace(".png", ".pdf"), bbox_inches="tight")

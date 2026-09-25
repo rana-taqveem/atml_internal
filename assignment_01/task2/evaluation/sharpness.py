@@ -1,20 +1,4 @@
-"""Local sharpness proxy, shared across models.
-
-    delta_sharp = L_val(theta + eps) - L_val(theta),
-    eps = radius * grad L_val(theta) / ||grad L_val(theta)||
-
-Take one normalized step uphill and measure how much the loss rises. A larger
-increase means the solution sits in a sharper region under this specific
-perturbation.
-
-The assignment is careful about what this shows, and the report should be too:
-it is a standardized local diagnostic under one perturbation of one radius on
-one fixed batch. It does not establish that a model's whole loss landscape is
-flatter, and it does not prove that domain shift was solved.
-
-Every model must be measured on the same fixed batch, drawn with seed 6304,
-with the model in evaluation mode.
-"""
+"""Measure a shared local sharpness proxy on a fixed validation batch."""
 
 import numpy as np
 import torch
@@ -66,9 +50,7 @@ def sharpness_proxy(model, images, labels, radius=None, criterion=None):
     parameters = [p for p in model.parameters() if p.grad is not None]
     grad_norm = torch.norm(torch.stack([p.grad.norm(p=2) for p in parameters]), p=2)
 
-    # Snapshot and copy back rather than add/subtract: add_ then sub_ is not
-    # exactly reversible in floating point, and this diagnostic must leave
-    # every model bit-identical so repeated measurements stay comparable.
+    # Copy back exactly; add/subtract is not reversible in floating point.
     original = [p.detach().clone() for p in parameters]
 
     with torch.no_grad():

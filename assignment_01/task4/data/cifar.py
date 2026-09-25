@@ -1,22 +1,4 @@
-"""CIFAR-10 knowns and the fixed CIFAR-100 unknown groups.
-
-Three things live here:
-
-  * the stratified 90/10 split of the CIFAR-10 training partition (seed 6304),
-    written to disk as indices so every model and every score sees exactly the
-    same examples;
-  * the three CIFAR-10 loaders (train / validation / test);
-  * the two unknown loaders, built from the fixed CIFAR-100 *test* classes.
-
-Two rules from the assignment shape this file. CIFAR-100 training images may
-never be used, so only the test partition is read. And unknowns are evaluation
-data, so nothing here is called by train.py - only extract_outputs.py and
-evaluate_osr.py touch the unknown loaders.
-
-Augmentation differs between Vanilla and GCSC by exactly one transform
-(RandAugment), inserted after the crop and flip and before tensor conversion
-and normalization, which is where the assignment specifies it.
-"""
+"""CIFAR-10 splits and evaluation-only CIFAR-100 unknown loaders."""
 
 import json
 import os
@@ -35,12 +17,7 @@ def _normalize():
 
 
 def train_transform(randaugment=False):
-    """Crop and flip, optionally RandAugment, then tensor + normalize.
-
-    randaugment=False is the Vanilla recipe; True is GCSC. That single
-    difference is the whole controlled comparison, so the two share this
-    function rather than duplicating the pipeline.
-    """
+    """Build the Vanilla or RandAugment training transform."""
     steps = [
         transforms.RandomCrop(task_config.CROP_SIZE, padding=task_config.CROP_PADDING),
         transforms.RandomHorizontalFlip(),
@@ -64,13 +41,7 @@ def _split_path():
 
 
 def make_splits(root=None, seed=None, val_fraction=None):
-    """Stratified 90/10 split of the CIFAR-10 train partition, cached to disk.
-
-    Stratified means each of the ten classes keeps the same 90/10 proportion,
-    so the validation split is class-balanced. The indices are saved and
-    reused, because the rejection threshold is calibrated on this exact
-    validation set and every model must share it.
-    """
+    """Create or load the stratified CIFAR-10 train/validation split."""
     root = root or task_config.TASK_DATASET_DIR
     seed = task_config.SEED if seed is None else seed
     val_fraction = task_config.TRAIN_VAL_SPLIT if val_fraction is None else val_fraction
@@ -106,13 +77,7 @@ def make_splits(root=None, seed=None, val_fraction=None):
 
 def get_cifar10_loaders(root=None, batch_size=None, num_workers=2, randaugment=False,
                         train_eval_transform=False):
-    """Train / validation / test loaders for the ten known classes.
-
-    train_eval_transform=True returns the training split with no augmentation,
-    which is what the Mahalanobis score needs: the assignment requires class
-    means and the shared covariance to be estimated from unaugmented training
-    features.
-    """
+    """Return CIFAR-10 train, validation, and test loaders."""
     root = root or task_config.TASK_DATASET_DIR
     batch_size = batch_size or task_config.BATCH_SIZE
     train_indices, val_indices = make_splits(root=root)
@@ -139,13 +104,7 @@ def get_cifar10_loaders(root=None, batch_size=None, num_workers=2, randaugment=F
 
 
 class _UnknownSubset(torch.utils.data.Dataset):
-    """CIFAR-100 test images from selected fine classes, relabelled.
-
-    Every unknown carries label -1: they have no known class, and a negative
-    label makes it impossible to score them as if they did by accident. The
-    original fine-class name is returned alongside so the failure analysis can
-    report which unknown class was accepted.
-    """
+    """Selected CIFAR-100 test images with label -1 and original class names."""
 
     def __init__(self, dataset, indices, class_names):
         self.dataset = dataset
@@ -161,12 +120,7 @@ class _UnknownSubset(torch.utils.data.Dataset):
 
 
 def get_unknown_loaders(root=None, batch_size=None, num_workers=2):
-    """Near and far unknown loaders, 800 images each, evaluation only.
-
-    Called by extract_outputs.py and evaluate_osr.py and by nothing else: no
-    CIFAR-100 image may reach training, checkpoint selection, score design or
-    threshold selection.
-    """
+    """Return evaluation-only near and far unknown loaders."""
     root = root or task_config.TASK_DATASET_DIR
     batch_size = batch_size or task_config.BATCH_SIZE
 

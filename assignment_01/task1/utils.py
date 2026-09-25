@@ -5,24 +5,6 @@ from pathlib import Path
 import torch
 from torch.utils.data import DataLoader
 
-# def get_data_dir(task_name: str):
-    
-#     if os.path.exists('/content/drive/MyDrive'):
-#         print("Detected an already mounted Google Drive workspace.")
-#         base_dir = f"/content/drive/MyDrive/assignment_01/{task_name}"
-#     else:
-#         try:
-#             from google.colab import drive
-#             print("Google Drive not detected. Attempting to mount...")
-#             drive.mount('/content/drive', force_remount=True)
-#             base_dir = f"/content/drive/MyDrive/assignment_01/{task_name}"
-#         except Exception as e:
-#             print("Google Drive mounting failed or non-interactive. Using local storage path.")
-#             base_dir = str(Path(__file__).resolve().parent / "local_runs" / task_name)
-        
-#     os.makedirs(base_dir, exist_ok=True)
-#     return base_dir
-
 def get_data_dir(task_name: str):
     # Colab sets this environment variable in its runtime.
     running_in_colab = bool(os.environ.get("COLAB_RELEASE_TAG"))

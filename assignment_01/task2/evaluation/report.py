@@ -1,12 +1,4 @@
-"""Task 2 tables and figures, built from the saved result and history JSONs.
-
-Reads only the files written by scripts/main.py, so it needs no model, no GPU
-and no PACS copy. Diagnostics that require the checkpoints (domain
-separability, per-class target analysis) live in scripts/evaluate_diagnostics.py
-and write their own JSON, which this module merges in when present.
-
-    python -m assignment_01.task2.evaluation.report <results_dir> [--out DIR]
-"""
+"""Build Task 2 tables and figures from saved results and histories."""
 
 import argparse
 import csv
@@ -16,7 +8,15 @@ from pathlib import Path
 import numpy as np
 from matplotlib import pyplot as plt
 
+from assignment_01.figure_style import print_ready
+
 TEXT_WIDTH = 5.5
+# Printed width (inches) of figures the report shows narrower than the text block.
+PRINT_WIDTH = {
+    "task2_fig4_per_class": 4.4,
+    "task2_fig5_separability": 3.0,
+    "task2_fig3_alignment_study": 4.4,
+}
 
 # Order used in every table and figure.
 METHOD_ORDER = ["erm", "dan", "dann", "cdan"]
@@ -70,6 +70,7 @@ def tidy(ax):
 
 
 def save(fig, out_dir, name):
+    print_ready(fig, width_in=PRINT_WIDTH.get(name, TEXT_WIDTH))
     for suffix in ("pdf", "png"):
         fig.savefig(Path(out_dir) / f"{name}.{suffix}")
     plt.close(fig)
@@ -138,18 +139,7 @@ def training_health_rows(runs):
 
 
 def figure_erm_failures(results_dir, out_dir, baseline="erm"):
-    """Where the source-only model's target errors actually come from.
-
-    Required evidence for the first research question: the aggregate domain gap
-    says how much is lost, not which classes lose it. Two panels:
-
-      (a) per-class accuracy on the target, with support annotated, so a low
-          score on a small class is not mistaken for a large failure
-      (b) error counts ordered largest first with a cumulative share line,
-          which is what makes "three classes account for most of the errors"
-          a statement rather than an impression. Each bar is annotated with
-          the class that absorbs those errors.
-    """
+    """Plot ERM target accuracy and error contribution by class."""
     path = Path(results_dir) / "per_class_target.csv"
     if not path.is_file():
         print("  (no per_class_target.csv: skipping ERM failure figure)")
@@ -358,20 +348,14 @@ def figure_alignment_study(runs, diagnostics, out_dir):
 
 
 def figure_per_class(results_dir, out_dir, baseline="erm", order=None):
-    """Per-class target accuracy change against ERM, one bar group per method.
-
-    Required evidence: an aggregate gain can hide class-specific negative
-    transfer, so the per-class view has to be shown rather than summarized.
-    """
+    """Plot per-class target accuracy changes against ERM."""
     path = Path(results_dir) / "per_class_target.csv"
     if not path.is_file():
         print("  (no per_class_target.csv yet: skipping per-class figure)")
         return None
 
     with path.open(encoding="utf-8") as file:
-        # Strip whitespace from headers and values: a results CSV that has been
-        # opened and column-aligned in an editor still holds the right numbers,
-        # and should not break the figure.
+        # Accept column-aligned CSVs by stripping surrounding whitespace.
         rows = [{(k or "").strip(): (v.strip() if isinstance(v, str) else v)
                  for k, v in record.items()}
                 for record in csv.DictReader(file)]

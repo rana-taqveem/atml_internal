@@ -1,15 +1,4 @@
-"""Task 3 training: ERM (reused), DAN-DG and SAM.
-
-This script never loads Sketch. Source loaders, checkpoint selection and every
-diagnostic here use the three observed source domains only; Sketch is touched
-solely by evaluate_sketch.py, after all configurations are frozen.
-
-Almost everything is reused from Task 2: the PACS loaders and splits, the
-model, the epoch loop, early stopping, checkpointing and the run manifest.
-Task 3 adds only the pairwise-source MMD penalty and the SAM update.
-
-    python -m assignment_01.task3.scripts.train --method dan_dg
-"""
+"""Train Task 3 ERM, DAN-DG, or SAM without loading Sketch."""
 
 import argparse
 import json
@@ -31,11 +20,7 @@ from assignment_01.task3.config import task_config
 
 
 def source_validation_report(model, validation_loaders, criterion):
-    """Per-domain, mean and worst-domain source validation performance.
-
-    The assignment asks for the worst source domain explicitly: a strong mean
-    can hide one neglected environment.
-    """
+    """Return per-domain, mean, and worst-domain validation performance."""
     per_domain = {}
     for domain, loader in validation_loaders.items():
         loss, accuracy, macro_f1 = evaluate(model, loader, criterion)

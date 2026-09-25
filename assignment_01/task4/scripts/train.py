@@ -1,18 +1,4 @@
-"""Task 4 training: Vanilla, GCSC and PROSER.
-
-No CIFAR-100 image is loaded here. Checkpoints are selected on CIFAR-10
-validation accuracy alone, which is the rule the assignment requires and the
-reason the rejection threshold can later be calibrated without touching
-unknown data.
-
-    python -m assignment_01.task4.scripts.train --method vanilla
-    python -m assignment_01.task4.scripts.train --method gcsc
-    python -m assignment_01.task4.scripts.train --method proser
-
-Vanilla and GCSC differ by exactly one transform (RandAugment) and share
-everything else: initialization, optimizer, schedule, batch size, epochs, seed
-and selection rule. PROSER starts from the selected Vanilla checkpoint.
-"""
+"""Train Task 4 Vanilla, GCSC, or PROSER models using CIFAR-10 only."""
 
 import argparse
 import json
@@ -42,11 +28,7 @@ def set_seed(seed=None):
 
 @torch.no_grad()
 def evaluate(model, loader, criterion=None, num_known=None):
-    """Mean loss and accuracy on a labelled loader.
-
-    num_known restricts the argmax to the known columns, which PROSER needs so
-    that closed-set accuracy never depends on the dummy units.
-    """
+    """Return mean loss and known-class accuracy."""
     model.eval()
     criterion = criterion or nn.CrossEntropyLoss()
     total_loss, correct, seen = 0.0, 0, 0

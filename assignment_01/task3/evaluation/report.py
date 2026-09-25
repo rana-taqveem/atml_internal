@@ -1,24 +1,4 @@
-"""Task 3 report artifacts: the figures the assignment asks for.
-
-Required evidence covered here:
-
-  fig1  training curves - classification loss and, for DAN-DG, the pairwise
-        source MMD penalty, plus source validation macro-F1 per epoch
-  fig2  method comparison - mean-source, worst-source and Sketch macro-F1
-        side by side, which is where the source/target disagreement shows
-  fig3  controlled study - lambda_DG against source performance, source
-        separability and Sketch performance on one axis
-  fig4  per-class Sketch accuracy change against ERM
-
-Reads only the saved result files, so nothing is recomputed and every number
-traces back to a run:
-
-    *_history.json          per-epoch curves, written by train.py
-    final_results.json      aggregate diagnostics, written by evaluate_sketch.py
-    per_class_sketch.csv    class-level changes, written by evaluate_sketch.py
-
-    python -m assignment_01.task3.evaluation.report assignment_01/task3/results
-"""
+"""Generate Task 3 report tables and figures from saved results."""
 
 import argparse
 import csv
@@ -29,6 +9,11 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+
+from assignment_01.figure_style import TEXT_WIDTH_IN, print_ready
+
+# Printed width (inches) of figures the report shows narrower than the text block.
+PRINT_WIDTH = {"task3_fig3_alignment_study": 3.6}
 
 # Main comparison first, then the strength study.
 METHOD_ORDER = ["erm", "dan_dg", "sam", "dan_dg_lambda0.1", "dan_dg_lambda10"]
@@ -49,11 +34,7 @@ COLORS = {
 
 
 def read_csv_stripped(path):
-    """CSV rows with whitespace trimmed from headers and values.
-
-    A results file that has been opened and column-aligned in an editor still
-    holds the right numbers and should not break the figures.
-    """
+    """Read CSV rows with whitespace trimmed from headers and values."""
     with Path(path).open(encoding="utf-8") as file:
         return [{(k or "").strip(): (v.strip() if isinstance(v, str) else v)
                  for k, v in record.items()}
@@ -92,6 +73,7 @@ def tidy(axis):
 def save(figure, out_dir, name):
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
+    print_ready(figure, width_in=PRINT_WIDTH.get(name, TEXT_WIDTH_IN))
     for suffix in ("png", "pdf"):
         figure.savefig(out_dir / f"{name}.{suffix}", dpi=200, bbox_inches="tight")
     plt.close(figure)
@@ -214,20 +196,7 @@ def figure_alignment_study(final, out_dir):
 
 
 def figure_diagnostics(final, out_dir):
-    """The two source-side diagnostics against Sketch performance.
-
-    Required evidence: source-domain separability and the shared sharpness
-    proxy for every model. Both are drawn against Sketch macro-F1 rather than
-    on their own, because the question is not what the diagnostics measure but
-    whether either predicts transfer.
-
-      (a) separability. Chance is 33.3% for a three-class probe over the
-          observed source domains, so lower means the domains are harder to
-          tell apart.
-      (b) sharpness proxy, the loss increase after one normalised
-          gradient-ascent step of radius 0.05. Lower means the solution is
-          locally more stable.
-    """
+    """Plot source separability and sharpness against Sketch performance."""
     names = ordered(final)
     if not names:
         return
@@ -266,12 +235,7 @@ def figure_diagnostics(final, out_dir):
 
 
 def figure_target_access(final, task2_results_dir, out_dir):
-    """Target-aware DAN (Task 2) against target-free DAN-DG (Task 3).
-
-    Both are measured against the same Source-only ERM checkpoint, which is
-    what makes the comparison meaningful: the only difference between the two
-    alignment runs is whether unlabelled Sketch images were available.
-    """
+    """Compare target-aware DAN with target-free DAN-DG."""
     diagnostics_path = Path(task2_results_dir) / "diagnostics.json"
     if not diagnostics_path.is_file():
         print("  (no Task 2 diagnostics.json: skipping target-access figure)")
@@ -357,13 +321,7 @@ def figure_per_class(results_dir, out_dir, baseline="erm"):
 
 
 def figure_per_class_vs_task2(results_dir, task2_results_dir, out_dir):
-    """Per-class Sketch change for target-aware DAN against target-free DAN-DG.
-
-    Required evidence asks for the per-class comparison against the
-    corresponding Task 2 result. Both methods use the same discrepancy measure
-    and the same ERM baseline, so a class where they disagree isolates what
-    access to unlabelled target data actually changed.
-    """
+    """Compare per-class Sketch changes for DAN and DAN-DG."""
     task3_path = None
     for name in ("per_class_sketch.csv", "task3_per_class_sketch.csv"):
         candidate = Path(results_dir) / name

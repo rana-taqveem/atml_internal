@@ -12,10 +12,7 @@ def get_data_dir(task_name: str):
     running_in_colab = bool(os.environ.get("COLAB_RELEASE_TAG"))
 
     if is_running_in_kaggle():
-        # /kaggle/working is the only writable location that survives to the
-        # session's output; anything written elsewhere is lost when the kernel
-        # stops. Checkpoints and caches are large, so they go here rather than
-        # inside the cloned repository.
+        # Keep Kaggle outputs in its persistent writable directory.
         base_dir = Path("/kaggle/working") / "atml" / task_name
 
     elif running_in_colab:

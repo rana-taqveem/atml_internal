@@ -1,16 +1,4 @@
-"""Prepare PACS, following the same pattern as Task 1's prepare_stl10.
-
-prepare_stl10 could download and verify automatically because torchvision
-ships STL-10's URL, MD5 and file list. PACS has no torchvision dataset class,
-so those three constants have to be supplied here: set PACS_URL (and
-optionally PACS_MD5 and PACS_ARCHIVE_NAME) once and prepare_pacs behaves
-exactly like prepare_stl10 -- reuse valid data, otherwise stage the download
-on local disk, verify it, copy it to the destination and extract.
-
-With PACS_URL left as None the download step is skipped and the archive is
-expected to be on Drive already, which is the flow used for the Task 1
-cue-conflict set.
-"""
+"""Download, validate, and extract the PACS dataset when needed."""
 
 import shutil
 import tempfile
@@ -20,8 +8,7 @@ from torchvision.datasets.utils import check_integrity, download_url
 
 from assignment_01.task2.config import task_config
 
-# Fill these in to enable automatic download. No default is provided because
-# PACS has no stable official download endpoint; set the URL you were given.
+# PACS has no stable official download endpoint.
 PACS_URL = None
 PACS_MD5 = None
 PACS_ARCHIVE_NAME = "pacs.zip"
@@ -40,12 +27,7 @@ ALL_DOMAINS = tuple(task_config.SOURCE_DOMAINS) + (task_config.TARGET_DOMAIN,)
 
 
 def find_domain_root(root):
-    """Return the directory that directly contains the PACS domain folders.
-
-    Distributions nest the data differently (``pacs_data/``, ``kfold/``,
-    ``PACS/``), so search for a directory holding at least two recognised
-    domain names.
-    """
+    """Find the directory that directly contains the PACS domains."""
     root = Path(root)
     if not root.is_dir():
         return None
@@ -72,12 +54,7 @@ def resolve_domain_dir(domain_root, domain):
 
 
 def _extracted_files_valid(root, verbose=False):
-    """True when every domain folder holds every class folder with images.
-
-    The counterpart of Task 1's _extracted_files_valid, which checked STL-10's
-    published file list and checksums. PACS has no published checksums, so
-    this checks structure and reports the image counts instead.
-    """
+    """Check that every domain contains every class and image files."""
     domain_root = find_domain_root(root)
     if domain_root is None:
         return False
@@ -118,17 +95,7 @@ def _find_archive(target_dir, name=None):
 
 def prepare_pacs_from_huggingface(root=None, staging_root=None, repo_id="flwrlabs/pacs",
                                   split="train", make_archive=True):
-    """Download PACS from the Hugging Face hub and write the folder layout.
-
-    The hub copy stores one table of (image, domain, label) rather than the
-    per-domain folders the rest of this task expects, so images are written
-    out as <domain>/<class>/<index>.jpg on local disk. When make_archive is
-    set, the result is zipped back to the dataset directory on Drive, so the
-    next session takes the fast archive path instead of downloading again.
-
-    Class and domain names come from the dataset itself, not from the config,
-    so a mismatch surfaces as a clear error rather than mislabelled data.
-    """
+    """Download PACS from Hugging Face and create its domain/class layout."""
     from datasets import load_dataset
 
     root = Path(root or task_config.TASK_DATASET_DIR).expanduser().resolve()

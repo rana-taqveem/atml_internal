@@ -1,22 +1,4 @@
-"""Cache penultimate features and logits for every split, once per model.
-
-Every score must see exactly the same examples and the same model outputs, so
-the outputs are extracted once and written to a .npz cache that the scoring
-step reads. That also makes the comparison between MSP, MLS, Energy and
-Mahalanobis a pure difference in score definition rather than in data handling.
-
-This is the first script that loads CIFAR-100, which is legitimate: the model
-is already trained and its checkpoint already selected. Nothing here writes to
-a checkpoint or influences a training decision.
-
-    python -m assignment_01.task4.scripts.extract_outputs --method vanilla
-
-Cached per model:
-    train_features/train_labels   unaugmented, for the Mahalanobis fit
-    val_features/val_logits       for threshold calibration
-    test_features/test_logits     known-class evaluation (CSA + acceptance)
-    near_*/far_*                  the two unknown groups, plus class names
-"""
+"""Cache features and logits for consistent post-training OSR evaluation."""
 
 import argparse
 import os
@@ -35,12 +17,7 @@ def cache_path(method):
 
 
 def load_trained_model(method):
-    """Rebuild the model and restore its selected checkpoint.
-
-    PROSER is wrapped so its dummy units are restored too; its logits are
-    therefore [N, 10 + C_dummy] while Vanilla and GCSC give [N, 10]. The
-    scoring step slices the known columns where it needs them.
-    """
+    """Rebuild a model and restore its selected checkpoint."""
     path = task_config.checkpoint_path(method)
     if not os.path.isfile(path):
         raise SystemExit(f"No checkpoint for '{method}' at {path}. Train it first.")

@@ -1,23 +1,4 @@
-"""Task 4 evaluation: both required tables, the figure data and the failures.
-
-Reads the cached outputs written by extract_outputs.py, so every score is
-computed from identical model outputs.
-
-Produces:
-
-  Table 1  MSP / MLS / Energy / Mahalanobis on the frozen Vanilla model,
-           with near, far and all-unknown AUROC and the validation-calibrated
-           rejection numbers.
-  Table 2  Vanilla / GCSC / PROSER compared with MLS as the common score,
-           plus a PROSER row using its placeholder-based detection score, and
-           CSA for each.
-  Failures at least three near and three far unknowns that were wrongly
-           accepted, with unknown class, predicted CIFAR-10 class, score and
-           threshold.
-  Figure   per-score arrays for the score-distribution / ROC panel.
-
-    python -m assignment_01.task4.scripts.evaluate_osr
-"""
+"""Build Task 4 OSR tables, figure data, and failure records from cached outputs."""
 
 import argparse
 import csv
@@ -105,14 +86,7 @@ def build_table2(caches):
 
 
 def find_failures(cache, method, score_name="mls", per_group=5):
-    """Unknowns wrongly accepted under the calibrated threshold.
-
-    The assignment asks for at least three near and three far examples, with
-    the unknown class, the predicted CIFAR-10 class, the score and the
-    threshold, so that plausible confusions can be told apart from surprising
-    ones. The most confidently accepted are reported first - those are the
-    informative failures.
-    """
+    """Return the most confidently accepted unknowns per group."""
     by_score = scores_for(cache, method, [score_name])
     from assignment_01.task4.evaluation.metrics import calibrate_threshold
     threshold = calibrate_threshold(by_score["val"][score_name],

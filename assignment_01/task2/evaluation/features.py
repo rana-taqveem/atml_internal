@@ -1,8 +1,4 @@
-"""Collect features and predictions from a frozen backbone.
-
-Shared by Task 2 and Task 3. Every diagnostic downstream (domain separability,
-per-class analysis) works from these arrays rather than re-running the model.
-"""
+"""Collect features and predictions from a frozen backbone."""
 
 import numpy as np
 import torch
@@ -12,14 +8,7 @@ from assignment_01.task2.scripts.main import DEVICE
 
 @torch.no_grad()
 def collect_features(model, loaders, max_per_group=None, seed=6304):
-    """Run the frozen backbone over one or more loaders.
-
-    loaders          dict of group name -> DataLoader (a domain, usually)
-    max_per_group    subsample each group to this many examples, seeded, so
-                     groups can be balanced as the assignment requires
-    returns          dict with features [N, 512], labels [N], groups [N],
-                     predictions [N], and the group names in order
-    """
+    """Run the backbone and optionally balance samples across loader groups."""
     model.eval()
     names = list(loaders)
     features, labels, groups, predictions = [], [], [], []

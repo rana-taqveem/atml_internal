@@ -1,17 +1,4 @@
-"""Task 2 training and evaluation scaffolding (PACS unsupervised domain adaptation).
-
-Reused from the Task 1 pipeline: the epoch loop, the evaluation loop, early
-stopping, seeding, checkpoint hashing and the run manifest. Adapted for Task 2:
-
-  * the whole network is fine-tuned, not just a linear head on frozen features;
-  * BatchNorm running statistics stay frozen at their pretrained ImageNet values
-    while the affine parameters remain trainable (assignment requirement);
-  * checkpoints are selected on mean macro-F1 across the three source-domain
-    validation splits, not on accuracy.
-
-Method-specific objectives (DAN's MMD penalty, DANN's gradient reversal) plug in
-through `extra_loss_fn`; the domain-balanced loaders they need are not built here.
-"""
+"""Train and evaluate PACS unsupervised domain-adaptation methods."""
 
 import argparse
 import hashlib
@@ -42,15 +29,7 @@ def set_seed(seed=task_config.SEED):
 
 
 def freeze_batchnorm_statistics(model):
-    """Keep BatchNorm running mean/variance fixed while training.
-
-    Source and target images come from different visual distributions, so
-    updating the running statistics on adaptation batches would make them
-    depend on the source-target mixture and act as an implicit extra form of
-    adaptation. Call this after model.train() on every epoch: it places only
-    the BatchNorm modules in evaluation mode. The scale and bias parameters
-    stay trainable.
-    """
+    """Freeze BatchNorm running statistics while keeping affine parameters trainable."""
     for module in model.modules():
         if isinstance(module, nn.modules.batchnorm._BatchNorm):
             module.eval()
@@ -62,21 +41,7 @@ def _all_parameters(optimizer):
 
 def train_one_epoch(model, loader, criterion, optimizer, extra_loss_fn=None, scaler=None,
                     epoch=0, num_epochs=1, grad_clip=None):
-    """One pass over a labelled loader.
-
-    extra_loss_fn(model, batch, source_features, progress) may return an extra
-    scalar loss (an MMD penalty, a domain-adversarial loss) added to the
-    classification loss before the backward pass. It receives the source
-    features already computed here, so the backbone runs once per batch, and
-    `progress`, the fraction of training completed, which the DANN schedule
-    needs.
-
-    scaler enables mixed precision on CUDA, which roughly halves the time per
-    epoch for this model with no change to the objective.
-
-    Returns a dict with the mean total, classification and alignment losses
-    and the training accuracy, so the two loss curves can be reported apart.
-    """
+    """Run one epoch with an optional adaptation loss and mixed precision."""
     model.train()
     freeze_batchnorm_statistics(model)
 
@@ -209,15 +174,7 @@ def train_model(model, method_name, train_loader, validation_loaders, criterion,
                 num_epochs=None, early_stopping_patience=None, extra_loss_fn=None, use_amp=None,
                 grad_clip=None, epoch_fn=None, weights_dir=None, results_dir=None):
     
-    """Fine-tune with early stopping on mean source-validation macro-F1.
-
-    The best checkpoint and the history are written as soon as they improve,
-    so a disconnected Colab session still leaves a usable model on Drive.
-    Returns the per-epoch history; the model is left holding the best weights.
-
-    weights_dir/results_dir default to Task 2's directories. Task 3 passes its
-    own, so its runs are written under task3/ rather than beside Task 2's.
-    """
+    """Train with early stopping and restore the best source-validation checkpoint."""
     num_epochs = num_epochs or task_config.NUM_EPOCHS
     early_stopping_patience = early_stopping_patience or task_config.EARLY_STOPPING_PATIENCE
     grad_clip = task_config.GRAD_CLIP_NORM if grad_clip is None else grad_clip
@@ -387,17 +344,7 @@ def evaluate_final(model, validation_loaders, target_loader, criterion):
 def run_method(method="erm", num_workers=2, num_epochs=None, use_amp=None,
                data_root=None, download_hf=False, lambda_mmd=None, max_alpha=None,
                grad_clip=None):
-    """Train one Task 2 method and evaluate it once on the target.
-
-    All methods share the loaders, the model, the optimizer settings and the
-    checkpoint-selection rule; they differ only in the extra loss term and in
-    whether target images are drawn during training:
-
-      erm   source-only, no target data in the objective (the control)
-      dan   + lambda_MMD * MMD^2 between source and target features
-      dann  + domain discriminator on the feature, via gradient reversal
-      cdan  + domain discriminator on vec(feature (x) class probabilities)
-    """
+    """Train one Task 2 method and evaluate its selected checkpoint."""
     from assignment_01.task2.data.pacs import (DomainBalancedBatches, get_source_loaders, get_target_loaders,)
     from assignment_01.task2.models.backbones import build_model
     from assignment_01.task2.data.download import prepare_pacs

@@ -1,15 +1,4 @@
-"""End-to-end synthetic smoke test of Task 1 inference and reporting.
-
-Runs the real start_inference() and report.run_all() code paths, but with
-  * a fake STL-10 (deterministic random 96x96 images, label = index % 10),
-  * tiny stub backbones with the real feature sizes (2048 / 768 / 512),
-  * the real finalized cue-conflict folder and the real 500 selected test IDs.
-
-It verifies wiring, file naming, ID alignment and every report section; the
-numbers it produces are meaningless. No downloads are needed.
-
-    python -m assignment_01.task1.tests.smoke_test_pipeline [--work-dir DIR]
-"""
+"""End-to-end synthetic smoke test of Task 1 inference and reporting."""
 
 import argparse
 import json

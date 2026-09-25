@@ -1,15 +1,4 @@
-"""Joint t-SNE projections of clean and transformed features, one fit per backbone.
-
-For each backbone, the clean subset and every selected intervention are
-stacked and projected together, so all conditions share one coordinate
-system. The panels of one backbone reuse those coordinates; coordinates are
-not comparable across backbones because each backbone has its own fit.
-
-Preprocessing: L2-normalize each feature (cosine geometry, and ResNet's
-larger feature norms do not dominate), PCA to 50 dimensions, then t-SNE.
-Points are colored by ground-truth class; cue conflicts use their content
-(shape) class. Marker style separates clean from transformed examples.
-"""
+"""Joint t-SNE projections of clean and transformed backbone features."""
 
 import json
 from pathlib import Path
@@ -70,11 +59,7 @@ def _sample_ids(result):
 
 
 def fit_joint_projection(baseline_result, transformed_results, seed=task_config.SEED):
-    """Fit one t-SNE on clean + all transformed features of a single backbone.
-
-    transformed_results maps condition -> result. Returns a list of point
-    records (condition, sample_id, label, x, y) and the settings used.
-    """
+    """Fit one joint t-SNE for a backbone's clean and transformed features."""
     blocks = [("baseline", baseline_result)] + list(transformed_results.items())
 
     features, records = [], []

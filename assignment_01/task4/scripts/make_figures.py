@@ -1,21 +1,4 @@
-"""The required Task 4 figure: score distributions and ROC for three scores.
-
-The assignment asks for one compact multi-panel figure covering MSP, MLS and
-Mahalanobis on the frozen Vanilla model. Two rows are drawn because they
-answer different questions:
-
-  top     score distributions for known test, near unknown and far unknown,
-          with the validation-calibrated threshold marked. This shows where
-          the operating point actually falls and how much the three
-          populations overlap.
-  bottom  ROC curves for known-vs-near and known-vs-far, with AUROC in the
-          legend. This is the threshold-free view.
-
-Reads figure_scores.json and osr_results.json, both written by evaluate_osr.py,
-so no model is loaded and nothing is recomputed.
-
-    python -m assignment_01.task4.scripts.make_figures
-"""
+"""Create Task 4 score-distribution, ROC, and model-comparison figures."""
 
 import argparse
 import json
@@ -23,6 +6,7 @@ import os
 
 import numpy as np
 
+from assignment_01.figure_style import print_ready
 from assignment_01.task4.config import task_config
 from assignment_01.task4.evaluation.metrics import auroc
 
@@ -50,14 +34,7 @@ def roc_curve(known_scores, unknown_scores):
 
 
 def model_comparison_figure(results_dir, dpi=200):
-    """Closed-set accuracy against open-set performance, per model.
-
-    The assignment warns that better closed-set accuracy need not improve
-    rejection, so the two are drawn on the same figure rather than in separate
-    tables. Left: CSA and the three AUROCs as grouped bars. Right: near-unknown
-    against far-unknown AUROC, which shows how differently the same model
-    handles the two kinds of novelty.
-    """
+    """Plot closed-set accuracy against open-set performance."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -118,6 +95,7 @@ def model_comparison_figure(results_dir, dpi=200):
 
     figure.tight_layout()
     output = os.path.join(results_dir, "figure_model_comparison.png")
+    print_ready(figure)
     figure.savefig(output, dpi=dpi, bbox_inches="tight")
     figure.savefig(output.replace(".png", ".pdf"), bbox_inches="tight")
     plt.close(figure)
@@ -199,9 +177,11 @@ def run(results_dir=None, output_path=None, dpi=200):
 
     figure.suptitle("Post-hoc novelty scores on the frozen Vanilla model", fontsize=11)
     figure.tight_layout(rect=(0, 0, 1, 0.97))
+    print_ready(figure, min_height_in=4.2)
 
     output_path = output_path or os.path.join(results_dir, "figure_osr_scores.png")
     figure.savefig(output_path, dpi=dpi, bbox_inches="tight")
+    figure.savefig(output_path.replace(".png", ".pdf"), bbox_inches="tight")
     plt.close(figure)
     print(f"Saved {output_path}")
     return output_path

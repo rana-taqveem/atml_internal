@@ -1,14 +1,6 @@
-"""Task 4 settings: open-set recognition on CIFAR-10 with CIFAR-100 unknowns.
+"""Task 4 open-set recognition settings.
 
-Every value here is fixed by the assignment. Task 4 shares almost nothing with
-Tasks 2 and 3: a different dataset, a CIFAR-specific ResNet-18 and SGD with a
-cosine schedule rather than AdamW, so the protocol is restated in full instead
-of imported.
-
-The one rule that shapes the whole design: CIFAR-100 is evaluation-only. No
-unknown example may influence training, checkpoint selection, score definition
-or the rejection threshold. The threshold therefore comes from the CIFAR-10
-validation split, and unknown data is loaded only by evaluate_osr.py.
+CIFAR-100 is evaluation-only; thresholds are calibrated on CIFAR-10 validation.
 """
 
 import os
@@ -26,7 +18,6 @@ class Task4Config:
         self.TASK_DATASET_DIR = os.path.join(self.TASK_DIR, "dataset")
         self.TASK_RESULTS_DIR = os.path.join(self.TASK_DIR, "results")
         self.MODEL_WEIGHTS_DIR = os.path.join(self.TASK_DIR, "model_weights")
-        # Cached features/logits only - never raw images.
         self.CACHE_DIR = os.path.join(self.TASK_DIR, "cache")
 
         ## PROTOCOL
@@ -56,15 +47,13 @@ class Task4Config:
         self.PROSER_BETA = 1.0                    # classifier-placeholder loss weight
         self.PROSER_GAMMA = 0.1                   # data-placeholder loss weight
         self.PROSER_MIXUP_ALPHA = 2.0             # lambda ~ Beta(2, 2)
-        # Manifold mixup is applied after layer2 and before layer3.
         self.PROSER_MIXUP_LAYER = "layer2"
 
         ## SCORES
         self.MAHALANOBIS_EPSILON = 1e-6           # added to every diagonal entry
 
         ## EVALUATION
-        # Threshold = this percentile of unknownness on CIFAR-10 validation,
-        # so the rule aims to accept 95% of known examples.
+        # Calibrated to accept about 95% of known validation examples.
         self.ACCEPT_PERCENTILE = 95.0
 
         ## DATA: CIFAR-10 knowns, CIFAR-100 unknowns (evaluation only)
@@ -72,7 +61,6 @@ class Task4Config:
             "airplane", "automobile", "bird", "cat", "deer",
             "dog", "frog", "horse", "ship", "truck",
         ]
-        # Fixed by the assignment; 800 images per group. Not to be revised.
         self.NEAR_UNKNOWN_CLASSES = [
             "bus", "pickup_truck", "motorcycle", "tractor",
             "wolf", "fox", "leopard", "camel",
@@ -82,8 +70,7 @@ class Task4Config:
             "keyboard", "mushroom", "sunflower", "wardrobe",
         ]
 
-        # CIFAR-10 channel statistics, used for both datasets so known and
-        # unknown inputs are preprocessed identically.
+        # Shared preprocessing for known and unknown inputs.
         self.NORMALIZE_MEAN = (0.4914, 0.4822, 0.4465)
         self.NORMALIZE_STD = (0.2470, 0.2435, 0.2616)
 

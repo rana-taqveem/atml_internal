@@ -1,19 +1,4 @@
-"""Domain separability: how much domain information survives in the features.
-
-Freeze the backbone, collect balanced features, then train a logistic
-regression to predict which domain each feature came from. Its held-out
-accuracy is the separability score.
-
-    Task 2  source-validation vs target        2 classes, chance = 50%
-    Task 3  photo vs art_painting vs cartoon   3 classes, chance = 33.3%
-
-Both use the same recipe from the assignment: equal numbers per group, seed
-6304, a 70/30 split, and a balanced logistic-regression classifier with C = 1.
-
-Reading the score: a lower value means domain information is harder to
-recover. It does NOT mean class information was preserved, and it does not by
-itself mean target recognition improved. Always report it next to accuracy.
-"""
+"""Measure domain separability with a probe on balanced frozen features."""
 
 import numpy as np
 from sklearn.linear_model import LogisticRegression
@@ -25,11 +10,7 @@ from assignment_01.task2.evaluation.features import collect_features
 
 def domain_separability(model, loaders, seed=None, test_size=0.30, regularization=1.0,
                         max_per_group=None):
-    """Held-out accuracy of a domain classifier trained on frozen features.
-
-    loaders   dict of domain name -> DataLoader. Two entries gives the Task 2
-              source-vs-target probe; three gives the Task 3 source probe.
-    """
+    """Return held-out domain-classifier accuracy on frozen features."""
     seed = task_config.SEED if seed is None else seed
 
     # Balance the groups: the smallest decides, so the probe cannot win by

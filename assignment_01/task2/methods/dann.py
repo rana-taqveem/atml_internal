@@ -1,26 +1,4 @@
-"""DANN: adversarial alignment with a domain discriminator.
-
-Instead of measuring the source-target gap with a fixed formula, DANN learns
-a binary classifier that tries to tell source features from target features,
-and trains the backbone to defeat it. If a well-trained discriminator cannot
-separate the domains, the representation carries little domain information.
-
-The two opposing objectives share one backward pass through a gradient
-reversal layer: it is the identity going forward, and multiplies the gradient
-by -alpha going backward. So the discriminator descends the domain loss while
-the backbone ascends it.
-
-alpha follows the standard schedule
-
-    alpha(p) = 2 / (1 + exp(-10p)) - 1,   p in [0, 1] training progress,
-
-which starts near 0 and approaches 1. Early on the representation is free to
-learn the class task; later the reversed gradient increasingly pushes for
-domain confusion.
-
-Only source examples contribute to the classification loss; both source and
-target contribute to the domain loss. Target labels are never used.
-"""
+"""DANN adversarial alignment with a gradient-reversed domain classifier."""
 
 import torch
 import torch.nn as nn
@@ -29,11 +7,7 @@ from assignment_01.task2.config import task_config
 
 
 class GradientReversal(torch.autograd.Function):
-    """Identity forward; negated, scaled gradient backward.
-
-    Shape is unchanged in both directions: whatever goes in comes out, and the
-    gradient keeps the same shape. Only the sign and scale of the gradient change.
-    """
+    """Identity forward pass with a negated, scaled backward gradient."""
 
     @staticmethod
     def forward(ctx, x, alpha):

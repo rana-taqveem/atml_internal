@@ -28,14 +28,7 @@ def get_translation_conditions():
 
 
 class TranslationDataset(Dataset):
-    """Apply one fixed translation to an existing baseline dataset.
-
-    The baseline dataset must return (image, label, image_id), where image
-    is an unnormalized tensor with shape [C, H, W].
-
-    Translation preserves the label and image ID. Images are transformed
-    when accessed, so the complete translated dataset is not stored.
-    """
+    """Apply a fixed translation while preserving each label and image ID."""
 
     def __init__(self, baseline_dataset, translate_x, translate_y):
         for value in (translate_x, translate_y):

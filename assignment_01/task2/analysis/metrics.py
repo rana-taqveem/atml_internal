@@ -3,47 +3,7 @@ from sklearn.metrics import precision_recall_fscore_support
 from assignment_01.task2.config import task_config
 
 def calcultate_metrics(result, top_k=(1, )):
-    """Calculate classification metrics for one model and one image condition.
-
-    Inputs and dimensions:
-        result["y_true"] contains N integer class IDs, with shape [N].
-        result["logits"] contains class scores with shape [N, C]: each row
-        represents an image and each column a class. Class IDs index these
-        columns from 0 to C-1. top_k is a tuple of integer rank cutoffs;
-        (1,) requests top-1 accuracy, while (1, 5) requests top-1 and top-5.
-
-    Calculation:
-        Validate score/label dimensions, matching nonzero image counts,
-        finite values and label range. Softmax across dim=1 (classes)
-        converts each image's scores into probabilities summing to one.
-        The largest probability is its confidence; its column index is
-        its predicted class. Accuracy is the fraction matching true labels.
-
-        For each class, treat all other classes as negatives. Precision is
-        TP/(TP+FP), recall is TP/(TP+FN), and F1 is 2TP/(2TP+FP+FN).
-        Undefined scores become zero. Macro metrics average class scores
-        equally, including absent classes. Macro-F1 is the mean of class
-        F1 scores, not F1 calculated from macro precision and macro recall.
-        Support counts how many true examples belong to a class.
-
-        Top-k ranks class IDs by descending score for each image. Selecting
-        the first k produces [N, k]. labels[:, None] has shape [N, 1], so
-        broadcasting compares each image's label with all its candidates.
-        any(dim=1) reduces these comparisons to one success flag per image;
-        averaging the flags gives top-k accuracy. Stable sorting preserves
-        class-index order when raw scores tie.
-
-    Returns:
-        A dictionary with image count, accuracy, macro precision/recall/F1,
-        per-class metrics and support, requested top-k accuracies, and mean
-        maximum confidence. Accuracy and macro scores are percentages;
-        per-class precision/recall/F1 and confidence are fractions in [0, 1].
-        Confidence measures certainty, not correctness or calibration.
-
-    Validation:
-        Labels are checked for finite, integer-valued IDs before casting;
-        each k must be an integer in [1, C]. No output files are written.
-    """
+    """Calculate accuracy, macro/per-class metrics, and top-k accuracy."""
 
     labels = torch.as_tensor(result["y_true"], device="cpu")
     logits = torch.as_tensor(result["logits"], dtype=torch.float32, device="cpu")
@@ -132,43 +92,7 @@ def calcultate_metrics(result, top_k=(1, )):
     }
 
 def compare_with_baseline(baseline_result, transformed_result):
-    """Compare baseline and transformed predictions after pairing images by ID.
-
-    Inputs and assumptions:
-        Both result dictionaries contain image_ids [N], y_true [N], and
-        logits [N, C]. Rows within each result must describe the same image.
-        The caller should supply the same model, decision method, checkpoint
-        and class-column ordering for both conditions. The intervention
-        must preserve ground-truth labels, as grayscale and hue rotation do.
-
-    Pairing and calculations:
-        Require nonempty one-dimensional IDs without duplicates and equal
-        image-ID sets. Sorting returns both sorted IDs and their original
-        row indices; comparing sorted IDs alone does not reorder results.
-        Apply each run's own sorting indices to its logits and labels so
-        corresponding rows refer to the same image, then compare labels.
-
-        Standalone metrics are calculated before alignment because each
-        run's accuracy is unaffected by jointly reordering its rows and
-        labels. Paired prediction consistency does require alignment.
-        argmax(dim=1) selects one class per image, reducing [N, C] to [N].
-        Comparing baseline and transformed predictions produces [N] Booleans.
-        Converting True/False to 1/0 and averaging measures consistency.
-        Identical incorrect predictions count as consistent, so consistency
-        and accuracy answer different questions.
-
-    Returns:
-        Image count, baseline and transformed accuracy percentages, accuracy
-        change and drop in percentage points, and consistency percentage.
-        Change = transformed - baseline; drop = baseline - transformed.
-        For example, 90% to 80% is a change of -10 percentage points and
-        a drop of 10 percentage points, not a 10% relative decrease.
-
-    Checks:
-        Class names and order must match; class counts are compared via
-        logits.shape[1]. Matching model/checkpoint identity is enforced by
-        the caller (report.summarize_intervention).
-    """
+    """Compare paired baseline and transformed predictions by image ID."""
 
 
     baseline_ids =  torch.as_tensor(baseline_result["image_ids"], dtype=torch.long, device="cpu")

@@ -446,12 +446,7 @@ def infer_cue_conflicts(model, loader, model_name):
     }
        
 def run_condition_inference(loader, metadata, models, text_features, logit_scale, prompts):
-    """Evaluate every trained head and zero-shot CLIP on one image condition.
-
-    Each method writes {model_name}_{transformation}_results.pt. Zero-shot
-    CLIP reuses the CLIP head run's image embeddings, so both CLIP decision
-    methods see identical features.
-    """
+    """Evaluate every trained head and zero-shot CLIP on one condition."""
     clip_result = None
 
     for model_name, model in models:
@@ -704,14 +699,7 @@ def run_conflict_inference(conflict_dir, models, text_features, logit_scale, pro
     print(f"Saved zero-shot conflict inference: {result_path}")
 
 def get_head_checkpoint_path(model_name):
-    """Locate one trained head's weight file.
-
-    Checks task_config.MODEL_WEIGHTS_DIR first (where --mode train saves new
-    heads, on Drive on Colab), then falls back to the copies already
-    committed in the repo (task_config.PRETRAINED_HEADS_DIR). Returns the
-    Drive path if neither exists, so the caller's FileNotFoundError names
-    the primary expected location.
-    """
+    """Locate a trained head in the run directory or repository fallback."""
     filename = task_config.HEAD_WEIGHT_FILES[model_name]
     drive_path = os.path.join(task_config.MODEL_WEIGHTS_DIR, filename)
     if os.path.isfile(drive_path):
@@ -729,12 +717,7 @@ def expected_validation_accuracy(model_name):
     return float(stem.rsplit("_", 1)[1])
 
 def verify_heads_on_validation(models, tolerance_pp=0.2):
-    """Re-evaluate backbone + head on the seed-6304 validation split.
-
-    This confirms that the loaded head file matches the current backbone
-    before any test-time evidence is produced. It fails when a head's
-    accuracy differs from the value in its filename by more than the tolerance.
-    """
+    """Verify loaded heads against their recorded validation accuracy."""
     _, val_loader = get_train_val_dataloaders()
     report = {}
 
