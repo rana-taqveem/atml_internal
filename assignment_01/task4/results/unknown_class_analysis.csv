@@ -1,0 +1,17 @@
+method , group, unknown_class, n_images, accepted, acceptance_rate_pct, mean_unknownness   , absorbed_by, absorbed_count, score_name, threshold
+vanilla, near , bus          ,      100,       82,   82.0             , -8.145971987247467 , truck      ,             68, mls       , -6.057860875129698
+vanilla, near , camel        ,      100,       55,   55.00000000000001, -6.338117229938507 , deer       ,             16, mls       , -6.057860875129698
+vanilla, near , fox          ,      100,       66,   66.0             , -7.002926666736602 , cat        ,             27, mls       , -6.057860875129698
+vanilla, near , leopard      ,      100,       62,   62.0             , -6.878508801460266 , cat        ,             25, mls       , -6.057860875129698
+vanilla, near , motorcycle   ,      100,       37,   37.0             , -5.6048860311508175, automobile ,             22, mls       , -6.057860875129698
+vanilla, near , pickup_truck ,      100,       91,   91.0             , -8.041585855484009 , automobile ,             61, mls       , -6.057860875129698
+vanilla, near , tractor      ,      100,       52,   52.0             , -6.246312317848205 , truck      ,             42, mls       , -6.057860875129698
+vanilla, near , wolf         ,      100,       77,   77.0             , -7.247711851596832 , dog        ,             37, mls       , -6.057860875129698
+vanilla, far  , bottle       ,      100,       38,   38.0             , -5.484624459743499 , cat        ,             14, mls       , -6.057860875129698
+vanilla, far  , bowl         ,   faili   100,       53,   53.0             , -6.2422549700737   , cat        ,             17, mls       , -6.057860875129698
+vanilla, far  , chair        ,      100,       41,   41.0             , -5.798149726390839 , airplane   ,             24, mls       , -6.057860875129698
+vanilla, far  , clock        ,      100,       33,   33.0             , -5.549737067222595 , cat        ,              9, mls       , -6.057860875129698
+vanilla, far  , keyboard     ,      100,       44,   44.0             , -5.901759777069092 , truck      ,             14, mls       , -6.057860875129698
+vanilla, far  , mushroom     ,      100,       43,   43.0             , -6.126540107727051 , bird       ,             17, mls       , -6.057860875129698
+vanilla, far  , sunflower    ,      100,       47,   47.0             , -6.091628224849701 , bird       ,             22, mls       , -6.057860875129698
+vanilla, far  , wardrobe     ,      100,       68,   68.0             , -7.004377379417419 , truck      ,             34, mls       , -6.057860875129698

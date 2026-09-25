@@ -137,6 +137,88 @@ def training_health_rows(runs):
     return rows
 
 
+def figure_erm_failures(results_dir, out_dir, baseline="erm"):
+    """Where the source-only model's target errors actually come from.
+
+    Required evidence for the first research question: the aggregate domain gap
+    says how much is lost, not which classes lose it. Two panels:
+
+      (a) per-class accuracy on the target, with support annotated, so a low
+          score on a small class is not mistaken for a large failure
+      (b) error counts ordered largest first with a cumulative share line,
+          which is what makes "three classes account for most of the errors"
+          a statement rather than an impression. Each bar is annotated with
+          the class that absorbs those errors.
+    """
+    path = Path(results_dir) / "per_class_target.csv"
+    if not path.is_file():
+        print("  (no per_class_target.csv: skipping ERM failure figure)")
+        return
+
+    with path.open(encoding="utf-8") as file:
+        rows = [{(k or "").strip(): (v.strip() if isinstance(v, str) else v)
+                 for k, v in record.items()}
+                for record in csv.DictReader(file)]
+    rows = [r for r in rows if r["method"] == baseline]
+    if not rows:
+        return
+
+    for row in rows:
+        row["support_n"] = int(float(row["support"]))
+        row["accuracy"] = float(row["baseline_accuracy_pct"])
+        # Errors implied by accuracy and support, so the panel cannot drift
+        # away from the accuracy it is drawn beside.
+        row["errors"] = int(round(row["support_n"] * (1 - row["accuracy"] / 100)))
+
+    figure, axes = plt.subplots(1, 2, figsize=(12.4, 4.3))
+
+    # (a) accuracy, weakest first
+    by_accuracy = sorted(rows, key=lambda r: r["accuracy"])
+    names = [r["class"] for r in by_accuracy]
+    values = [r["accuracy"] for r in by_accuracy]
+    bars = axes[0].bar(names, values, color="#4C72B0")
+    for bar, row in zip(bars, by_accuracy):
+        axes[0].text(bar.get_x() + bar.get_width() / 2, row["accuracy"] + 1.5,
+                     f"n={row['support_n']}", ha="center", fontsize=7.5, color="#444")
+    axes[0].set_ylim(0, 108)
+    axes[0].set_ylabel("Target accuracy (%)")
+    axes[0].set_title("(a) Source-only ERM, per class on Sketch")
+    axes[0].tick_params(axis="x", labelsize=8.5)
+
+    # (b) error counts with cumulative share
+    by_errors = sorted(rows, key=lambda r: r["errors"], reverse=True)
+    names = [r["class"] for r in by_errors]
+    counts = [r["errors"] for r in by_errors]
+    total = sum(counts)
+    cumulative = np.cumsum(counts) / total * 100
+
+    axes[1].bar(names, counts, color="#DD8452")
+    for index, row in enumerate(by_errors):
+        if row.get("confused_with"):
+            axes[1].text(index, counts[index] + total * 0.012,
+                         f"-> {row['confused_with']}\n({row['confused_count']})",
+                         ha="center", fontsize=7, color="#444")
+
+    twin = axes[1].twinx()
+    twin.plot(names, cumulative, "o-", color="#55A868", linewidth=1.5, markersize=4)
+    twin.set_ylim(0, 105)
+    twin.set_ylabel("cumulative share of errors (%)", color="#55A868")
+    twin.tick_params(axis="y", labelcolor="#55A868")
+    twin.axhline(cumulative[2], color="#55A868", linestyle=":", linewidth=1.0)
+    twin.text(len(names) - 1.4, cumulative[2] + 2.5,
+              f"top 3 = {cumulative[2]:.1f}%", fontsize=8, color="#55A868", ha="right")
+
+    axes[1].set_ylim(0, max(counts) * 1.28)
+    axes[1].set_ylabel("Misclassified target images")
+    axes[1].set_title("(b) Error contribution and dominant confusion")
+    axes[1].tick_params(axis="x", labelsize=8.5)
+
+    for axis in axes:
+        tidy(axis)
+    figure.tight_layout()
+    save(figure, out_dir, "task2_fig0_erm_failures")
+
+
 def save_rows(rows, path):
     if not rows:
         return
@@ -287,7 +369,12 @@ def figure_per_class(results_dir, out_dir, baseline="erm", order=None):
         return None
 
     with path.open(encoding="utf-8") as file:
-        rows = [r for r in csv.DictReader(file)]
+        # Strip whitespace from headers and values: a results CSV that has been
+        # opened and column-aligned in an editor still holds the right numbers,
+        # and should not break the figure.
+        rows = [{(k or "").strip(): (v.strip() if isinstance(v, str) else v)
+                 for k, v in record.items()}
+                for record in csv.DictReader(file)]
     if not rows:
         return None
 
@@ -368,6 +455,7 @@ def main():
     save_rows(rows, out_dir / "task2_method_comparison.csv")
     save_rows(training_health_rows(runs), out_dir / "task2_training_health.csv")
 
+    figure_erm_failures(args.results_dir, out_dir)
     figure_training_curves(runs, out_dir)
     figure_method_comparison(rows, out_dir)
     figure_per_class(args.results_dir, out_dir)

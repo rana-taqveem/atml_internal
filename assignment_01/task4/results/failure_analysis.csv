@@ -1,0 +1,31 @@
+model  , group, unknown_class, predicted_cifar10_class, score_name, score              , threshold
+vanilla, near , wolf         , dog                    , mls       , -12.119836807250977, -6.057860875129698
+vanilla, near , fox          , cat                    , mls       , -12.037137031555176, -6.057860875129698
+vanilla, near , bus          , truck                  , mls       , -11.597114562988281, -6.057860875129698
+vanilla, near , tractor      , ship                   , mls       , -11.535319328308105, -6.057860875129698
+vanilla, near , pickup_truck , automobile             , mls       , -11.46247673034668 , -6.057860875129698
+vanilla, far  , keyboard     , bird                   , mls       , -12.150077819824219, -6.057860875129698
+vanilla, far  , mushroom     , bird                   , mls       , -11.894728660583496, -6.057860875129698
+vanilla, far  , chair        , airplane               , mls       , -11.772829055786133, -6.057860875129698
+vanilla, far  , keyboard     , truck                  , mls       , -11.544795989990234, -6.057860875129698
+vanilla, far  , sunflower    , bird                   , mls       , -11.517230033874512, -6.057860875129698
+gcsc   , near , bus          , truck                  , mls       , -12.447927474975586, -6.2759488105773915
+gcsc   , near , bus          , truck                  , mls       , -11.952580451965332, -6.2759488105773915
+gcsc   , near , bus          , truck                  , mls       , -11.835413932800293, -6.2759488105773915
+gcsc   , near , bus          , truck                  , mls       , -11.751009941101074, -6.2759488105773915
+gcsc   , near , wolf         , dog                    , mls       , -11.630748748779297, -6.2759488105773915
+gcsc   , far  , keyboard     , bird                   , mls       , -12.963638305664062, -6.2759488105773915
+gcsc   , far  , bottle       , cat                    , mls       , -12.181928634643555, -6.2759488105773915
+gcsc   , far  , clock        , automobile             , mls       , -12.094264030456543, -6.2759488105773915
+gcsc   , far  , bowl         , airplane               , mls       , -11.690311431884766, -6.2759488105773915
+gcsc   , far  , mushroom     , bird                   , mls       , -11.367592811584473, -6.2759488105773915
+proser , near , fox          , cat                    , mls       , -12.467925071716309, -5.967806935310364
+proser , near , camel        , bird                   , mls       , -11.983914375305176, -5.967806935310364
+proser , near , bus          , truck                  , mls       , -11.96142864227295 , -5.967806935310364
+proser , near , bus          , truck                  , mls       , -11.92446517944336 , -5.967806935310364
+proser , near , fox          , deer                   , mls       , -11.583036422729492, -5.967806935310364
+proser , far  , keyboard     , bird                   , mls       , -12.636384010314941, -5.967806935310364
+proser , far  , bowl         , ship                   , mls       , -11.533815383911133, -5.967806935310364
+proser , far  , chair        , airplane               , mls       , -11.215741157531738, -5.967806935310364
+proser , far  , mushroom     , bird                   , mls       , -11.203160285949707, -5.967806935310364
+proser , far  , wardrobe     , truck                  , mls       , -11.006307601928711, -5.967806935310364

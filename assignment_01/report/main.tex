@@ -1,0 +1,51 @@
+% ATML Programming Assignment 1 -- draft report.
+%
+% Single-column NeurIPS-style layout: 5.5in text block on US Letter, which is
+% the geometry the course template uses. Swap this preamble for the official
+% neurips .sty when compiling the final submission; the section files need no
+% changes because they only use standard article commands, booktabs tables and
+% graphicx figures.
+
+\documentclass[10pt,letterpaper]{article}
+
+\usepackage[letterpaper,textwidth=5.5in,textheight=9in,centering]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{placeins}
+% expansion=false: the default Computer Modern bitmaps are not scalable, so
+% pdfTeX refuses automatic font expansion. Protrusion still applies.
+\usepackage[expansion=false]{microtype}
+\usepackage{url}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+
+\graphicspath{{./}}
+
+\captionsetup{font=small,labelfont=bf,skip=6pt}
+\setlength{\parskip}{0.4em}
+
+\title{\textbf{Learning Beyond the IID Closed-Set Setting}\\
+\large Programming Assignment 1 --- Draft (Tasks 1--3)}
+\author{Rana Taqveem ul Hassan}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+% Abstract to be written once all four tasks are complete.
+Draft compiled with Tasks 1--3 only. Task 4 is omitted from this build.
+\end{abstract}
+
+\input{sections/02_task1}
+
+\clearpage
+\input{sections/03_task2}
+
+\clearpage
+\input{sections/04_task3}
+
+\end{document}
