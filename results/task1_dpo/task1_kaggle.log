@@ -1,0 +1,139 @@
+[standard] pairs=1500 beta=0.1 micro_batches/epoch=750 updates=94 trainable_params=1089536/1544803840
+[standard] update 1/94 loss=0.6931 acc=0.000 margin=0.000 gnorm=1.764 t=13s
+[standard] update 5/94 loss=0.6955 acc=0.312 margin=-0.046 gnorm=2.301 t=73s
+[standard] update 10/94 loss=0.6920 acc=0.500 margin=0.024 gnorm=1.939 t=158s
+[standard] update 15/94 loss=0.6886 acc=0.688 margin=0.093 gnorm=2.197 t=240s
+[standard] update 20/94 loss=0.6870 acc=0.562 margin=0.126 gnorm=2.363 t=316s
+[standard] update 25/94 loss=0.6952 acc=0.625 margin=-0.038 gnorm=2.208 t=396s
+[standard] update 30/94 loss=0.6893 acc=0.625 margin=0.080 gnorm=2.111 t=484s
+[standard] update 35/94 loss=0.6839 acc=0.562 margin=0.190 gnorm=2.019 t=570s
+[standard] update 40/94 loss=0.6792 acc=0.812 margin=0.288 gnorm=2.297 t=655s
+[standard] update 45/94 loss=0.6957 acc=0.500 margin=-0.048 gnorm=2.095 t=741s
+[standard] update 50/94 loss=0.6827 acc=0.562 margin=0.218 gnorm=2.209 t=816s
+[standard] update 55/94 loss=0.6914 acc=0.500 margin=0.040 gnorm=2.219 t=894s
+[standard] update 60/94 loss=0.6840 acc=0.625 margin=0.209 gnorm=2.305 t=984s
+[standard] update 65/94 loss=0.6643 acc=0.875 margin=0.592 gnorm=2.475 t=1065s
+[standard] update 70/94 loss=0.7022 acc=0.438 margin=-0.154 gnorm=2.314 t=1153s
+[standard] update 75/94 loss=0.6693 acc=0.750 margin=0.522 gnorm=2.068 t=1235s
+[standard] update 80/94 loss=0.6914 acc=0.625 margin=0.056 gnorm=2.022 t=1316s
+[standard] update 85/94 loss=0.6769 acc=0.562 margin=0.362 gnorm=2.023 t=1391s
+[standard] update 90/94 loss=0.6780 acc=0.625 margin=0.355 gnorm=2.629 t=1479s
+[standard] update 94/94 loss=0.6552 acc=0.917 margin=0.786 gnorm=2.787 t=1534s
+[standard] done in 25.6 min, adapter -> /kaggle/working/pa2/outputs/task1_dpo/standard
+[sft] held-out acc=0.000 loss=0.6931
+[sft] reward=1.361 kl_tok=0.0000 len=166.9
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+[sft] word-limit compliance greedy=0.50
+[standard] held-out acc=0.637 loss=0.6763
+[standard] reward=1.329 kl_tok=0.0003 len=168.2
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+[standard] word-limit compliance greedy=0.40
+Required beta values: [0.03, 0.1, 0.3]
+Short-run examples per condition: 600
+[beta_0.03] pairs=600 beta=0.03 micro_batches/epoch=300 updates=38 trainable_params=1089536/1544803840
+[beta_0.03] update 1/38 loss=0.6931 acc=0.000 margin=0.000 gnorm=0.623 t=14s
+[beta_0.03] update 5/38 loss=0.6914 acc=0.812 margin=0.114 gnorm=0.679 t=85s
+[beta_0.03] update 10/38 loss=0.6923 acc=0.500 margin=0.061 gnorm=0.598 t=168s
+[beta_0.03] update 15/38 loss=0.6917 acc=0.562 margin=0.100 gnorm=0.675 t=251s
+[beta_0.03] update 20/38 loss=0.6915 acc=0.688 margin=0.109 gnorm=0.721 t=337s
+[beta_0.03] update 25/38 loss=0.6951 acc=0.562 margin=-0.125 gnorm=0.700 t=418s
+[beta_0.03] update 30/38 loss=0.6875 acc=0.688 margin=0.381 gnorm=0.708 t=499s
+[beta_0.03] update 35/38 loss=0.6909 acc=0.562 margin=0.156 gnorm=0.663 t=586s
+[beta_0.03] update 38/38 loss=0.6894 acc=0.750 margin=0.255 gnorm=0.851 t=619s
+[beta_0.03] done in 10.3 min, adapter -> /kaggle/working/pa2/outputs/task1_dpo/beta_0.03
+[beta_0.03] held-out acc=0.610 loss=0.6912
+[beta_0.03] reward=1.313 kl_tok=0.0002 len=167.5
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+[beta_0.03] word-limit compliance greedy=0.50
+[beta_0.1] pairs=600 beta=0.1 micro_batches/epoch=300 updates=38 trainable_params=1089536/1544803840
+[beta_0.1] update 1/38 loss=0.6931 acc=0.000 margin=0.000 gnorm=2.053 t=14s
+[beta_0.1] update 5/38 loss=0.6900 acc=0.625 margin=0.063 gnorm=2.224 t=84s
+[beta_0.1] update 10/38 loss=0.6892 acc=0.562 margin=0.084 gnorm=1.938 t=167s
+[beta_0.1] update 15/38 loss=0.6904 acc=0.562 margin=0.060 gnorm=2.222 t=252s
+[beta_0.1] update 20/38 loss=0.6868 acc=0.562 margin=0.133 gnorm=2.360 t=337s
+[beta_0.1] update 25/38 loss=0.7001 acc=0.438 margin=-0.132 gnorm=2.305 t=420s
+[beta_0.1] update 30/38 loss=0.6754 acc=0.688 margin=0.367 gnorm=2.278 t=501s
+[beta_0.1] update 35/38 loss=0.6862 acc=0.688 margin=0.148 gnorm=2.154 t=588s
+[beta_0.1] update 38/38 loss=0.6778 acc=0.750 margin=0.316 gnorm=2.748 t=621s
+[beta_0.1] done in 10.4 min, adapter -> /kaggle/working/pa2/outputs/task1_dpo/beta_0.1
+[beta_0.1] held-out acc=0.600 loss=0.6875
+[beta_0.1] reward=1.313 kl_tok=0.0002 len=166.7
+[beta_0.1] word-limit compliance greedy=0.50
+[beta_0.3] pairs=600 beta=0.3 micro_batches/epoch=300 updates=38 trainable_params=1089536/1544803840
+[beta_0.3] update 1/38 loss=0.6931 acc=0.000 margin=0.000 gnorm=6.141 t=14s
+[beta_0.3] update 5/38 loss=0.6842 acc=0.625 margin=0.061 gnorm=6.617 t=85s
+[beta_0.3] update 10/38 loss=0.6830 acc=0.500 margin=0.085 gnorm=5.632 t=168s
+[beta_0.3] update 15/38 loss=0.6844 acc=0.625 margin=0.072 gnorm=6.657 t=253s
+[beta_0.3] update 20/38 loss=0.6737 acc=0.625 margin=0.144 gnorm=7.009 t=339s
+[beta_0.3] update 25/38 loss=0.7166 acc=0.500 margin=-0.139 gnorm=6.991 t=422s
+[beta_0.3] update 30/38 loss=0.6526 acc=0.688 margin=0.294 gnorm=6.538 t=503s
+[beta_0.3] update 35/38 loss=0.6785 acc=0.625 margin=0.121 gnorm=6.331 t=591s
+[beta_0.3] update 38/38 loss=0.6515 acc=0.750 margin=0.306 gnorm=7.914 t=624s
+[beta_0.3] done in 10.4 min, adapter -> /kaggle/working/pa2/outputs/task1_dpo/beta_0.3
+[beta_0.3] held-out acc=0.600 loss=0.6812
+[beta_0.3] reward=1.334 kl_tok=0.0002 len=167.7
+[beta_0.3] word-limit compliance greedy=0.50
+Length-balanced train rows: 1500
+Length-stratified eval rows: 246
+[length_balanced] pairs=1500 beta=0.1 micro_batches/epoch=750 updates=94 trainable_params=1089536/1544803840
+[length_balanced] update 1/94 loss=0.6931 acc=0.000 margin=0.000 gnorm=1.731 t=12s
+[length_balanced] update 5/94 loss=0.6942 acc=0.375 margin=-0.021 gnorm=1.586 t=62s
+[length_balanced] update 10/94 loss=0.6916 acc=0.562 margin=0.032 gnorm=1.868 t=125s
+[length_balanced] update 15/94 loss=0.6823 acc=0.812 margin=0.221 gnorm=2.268 t=197s
+[length_balanced] update 20/94 loss=0.6932 acc=0.562 margin=0.000 gnorm=1.774 t=264s
+[length_balanced] update 25/94 loss=0.6878 acc=0.562 margin=0.113 gnorm=1.796 t=329s
+[length_balanced] update 30/94 loss=0.6881 acc=0.625 margin=0.107 gnorm=1.742 t=389s
+[length_balanced] update 35/94 loss=0.6876 acc=0.625 margin=0.117 gnorm=1.862 t=452s
+[length_balanced] update 40/94 loss=0.6896 acc=0.688 margin=0.079 gnorm=1.863 t=514s
+[length_balanced] update 45/94 loss=0.6859 acc=0.562 margin=0.166 gnorm=2.498 t=579s
+[length_balanced] update 50/94 loss=0.6716 acc=0.875 margin=0.440 gnorm=1.751 t=641s
+[length_balanced] update 55/94 loss=0.6883 acc=0.500 margin=0.107 gnorm=1.784 t=705s
+[length_balanced] update 60/94 loss=0.6832 acc=0.562 margin=0.224 gnorm=1.977 t=766s
+[length_balanced] update 65/94 loss=0.6538 acc=0.875 margin=0.828 gnorm=2.175 t=827s
+[length_balanced] update 70/94 loss=0.6997 acc=0.438 margin=-0.061 gnorm=1.635 t=891s
+[length_balanced] update 75/94 loss=0.6641 acc=0.750 margin=0.618 gnorm=1.952 t=947s
+[length_balanced] update 80/94 loss=0.6684 acc=0.562 margin=0.580 gnorm=1.930 t=1009s
+[length_balanced] update 85/94 loss=0.6783 acc=0.625 margin=0.387 gnorm=1.929 t=1073s
+[length_balanced] update 90/94 loss=0.6726 acc=0.625 margin=0.567 gnorm=2.262 t=1138s
+[length_balanced] update 94/94 loss=0.6429 acc=0.833 margin=1.132 gnorm=3.070 t=1188s
+[length_balanced] done in 19.8 min, adapter -> /kaggle/working/pa2/outputs/task1_dpo/length_balanced
+[length_balanced] held-out acc=0.623 loss=0.6773
+[length_balanced] reward=1.358 kl_tok=0.0024 len=167.7
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+[length_balanced] word-limit compliance greedy=0.40
+
+Per-stratum held-out preference accuracy:
+condition           preferred_longer    length_matched   rejected_longer  gen tokens  WL greedy
+standard                       0.488             0.573             0.695       168.2       0.40
+length_balanced                0.451             0.610             0.780       167.7       0.40
+sft                            0.000             0.000             0.000       166.9       0.50
+
+Saved /kaggle/working/pa2/results/task1_dpo/length_analysis.json
+condition                          sft  standard  beta_0.03  beta_0.1  beta_0.3  length_balanced
+train_pairs                          0      1500        600       600       600             1500
+updates                              0        94         38        38        38               94
+train_beta                         NaN       0.1       0.03       0.1       0.3              0.1
+heldout_dpo_loss                0.6931    0.6763     0.6912    0.6875    0.6812           0.6773
+heldout_pref_acc                   0.0    0.6367       0.61       0.6       0.6           0.6233
+heldout_margin_mean                0.0    0.3935     0.1318     0.125    0.1062           0.4434
+chosen_logratio_mean               0.0   -0.5111    -0.2673   -0.2583   -0.2109          -1.2985
+rejected_logratio_mean             0.0   -0.9046    -0.3991   -0.3833   -0.3172           -1.742
+acc_preferred_longer               0.0    0.4878     0.3902    0.3902    0.3902           0.4512
+acc_length_matched                 0.0    0.5732     0.6098    0.5854    0.5854           0.6098
+acc_rejected_longer                0.0    0.6951     0.7561    0.7317    0.7439           0.7805
+kl_token_mean                      0.0    0.0003     0.0002    0.0002    0.0002           0.0024
+kl_seq_mean                        0.0    0.0539     0.0401    0.0369    0.0337           0.4033
+entropy_token_mean              0.7634    0.7735     0.7688     0.772    0.7667           0.7572
+rm_reward_mean                  1.3609    1.3292     1.3126    1.3134    1.3345           1.3582
+rm_reward_std                   1.1637    1.2367      1.218    1.2497    1.2478           1.2026
+gen_tokens_mean               166.9141  168.1562   167.5391  166.6797  167.6719         167.7344
+gen_tokens_std                102.6843  104.3055    103.889  104.0525  104.3216         105.1567
+gen_tokens_median                243.0     249.0      250.0     250.0     256.0            256.0
+gen_tokens_iqr                   208.5    216.25     216.25    216.25    216.25           213.25
+truncation_rate                 0.4766    0.4922     0.4922    0.4922    0.5078           0.5156
+wordlimit_greedy_compliance        0.5       0.4        0.5       0.5       0.5              0.4
+wordlimit_sampled_compliance      0.58      0.56       0.56      0.56      0.58             0.48
+wordlimit_greedy_words_mean       40.5      40.5       40.0      40.5      40.3             39.5
+corr_reward_vs_length           0.0184    0.0219     0.0418    0.0112    0.0522           0.0183
+
+Wrote /kaggle/working/pa2/results/task1_dpo/summary.csv, figures/, qualitative_candidates_*.md

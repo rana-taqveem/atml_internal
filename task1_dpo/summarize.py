@@ -10,10 +10,22 @@ import numpy as np
 import pandas as pd
 
 from common.data import load_yaml, read_jsonl, repo_path
-from common.logging_utils import load_json
+from common.logging_utils import load_json, save_json
 from common.metrics import safe_corr
 
 STRATA = ["preferred_longer", "length_matched", "rejected_longer"]
+N_BOOT = 5000
+
+
+def binom_se(p: float, n: int) -> float:
+    return float(np.sqrt(p * (1 - p) / max(n, 1)))
+
+
+def bootstrap_ci(values, rng, n_boot: int = N_BOOT):
+    """Percentile 95% CI of the mean of `values` (resampling the evaluation items)."""
+    v = np.asarray(values, float)
+    means = v[rng.integers(0, len(v), (n_boot, len(v)))].mean(1)
+    return float(np.percentile(means, 2.5)), float(np.percentile(means, 97.5))
 
 
 def condition_names(results_dir, betas):
@@ -35,28 +47,102 @@ def summary_table(results_dir, names) -> pd.DataFrame:
             "train_beta": ts.get("beta"),
             "heldout_dpo_loss": ps["dpo_loss"],
             "heldout_pref_acc": ps["preference_accuracy"],
+            "heldout_pref_acc_se": binom_se(ps["preference_accuracy"], ps["n_pairs"]),
             "heldout_margin_mean": ps["margin_mean"],
             "chosen_logratio_mean": ps["chosen_logratio_mean"],
             "rejected_logratio_mean": ps["rejected_logratio_mean"],
         }
-        row.update({f"acc_{s}": strat["by_stratum"][s]["preference_accuracy"] for s in STRATA})
+        for s in STRATA:
+            b = strat["by_stratum"][s]
+            row[f"acc_{s}"] = b["preference_accuracy"]
+            row[f"acc_{s}_se"] = binom_se(b["preference_accuracy"], b["n_pairs"])
         if "generation" in m:
             g = m["generation"]
             row.update({
                 "kl_token_mean": g["kl_token_mean"], "kl_seq_mean": g["kl_seq_mean"],
                 "entropy_token_mean": g["entropy_token_mean"],
                 "rm_reward_mean": g["reward_mean"], "rm_reward_std": g["reward_std"],
+                "rm_reward_se": g["reward_std"] / np.sqrt(g["n_prompts"]),
                 "gen_tokens_mean": g["response_tokens"]["mean"], "gen_tokens_std": g["response_tokens"]["std"],
                 "gen_tokens_median": g["response_tokens"]["median"], "gen_tokens_iqr": g["response_tokens"]["iqr"],
                 "truncation_rate": g["truncation_rate"],
+                "truncation_rate_se": binom_se(g["truncation_rate"], g["n_prompts"]),
                 "wordlimit_greedy_compliance": m["word_limit"]["greedy"]["compliance_rate"],
                 "wordlimit_sampled_compliance": m["word_limit"].get("sampled", {}).get("compliance_rate"),
                 "wordlimit_greedy_words_mean": m["word_limit"]["greedy"]["words"]["mean"],
             })
             gens = read_jsonl(results_dir / name / "generations.jsonl")
             row["corr_reward_vs_length"] = safe_corr([r["reward"] for r in gens], [r["response_tokens"] for r in gens])
+            sft_gens = results_dir / "sft" / "generations.jsonl"
+            if name != "sft" and sft_gens.exists():
+                # Paired on prompt: each condition and SFT answer the same held-out prompts.
+                base = {r["prompt_id"]: r for r in read_jsonl(sft_gens)}
+                rng = np.random.default_rng(0)
+                for key, col in [("reward", "rm_reward"), ("response_tokens", "gen_tokens")]:
+                    d = [r[key] - base[r["prompt_id"]][key] for r in gens if r["prompt_id"] in base]
+                    lo, hi = bootstrap_ci(d, rng)
+                    row.update({f"{col}_diff_vs_sft": float(np.mean(d)), f"{col}_diff_ci_lo": lo,
+                                f"{col}_diff_ci_hi": hi})
         rows.append(row)
     return pd.DataFrame(rows)
+
+
+def length_mechanism(results_dir, names) -> dict:
+    """Is the per-stratum asymmetry produced by summing log-ratios over tokens?
+
+    For every trained condition: correlation/slope of each response's log-ratio
+    (log pi - log ref) against its token count, and preference accuracy when the
+    margin uses per-token (length-normalised) log-ratios instead of sums. Plus paired
+    bootstrap CIs for length-balanced vs standard, and the within-model gap between
+    the rejected-longer and preferred-longer strata.
+    """
+    rng = np.random.default_rng(0)
+    out = {"conditions": {}}
+    for name in [n for n in names if n != "sft"]:
+        out["conditions"][name] = {}
+        for split in ["standard", "length_stratified"]:
+            pairs = read_jsonl(results_dir / name / f"eval_pairs_{split}.jsonl")
+            lr = np.array([p["policy_chosen_logp"] - p["ref_chosen_logp"] for p in pairs]
+                          + [p["policy_rejected_logp"] - p["ref_rejected_logp"] for p in pairs])
+            tok = np.array([p["chosen_tokens"] for p in pairs] + [p["rejected_tokens"] for p in pairs], float)
+            norm = np.array([(p["policy_chosen_logp"] - p["ref_chosen_logp"]) / p["chosen_tokens"]
+                             - (p["policy_rejected_logp"] - p["ref_rejected_logp"]) / p["rejected_tokens"]
+                             for p in pairs])
+            entry = {
+                "corr_logratio_vs_tokens": safe_corr(lr, tok),
+                "slope_logratio_per_100_tokens": float(np.polyfit(tok, lr, 1)[0] * 100),
+                "accuracy_summed_margin": float(np.mean([p["correct"] for p in pairs])),
+                "accuracy_per_token_margin": float(np.mean(norm > 0)),
+            }
+            if split == "length_stratified":
+                entry["by_stratum"] = {s: {
+                    "accuracy_summed_margin": float(np.mean([p["correct"] for p in pairs if p["length_stratum"] == s])),
+                    "accuracy_per_token_margin": float(np.mean([n > 0 for n, p in zip(norm, pairs)
+                                                                if p["length_stratum"] == s])),
+                } for s in STRATA}
+                acc = {s: np.array([p["correct"] for p in pairs if p["length_stratum"] == s], float) for s in STRATA}
+                a, b = acc["rejected_longer"], acc["preferred_longer"]
+                gaps = (a[rng.integers(0, len(a), (N_BOOT, len(a)))].mean(1)
+                        - b[rng.integers(0, len(b), (N_BOOT, len(b)))].mean(1))
+                entry["gap_rejected_minus_preferred_longer"] = {
+                    "value": float(a.mean() - b.mean()),
+                    "ci95": [float(np.percentile(gaps, 2.5)), float(np.percentile(gaps, 97.5))]}
+            out["conditions"][name][split] = entry
+
+    if {"standard", "length_balanced"} <= set(names):
+        def key(p):
+            return p["prompt_id"], p["length_stratum"]
+        a = {key(p): p for p in read_jsonl(results_dir / "standard" / "eval_pairs_length_stratified.jsonl")}
+        b = {key(p): p for p in read_jsonl(results_dir / "length_balanced" / "eval_pairs_length_stratified.jsonl")}
+        paired = {}
+        for s in STRATA + ["all"]:
+            ks = [k for k in a if s == "all" or k[1] == s]
+            d = np.array([b[k]["correct"] - a[k]["correct"] for k in ks], float)
+            lo, hi = bootstrap_ci(d, rng)
+            paired[s] = {"accuracy_diff": float(d.mean()), "ci95": [lo, hi],
+                         "discordant_pairs": int((d != 0).sum()), "n_pairs": len(d)}
+        out["length_balanced_minus_standard"] = paired
+    return out
 
 
 def plot_all(results_dir, fig_dir, df: pd.DataFrame, names):
@@ -75,9 +161,12 @@ def plot_all(results_dir, fig_dir, df: pd.DataFrame, names):
         std = df[df["condition"] == "standard"]
         sft = df[df["condition"] == "sft"]
         for ax, (col, title) in zip(axes, panels):
-            ax.plot(forks["train_beta"], forks[col], "o-", label="short fork (600 pairs)")
+            se = {"heldout_pref_acc": "heldout_pref_acc_se", "rm_reward_mean": "rm_reward_se"}.get(col)
+            ax.errorbar(forks["train_beta"], forks[col], yerr=forks[se] if se else None, fmt="o-", capsize=3,
+                        label="short fork (600 pairs)")
             if len(std):
-                ax.plot(std["train_beta"], std[col], "s", color="C3", label="standard (1 epoch, 1500 pairs)")
+                ax.errorbar(std["train_beta"], std[col], yerr=std[se] if se else None, fmt="s", color="C3",
+                            capsize=3, label="standard (1 epoch, 1500 pairs)")
             if len(sft) and col != "heldout_pref_acc":
                 ax.axhline(float(sft[col].iloc[0]), ls="--", color="gray", lw=1, label="SFT reference")
             ax.set_xscale("log")
@@ -98,7 +187,8 @@ def plot_all(results_dir, fig_dir, df: pd.DataFrame, names):
         x = np.arange(len(STRATA))
         w = 0.8 / len(pair)
         for i, (_, r) in enumerate(pair.iterrows()):
-            ax.bar(x + i * w - 0.4 + w / 2, [r[f"acc_{s}"] for s in STRATA], w, label=r["condition"])
+            ax.bar(x + i * w - 0.4 + w / 2, [r[f"acc_{s}"] for s in STRATA], w, label=r["condition"],
+                   yerr=[r[f"acc_{s}_se"] for s in STRATA], capsize=3)
         ax.axhline(0.5, ls="--", color="gray", lw=1)
         ax.set_xticks(x)
         ax.set_xticklabels([s.replace("_", "\n") for s in STRATA])
@@ -193,11 +283,12 @@ def main():
     with pd.option_context("display.max_columns", None, "display.width", 200, "display.precision", 4):
         print(df.T.to_string(header=False))
     plot_all(results_dir, results_dir / "figures", df, names)
+    save_json(results_dir / "length_mechanism.json", length_mechanism(results_dir, names))
     for target in ["standard", "length_balanced"]:
         if (results_dir / target / "generations.jsonl").exists():
             (results_dir / f"qualitative_candidates_{target}.md").write_text(
                 qualitative_candidates(results_dir, target, args.k), encoding="utf-8")
-    print(f"\nWrote {results_dir / 'summary.csv'}, figures/, qualitative_candidates_*.md")
+    print(f"\nWrote {results_dir / 'summary.csv'}, length_mechanism.json, figures/, qualitative_candidates_*.md")
 
 
 if __name__ == "__main__":
