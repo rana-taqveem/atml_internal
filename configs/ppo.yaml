@@ -32,3 +32,11 @@ max_grad_norm: 1.0
 output: outputs/task2_ppo/standard
 results_dir: results/task2_ppo
 cached_rollouts: cached/ppo_rollout.pt
+
+# Student additions (implementation choices, fixed for every condition).
+normalize_advantages: true        # whiten GAE advantages over the rollout batch's valid tokens
+clip_probe_steps: 4               # clipped-surrogate steps on the cached batch per epsilon
+fork_output_template: outputs/task2_ppo/{name}
+eval:
+  prompts: 64                     # first N held-out prompts (rl_prompt_pool_eval) fitting max_prompt_length
+  batch_size: 8

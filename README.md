@@ -113,12 +113,29 @@ the 10 common prompts with one greedy and 5 seeded sampled responses each.
 
 ### Task 2 - PPO
 
+Objective fix: `task2_ppo/ppo.py` combined the two surrogate terms with `torch.maximum`; the PPO
+clipped surrogate is `min(rho*A, clip(rho, 1-eps, 1+eps)*A)` (with max, clipping never restrains an update).
+`clip_diagnostics` adds the affected-token fraction (tokens where the clipped branch is active).
+
 ```bash
+# Step 1: 20-update continuation from the supplied midpoint policy + critic, then held-out evaluation
 python -m task2_ppo.continue_train --config configs/ppo.yaml --run-name standard
+python -m task2_ppo.evaluate --config configs/ppo.yaml --adapter checkpoints/ppo_midpoint_policy --name midpoint
+python -m task2_ppo.evaluate --config configs/ppo.yaml --adapter none --name sft
 python -m task2_ppo.evaluate --config configs/ppo.yaml --adapter outputs/task2_ppo/standard --name standard
-python -m task2_ppo.analyze_clipping --config configs/ppo.yaml
-python -m task2_ppo.ablate_kl --config configs/ppo.yaml
+# Step 2: cached-batch clipping study + 8-update forks for eps in {0.05, 0.20, 0.50} (kl_beta 0.10)
+python -m task2_ppo.analyze_clipping --config configs/ppo.yaml --skip-existing
+# Step 3: 8-update forks for kl_beta in {0, 0.10, 0.20} (eps 0.20; the 0.10 fork is shared with step 2)
+python -m task2_ppo.ablate_kl --config configs/ppo.yaml --skip-existing
+python -m task2_ppo.summarize --config configs/ppo.yaml
 ```
+
+Implementation choices (same for every condition): one rollout per update (`prompts_per_update: 1`) from a
+seeded permutation of the train pool (prompts <= 256 tokens), sampling seed `seed + update`, so forks see the same
+prompts; dropout disabled so the importance ratio is exactly 1 before an update; learned reward minus
+`missing_eos_penalty` when no EOS; sampled-token KL shaping with `kl_beta`; GAE (gamma 1, lambda 0.95) with
+advantages whitened over the batch; `ppo_epochs: 2` policy + critic steps per rollout. Held-out evaluation: first
+64 eval-pool prompts, one seeded sample each at the 768-token evaluation cap. Logs: `results/task2_ppo/<run>/`.
 
 ### Task 3 - GRPO
 

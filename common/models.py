@@ -231,6 +231,18 @@ def token_values(value_model, input_ids, attention_mask):
     return head(hidden).squeeze(-1)
 
 
+def disable_dropout(model):
+    """Zero every dropout probability (incl. LoRA dropout) while keeping train mode.
+
+    On-policy RL compares log-probs of the same tokens under the sampling policy and the
+    updated policy; dropout would make the importance ratio != 1 before any update.
+    """
+    for module in model.modules():
+        if isinstance(module, torch.nn.Dropout):
+            module.p = 0.0
+    return model
+
+
 def trainable_parameters(model):
     return [p for p in model.parameters() if p.requires_grad]
 

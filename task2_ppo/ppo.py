@@ -46,19 +46,41 @@ def shaped_rewards(task_reward, policy_logp, ref_logp, response_mask, beta_kl):
 def ppo_policy_loss(new_logp, old_logp, advantage, mask, eps=0.2):
     """Return PPO clipped policy loss and diagnostics.
 
-    Validate this starter implementation against the clipped surrogate in the assignment manual.
+    L = -E_t[min(rho_t A_t, clip(rho_t, 1-eps, 1+eps) A_t)].
+
+    Fix vs. the starter: the starter took torch.maximum, which is a pessimism-free *upper* bound:
+    for A>0 it keeps the unclipped rho*A when rho>1+eps (no limit on increasing the probability)
+    and for A<0 it picks the clipped term when rho<1-eps, so clipping never restrains the update.
+    The PPO surrogate is the elementwise minimum.
     """
     ratio = torch.exp(new_logp - old_logp)
     surr1 = ratio * advantage
     surr2 = ratio.clamp(1.0 - eps, 1.0 + eps) * advantage
 
-    # Starter implementation: students must validate the clipping geometry carefully.
-    objective = torch.maximum(surr1, surr2)
+    objective = torch.minimum(surr1, surr2)
 
     loss = -masked_mean(objective, mask)
-    affected = ((ratio < (1.0 - eps)) | (ratio > (1.0 + eps))).float()
-    clip_fraction = masked_mean(affected, mask)
+    outside = ((ratio < (1.0 - eps)) | (ratio > (1.0 + eps))).float()
+    clip_fraction = masked_mean(outside, mask)
     return loss, ratio.detach(), clip_fraction.detach()
+
+
+def clip_diagnostics(ratio, advantage, mask, eps):
+    """Clip fraction (ratio outside [1-eps, 1+eps]) and affected-token fraction.
+
+    A token is *affected* when the clipped branch is the active one in the min, i.e. its gradient
+    is zeroed: rho > 1+eps with A > 0, or rho < 1-eps with A < 0. Tokens outside the interval with
+    the opposite advantage sign still receive the unclipped gradient.
+    """
+    outside = (ratio < 1.0 - eps) | (ratio > 1.0 + eps)
+    affected = ((ratio > 1.0 + eps) & (advantage > 0)) | ((ratio < 1.0 - eps) & (advantage < 0))
+    surrogate = torch.minimum(ratio * advantage, ratio.clamp(1.0 - eps, 1.0 + eps) * advantage)
+    return {
+        "clip_fraction": float(masked_mean(outside.float(), mask)),
+        "affected_fraction": float(masked_mean(affected.float(), mask)),
+        "clipped_surrogate": float(masked_mean(surrogate, mask)),
+        "unclipped_surrogate": float(masked_mean(ratio * advantage, mask)),
+    }
 
 
 def value_mse_loss(predicted_values, returns, mask):
