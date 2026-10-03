@@ -83,12 +83,33 @@ The PPO value checkpoint is intentionally released as the exact staff midpoint s
 
 ### Task 1 - DPO
 
+Objective fix: `task1_dpo/dpo.py` used `beta * (policy_margin + ref_margin)`; the DPO logit is
+`beta * (policy_margin - ref_margin)` (loss = log 2 when policy == reference). Preference accuracy
+now uses the manual's margin `m > 0` instead of the raw policy margin.
+
 ```bash
+# Step 1: standard DPO (1 epoch, 1500 pairs, beta=0.10) + SFT reference baseline
 python -m task1_dpo.train --config configs/dpo.yaml --run-name standard
+python -m task1_dpo.evaluate --config configs/dpo.yaml --adapter none --name sft
 python -m task1_dpo.evaluate --config configs/dpo.yaml --adapter outputs/task1_dpo/standard --name standard
-python -m task1_dpo.ablate_beta --config configs/dpo.yaml
-python -m task1_dpo.analyze_length --config configs/dpo.yaml
+# Step 2: beta forks (first 600 training pairs each, beta in {0.03, 0.10, 0.30}), train + evaluate
+python -m task1_dpo.ablate_beta --config configs/dpo.yaml --skip-existing
+# Step 3: length-balanced DPO (1500 pairs, 500 per stratum) + per-stratum / word-limit comparison
+python -m task1_dpo.analyze_length --config configs/dpo.yaml --skip-existing
+# Tables, figures, qualitative-example shortlist (CPU only)
+python -m task1_dpo.summarize --config configs/dpo.yaml
 ```
+
+Outputs: adapters in `outputs/task1_dpo/<run>/`; per-run logs and metrics in `results/task1_dpo/<run>/`
+(`train_log.jsonl`, `train_summary.json` incl. training prompt-ID order, wall-clock and peak VRAM,
+`eval_metrics.json`, `eval_pairs_*.jsonl`, `generations.jsonl`, `word_limit.jsonl`); aggregates in
+`results/task1_dpo/summary.csv`, `length_analysis.json`, `figures/`, `qualitative_candidates_*.md`.
+
+Evaluation protocol (same for every condition, see `eval:` in `configs/dpo.yaml`): held-out DPO loss/accuracy on all
+300 standard-eval pairs and all 246 length-stratified pairs; reward-model score, sampled-response KL (token mean via
+`common.metrics.sampled_kl`, plus per-sequence sum), entropy and length on one seeded sample (T=0.7, top-p 0.9,
+256 new tokens) for each of the first 128 held-out prompts that fit in 512 prompt tokens; word-limit compliance on
+the 10 common prompts with one greedy and 5 seeded sampled responses each.
 
 ### Task 2 - PPO
 
