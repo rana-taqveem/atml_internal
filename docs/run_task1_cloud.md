@@ -7,7 +7,7 @@ independent and resumable with `--skip-existing`).
 
 ## Cell 1 - code + environment
 ```bash
-!git clone https://github.com/<YOUR_USER>/<YOUR_PA2_REPO>.git pa2
+!git clone -b pa2 https://github.com/rana-taqveem/atml_internal.git pa2
 %cd pa2
 !pip install -q -r requirements.txt
 !python -m scripts.download_assets
