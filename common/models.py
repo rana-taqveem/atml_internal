@@ -228,7 +228,31 @@ def token_values(value_model, input_ids, attention_mask):
         head = value_model.classifier
     else:
         raise RuntimeError("Could not locate scalar value head")
-    return head(hidden).squeeze(-1)
+    # The head may be kept in fp32 (see upcast_trainable) while the backbone runs in fp16.
+    head_dtype = next(head.parameters()).dtype
+    return head(hidden.to(head_dtype)).squeeze(-1)
+
+
+def upcast_trainable(model, head_names=("score", "classifier")):
+    """Keep every trainable parameter (and the scalar head modules) in fp32.
+
+    AdamW on fp16 parameters is numerically broken: eps=1e-8 rounds to 0 and small squared
+    gradients underflow, so the first step yields 0/0 = NaN. PEFT already stores LoRA weights in
+    fp32; the critic's `modules_to_save` head copy is created in the backbone dtype (fp16), so it
+    must be upcast. Frozen backbone weights stay fp16.
+    """
+    def to_fp32_inputs(_module, args):
+        return tuple(a.float() if torch.is_tensor(a) and a.is_floating_point() else a for a in args)
+
+    for name, module in model.named_modules():
+        if name.split(".")[-1] in head_names:
+            module.float()
+            # The fp16 backbone also calls the head internally (pooled logits); cast on every call path.
+            module.register_forward_pre_hook(to_fp32_inputs)
+    for p in model.parameters():
+        if p.requires_grad and p.dtype != torch.float32:
+            p.data = p.data.float()
+    return model
 
 
 def disable_dropout(model):

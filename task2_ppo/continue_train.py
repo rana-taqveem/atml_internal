@@ -20,6 +20,7 @@ from common.models import (
     reference_mode,
     token_values,
     trainable_parameters,
+    upcast_trainable,
     value_parameter_groups,
 )
 from common.policy_eval import prompt_schedule, token_logprobs_and_entropy
@@ -43,6 +44,8 @@ def prepare_ppo_continuation(config_path: str):
     )
     disable_dropout(policy)
     disable_dropout(value_model)
+    upcast_trainable(policy)
+    upcast_trainable(value_model)  # fp16 critic head + AdamW -> NaN on the first step otherwise
     reward_model, reward_tokenizer = load_reward_model(cfg)
     prompts = read_jsonl(cfg["paths"]["rl_prompt_train"])
 
@@ -148,6 +151,15 @@ def collect_rollout(bundle, rows, cfg, kl_beta: float, seed: int):
     return batch
 
 
+def check_finite(what: str, value, batch):
+    """Stop the run on the first non-finite loss instead of silently skipping updates."""
+    if not torch.isfinite(value):
+        raise RuntimeError(
+            f"non-finite {what} ({float(value)}); finite values/returns/advantages: "
+            f"{bool(torch.isfinite(batch['values']).all())}/{bool(torch.isfinite(batch['returns']).all())}/"
+            f"{bool(torch.isfinite(batch['advantages']).all())}")
+
+
 def ppo_update(bundle, batch, cfg, eps: float):
     """`ppo_epochs` passes over one rollout batch: clipped policy step + critic regression step."""
     policy, value_model = bundle["policy"], bundle["value_model"]
@@ -159,6 +171,7 @@ def ppo_update(bundle, batch, cfg, eps: float):
     for _ in range(int(cfg["ppo_epochs"])):
         new_logp, _ = token_logprobs_and_entropy(policy, *args, with_entropy=False)
         loss, ratio, clip_frac = ppo_policy_loss(new_logp, batch["old_logp"], adv, mask, eps)
+        check_finite("policy loss", loss, batch)
         diag = clip_diagnostics(ratio, adv, mask, eps)
         popt.zero_grad(set_to_none=True)
         loss.backward()
@@ -169,6 +182,7 @@ def ppo_update(bundle, batch, cfg, eps: float):
         values = response_values(value_model, batch["sequences"], batch["attention_mask"],
                                  batch["prompt_width"], mask.shape[1])
         v_loss = value_mse_loss(values, batch["returns"], mask)
+        check_finite("value loss", v_loss, batch)
         vopt.zero_grad(set_to_none=True)
         (float(cfg["value_coef"]) * v_loss).backward()
         v_gn = torch.nn.utils.clip_grad_norm_(trainable_parameters(value_model), max_norm)

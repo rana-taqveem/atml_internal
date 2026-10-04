@@ -10,7 +10,7 @@ from common.data import load_yaml, prompt_messages, read_jsonl, repo_path
 from common.generation import batch_generate, score_reward_pairs
 from common.logging_utils import append_jsonl, save_json, set_seed, wall_timer
 from common.metrics import masked_mean, safe_corr, sampled_kl
-from common.models import clear_gpu, disable_dropout, load_policy, load_reward_model, load_tokenizer, reference_mode, trainable_parameters
+from common.models import clear_gpu, disable_dropout, load_policy, load_reward_model, load_tokenizer, reference_mode, trainable_parameters, upcast_trainable
 from common.policy_eval import prompt_schedule, token_logprobs_and_entropy
 from task3_grpo.grpo import (
     group_relative_advantages,
@@ -31,6 +31,7 @@ def prepare_grpo_continuation(config_path: str):
         trainable=True,
     )
     disable_dropout(policy)
+    upcast_trainable(policy)
     reward_model, reward_tokenizer = load_reward_model(cfg)
     prompts = read_jsonl(cfg["paths"]["rl_prompt_train"])
     optimizer = AdamW(trainable_parameters(policy), lr=float(cfg["learning_rate"]))
@@ -120,6 +121,9 @@ def grpo_update(bundle, batch, cfg, loss_type: str):
         with torch.no_grad():
             loss, diag = grpo_policy_loss(new_logp, batch["old_logp"], batch["advantages"], lmask, batch["ref_logp"],
                                           eps, beta, loss_type, max_len)
+        if not torch.isfinite(loss):
+            raise RuntimeError(f"non-finite GRPO loss {float(loss)} (advantages finite: "
+                               f"{bool(torch.isfinite(batch['advantages']).all())}); stopping instead of skipping updates")
         gn = torch.nn.utils.clip_grad_norm_(params, float(cfg["max_grad_norm"]))
         if torch.isfinite(gn):
             opt.step()
