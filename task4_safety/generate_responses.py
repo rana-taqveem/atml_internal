@@ -3,9 +3,9 @@ from __future__ import annotations
 import argparse
 import pandas as pd
 
-from common.data import load_yaml, repo_path
+from common.data import load_yaml, repo_path, write_jsonl
 from common.generation import batch_generate
-from common.models import load_policy, load_tokenizer
+from common.models import clear_gpu, load_policy, load_tokenizer
 
 
 def policy_specs(cfg):
@@ -59,13 +59,26 @@ def generate_for_policy(cfg, policy_name: str, batch_size: int = 4):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default="configs/feedback.yaml")
+    ap.add_argument("--policies", nargs="+", help="subset of sft/dpo/ppo/grpo (default: all four)")
+    ap.add_argument("--batch-size", type=int, default=8)
+    ap.add_argument("--skip-existing", action="store_true")
     args = ap.parse_args()
     cfg = load_yaml(args.config)
     print("Policies:", list(policy_specs(cfg)))
     print("XSTest rows:", len(load_xstest(cfg)))
-    raise NotImplementedError(
-        "TODO(student): call generate_for_policy for SFT/DPO/PPO/GRPO, save common deterministic responses, and preserve the fixed prompt order."
-    )
+    outdir = repo_path(cfg["results_dir"]) / "task4_safety"
+    for name in args.policies or list(policy_specs(cfg)):
+        adapter = policy_specs(cfg)[name]
+        if adapter is not None and not (repo_path(adapter) / "adapter_config.json").exists():
+            raise FileNotFoundError(f"{name}: adapter {adapter} not found (copy the standard Task 1-3 adapter there)")
+        path = outdir / f"generated_{name}.jsonl"
+        if args.skip_existing and path.exists():
+            print(f"[{name}] exists, skipping")
+            continue
+        records = generate_for_policy(cfg, name, batch_size=args.batch_size)  # greedy, fixed prompt order
+        write_jsonl(path, records)
+        print(f"[{name}] {len(records)} responses -> {path}", flush=True)
+        clear_gpu()
 
 
 if __name__ == "__main__":

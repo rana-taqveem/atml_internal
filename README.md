@@ -165,25 +165,41 @@ averages and a binarised-reward variant. Held-out evaluation is the Task 2 proto
 
 ### Task 4 - Safety calibration
 
-The judge loader/parser are supplied. You must implement the requested generation aggregation and evaluation.
+Policies (fixed): untouched SFT, `outputs/task1_dpo/standard`, `outputs/task2_ppo/standard`,
+`outputs/task3_grpo/standard`. One greedy response per XSTest prompt (256-token cap), fixed prompt order.
 
 ```bash
-python -m task4_safety.generate_responses --config configs/feedback.yaml
-python -m task4_safety.judge_responses --config configs/feedback.yaml
-python -m task4_safety.make_audit_sheet --config configs/feedback.yaml
-python -m task4_safety.evaluate_safety --config configs/feedback.yaml
+python -m task4_safety.generate_responses --config configs/feedback.yaml      # generated_<policy>.jsonl
+python -m task4_safety.judge_responses --config configs/feedback.yaml         # judged_<policy>.jsonl (cached)
+python -m task4_safety.make_audit_sheet --config configs/feedback.yaml        # blinded manual_audit_sheet.csv
+# ... fill manual_label in the sheet by hand (before looking at AI labels) ...
+python -m task4_safety.evaluate_safety --config configs/feedback.yaml         # safety_metrics.json, category_labels.csv
 ```
+
+Rates follow the course spec (`manifests/source_v2_task4_safety_judge_spec.json`): safe-answer = P(SAFE_ANSWER | SAFE),
+over-refusal = P(OVER_REFUSAL | SAFE), unsafe-compliance = P(UNSAFE_COMPLIANCE | UNSAFE), justified-refusal =
+P(JUSTIFIED_REFUSAL | UNSAFE); also ambiguous rate, labels inconsistent with the benchmark class, per-category label
+distributions, length, and manual-vs-AI agreement (accuracy, Cohen's kappa, confusion matrix, disagreement list).
+The audit sheet hides policy and AI label; `manual_audit_key.csv` maps rows back. `--mode all` (default, 60 IDs x 4
+policies) or `--mode rotate` (60 rows, one policy per ID).
 
 ### Task 5 - RLVR vs RLAIF
 
-The exact verifier and pairwise AI judge are supplied; you implement the evaluation/analysis.
-
 ```bash
-python -m task5_feedback.evaluate_math --config configs/feedback.yaml --dataset gsm
-python -m task5_feedback.score_perturbations --config configs/feedback.yaml
-python -m task5_feedback.evaluate_math --config configs/feedback.yaml --dataset transfer
+python -m task5_feedback.evaluate_math --config configs/feedback.yaml --dataset gsm        # 300 GSM8K eval problems
+python -m task5_feedback.score_perturbations --config configs/feedback.yaml                # 20 problems x 5 variants
+python -m task5_feedback.evaluate_math --config configs/feedback.yaml --dataset transfer   # 100 SVAMP problems
 python -m task5_feedback.compare_feedback --config configs/feedback.yaml
 ```
+
+Protocol: greedy decoding, `math_max_new_tokens` cap, exact verifier = supplied `exact_reward` (last `#### <n>`),
+format compliance = designated final parsed. AI pairwise result = supplied `PairwiseAIJudge` comparing each policy's
+response (A) with SFT's (B) on the same problem (win 1 / tie 0.5 / loss 0; the judge balances A/B orientation by hash).
+Verifier-judge agreement: verifier label A/B/TIE from correctness vs judge label. Diagnostics: four controlled pairs
+against `clean_correct` (reasoning / outcome / filler / gold-distractor), each judged in both candidate orders
+(primary = course orientation; order consistency reported), plus a 5-way round-robin win rate per variant;
+S_reason = better rate on the reasoning pair, S_outcome = better rate pooled over the two outcome-changing pairs.
+Judge and verifier inference cost is logged.
 
 ## 6. Reproducibility rules
 
