@@ -139,12 +139,29 @@ advantages whitened over the batch; `ppo_epochs: 2` policy + critic steps per ro
 
 ### Task 3 - GRPO
 
+Objective fix: `task3_grpo/grpo.py::group_relative_advantages` normalised rewards with the mean/std of the
+whole batch, ignoring `group_ids`; the GRPO advantage uses the mean/std *within each prompt's group*.
+
 ```bash
+# Step 1: 20-update continuation (K=4, truncated completions masked) + held-out evaluation
 python -m task3_grpo.continue_train --config configs/grpo.yaml --run-name standard
+python -m task3_grpo.evaluate --config configs/grpo.yaml --adapter checkpoints/grpo_midpoint_policy --name midpoint
+python -m task3_grpo.evaluate --config configs/grpo.yaml --adapter none --name sft
 python -m task3_grpo.evaluate --config configs/grpo.yaml --adapter outputs/task3_grpo/standard --name standard
+# Step 2: equal-generation group-size study on the cached K=8 completions (CPU only)
 python -m task3_grpo.analyze_group_size --config configs/grpo.yaml
-python -m task3_grpo.compare_normalization --config configs/grpo.yaml
+# Step 3: 8-update canonical GRPO vs Dr. GRPO forks + length-conditioned gradient statistics
+python -m task3_grpo.compare_normalization --config configs/grpo.yaml --skip-existing
+python -m task3_grpo.summarize --config configs/grpo.yaml
 ```
+
+Implementation choices: rollout prompts/seeds as in Task 2 (shared `common.policy_eval.prompt_schedule`); truncated
+completions keep their reward in the group mean/std but contribute no loss tokens; the Dr. GRPO condition changes
+only the sequence normaliser (1/T_k -> 1/max_completion_length) and keeps the std-scaled advantage, so the comparison
+isolates length normalisation; each completion is backpropagated separately (identical total gradient) to log its
+own gradient norm vs. its length. Group-size study: each prompt's 8 cached completions split into disjoint K-groups
+(192 generations for every K), difficulty bins = tertiles of a prompt's mean cached reward, plus random-partition
+averages and a binarised-reward variant. Held-out evaluation is the Task 2 protocol (`common.policy_eval`).
 
 ### Task 4 - Safety calibration
 

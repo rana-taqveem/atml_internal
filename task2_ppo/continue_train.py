@@ -22,7 +22,7 @@ from common.models import (
     trainable_parameters,
     value_parameter_groups,
 )
-from common.policy_eval import fitting_prompts, token_logprobs_and_entropy
+from common.policy_eval import prompt_schedule, token_logprobs_and_entropy
 from task2_ppo.ppo import clip_diagnostics, compute_gae, normalize_advantages, ppo_policy_loss, shaped_rewards, value_mse_loss
 
 
@@ -70,15 +70,6 @@ def prepare_ppo_continuation(config_path: str):
         "policy_optimizer": policy_optimizer,
         "value_optimizer": value_optimizer,
     }
-
-
-def prompt_schedule(cfg, tokenizer, rows, n_updates: int):
-    """Fixed, seeded prompt order shared by every run/fork: update u uses batches[u]."""
-    eligible = fitting_prompts(tokenizer, rows, int(cfg["max_prompt_length"]))
-    order = np.random.default_rng(int(cfg["seed"])).permutation(len(eligible))
-    per = int(cfg["prompts_per_update"])
-    picked = [eligible[i] for i in order[: n_updates * per]]
-    return [picked[u * per:(u + 1) * per] for u in range(n_updates)]
 
 
 def response_values(value_model, sequences, attention_mask, prompt_width, steps):

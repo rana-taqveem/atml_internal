@@ -16,3 +16,14 @@ output: outputs/task3_grpo/standard
 results_dir: results/task3_grpo
 group_cache: cached/grpo_k_cache.jsonl
 cache_generation_cap: 768
+
+# Student additions (implementation choices, fixed for every condition).
+reward_max_length: 1280            # same RM truncation as PPO
+group_study_partitions: 200        # random K-partitions per K for expected informative rate / advantage instability
+fork_output_template: outputs/task3_grpo/{name}
+# Held-out evaluation: identical protocol to Task 2 (common.policy_eval) so PPO/GRPO numbers are comparable.
+eval_max_response_length: 768
+missing_eos_penalty: 1.0           # applied to the held-out reward only (as in Task 2); GRPO training masks truncation instead
+eval:
+  prompts: 64
+  batch_size: 8

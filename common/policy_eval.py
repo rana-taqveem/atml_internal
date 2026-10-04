@@ -41,6 +41,15 @@ def fitting_prompts(tokenizer, rows, max_prompt_length: int, n: int | None = Non
     return out
 
 
+def prompt_schedule(cfg, tokenizer, rows, n_updates: int):
+    """Fixed, seeded prompt order shared by every run/fork of a task: update u uses batches[u]."""
+    eligible = fitting_prompts(tokenizer, rows, int(cfg["max_prompt_length"]))
+    order = np.random.default_rng(int(cfg["seed"])).permutation(len(eligible))
+    per = int(cfg["prompts_per_update"])
+    picked = [eligible[i] for i in order[: n_updates * per]]
+    return [picked[u * per:(u + 1) * per] for u in range(n_updates)]
+
+
 def token_logprobs_and_entropy(model, sequences, attention_mask, prompt_width, response_ids, chunk: int = 1,
                                with_entropy: bool = True):
     """Sampled-token log-probs and exact per-token entropy over response positions.
@@ -129,3 +138,35 @@ def evaluate_heldout(model, tokenizer, reward, cfg, prompts, *, has_adapter: boo
 
 def heldout_prompts(cfg, tokenizer, n: int, max_prompt_length: int):
     return fitting_prompts(tokenizer, read_jsonl(cfg["paths"]["rl_prompt_eval"]), max_prompt_length, n)
+
+
+def evaluate_adapter(cfg: dict, adapter: str | None, name: str, n_prompts: int | None = None):
+    """Load policy (+ reward model), run the held-out protocol, save metrics/generations under results_dir/name."""
+    from common.data import repo_path, write_jsonl
+    from common.logging_utils import save_json, wall_timer
+    from common.models import clear_gpu, load_policy, load_reward_model, load_tokenizer
+
+    elapsed = wall_timer()
+    ecfg = cfg.get("eval", {})
+    tokenizer = load_tokenizer(cfg["base_model"])
+    policy = load_policy(cfg, adapter_path=adapter, trainable=False)
+    reward = load_reward_model(cfg)
+    max_prompt = int(cfg["max_prompt_length"])
+    prompts = heldout_prompts(cfg, tokenizer, int(n_prompts or ecfg.get("prompts", 64)), max_prompt)
+    records, metrics = evaluate_heldout(
+        policy, tokenizer, reward, cfg, prompts, has_adapter=adapter is not None,
+        max_new_tokens=int(cfg["eval_max_response_length"]), max_prompt_length=max_prompt,
+        batch_size=int(ecfg.get("batch_size", 8)), seed=int(cfg["seed"]),
+        missing_eos_penalty=float(cfg.get("missing_eos_penalty", 0.0)),
+        reward_max_length=int(cfg.get("reward_max_length", 1280)),
+    )
+    out_dir = repo_path(cfg["results_dir"]) / name
+    write_jsonl(out_dir / "heldout_generations.jsonl", records)
+    metrics.update({"name": name, "adapter": adapter, "eval_wall_clock_s": round(elapsed(), 1)})
+    save_json(out_dir / "eval_metrics.json", metrics)
+    print(f"[{name}] held-out reward={metrics['reward_mean']:+.3f}+-{metrics['reward_se']:.3f} "
+          f"kl={metrics['kl_token_mean']:.4f} ent={metrics['entropy_token_mean']:.3f} "
+          f"len={metrics['response_tokens']['mean']:.1f} trunc={metrics['truncation_rate']:.2f}", flush=True)
+    del policy, reward
+    clear_gpu()
+    return metrics
