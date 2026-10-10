@@ -1,0 +1,33 @@
+{
+  "n_prompts": 64,
+  "reward_mean": 1.8936004638671875,
+  "reward_std": 1.1899838061403847,
+  "reward_se": 0.14874797576754809,
+  "reward_raw_mean": 1.9873504638671875,
+  "kl_token_mean": 0.0,
+  "kl_seq_mean": 0.0,
+  "entropy_token_mean": 0.9781994819641113,
+  "response_tokens": {
+    "mean": 334.375,
+    "std": 267.9323317089597,
+    "median": 268.0,
+    "q1": 72.0,
+    "q3": 590.0,
+    "iqr": 518.0,
+    "n": 64
+  },
+  "eos_rate": 0.90625,
+  "truncation_rate": 0.09375,
+  "decoding": {
+    "temperature": 0.7,
+    "top_p": 0.9,
+    "do_sample": true,
+    "max_new_tokens": 768,
+    "max_prompt_tokens": 256,
+    "seed": 6304,
+    "missing_eos_penalty": 1.0
+  },
+  "name": "sft",
+  "adapter": null,
+  "eval_wall_clock_s": 253.1
+}

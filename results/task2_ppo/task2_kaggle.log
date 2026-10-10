@@ -1,0 +1,124 @@
+[standard] updates=20 eps=0.2 kl_beta=0.1 prompts/update=1 ppo_epochs=2 max_response=512
+[standard] update 1/20 reward=+0.212 kl=0.0003 ent=1.468 len=512 pl=-0.0000 vl=4.987 clip=0.000 gn=0.21 t=26s
+[standard] update 2/20 reward=+1.541 kl=-0.0002 ent=0.740 len=512 pl=+0.0001 vl=5.792 clip=0.000 gn=0.18 t=51s
+[standard] update 3/20 reward=+2.613 kl=-0.0015 ent=0.287 len=30 pl=+0.0010 vl=10.264 clip=0.000 gn=2.04 t=54s
+[standard] update 4/20 reward=+2.154 kl=0.0000 ent=0.822 len=344 pl=-0.0002 vl=4.890 clip=0.000 gn=0.25 t=71s
+[standard] update 5/20 reward=+1.199 kl=0.0023 ent=1.099 len=11 pl=-0.0003 vl=1.949 clip=0.000 gn=2.39 t=72s
+[standard] update 6/20 reward=+0.231 kl=0.0014 ent=1.425 len=31 pl=+0.0003 vl=2.616 clip=0.000 gn=1.17 t=75s
+[standard] update 7/20 reward=+2.453 kl=0.0003 ent=0.860 len=308 pl=+0.0002 vl=4.473 clip=0.000 gn=0.31 t=91s
+[standard] update 8/20 reward=+1.482 kl=-0.0002 ent=1.274 len=121 pl=+0.0004 vl=7.385 clip=0.000 gn=0.49 t=97s
+[standard] update 9/20 reward=+2.168 kl=0.0003 ent=1.354 len=276 pl=-0.0003 vl=5.263 clip=0.000 gn=0.29 t=111s
+[standard] update 10/20 reward=+1.787 kl=-0.0002 ent=1.430 len=512 pl=+0.0000 vl=3.008 clip=0.000 gn=0.19 t=137s
+[standard] update 11/20 reward=+0.251 kl=-0.0001 ent=1.389 len=512 pl=+0.0001 vl=3.143 clip=0.000 gn=0.23 t=161s
+[standard] update 12/20 reward=+1.894 kl=-0.0000 ent=1.288 len=128 pl=-0.0001 vl=2.903 clip=0.000 gn=0.39 t=168s
+[standard] update 13/20 reward=+1.366 kl=0.0014 ent=0.774 len=68 pl=-0.0005 vl=1.469 clip=0.000 gn=1.04 t=172s
+[standard] update 14/20 reward=+2.861 kl=0.0104 ent=0.452 len=2 pl=+0.0008 vl=4.998 clip=0.000 gn=6.88 t=173s
+[standard] update 15/20 reward=+2.061 kl=-0.0003 ent=0.952 len=177 pl=-0.0001 vl=2.228 clip=0.000 gn=0.39 t=182s
+[standard] update 16/20 reward=+1.772 kl=0.0001 ent=0.323 len=4 pl=-0.0002 vl=3.419 clip=0.000 gn=0.67 t=184s
+[standard] update 17/20 reward=-2.020 kl=-0.0003 ent=0.515 len=13 pl=+0.0002 vl=15.963 clip=0.000 gn=1.18 t=185s
+[standard] update 18/20 reward=+0.583 kl=0.0001 ent=1.089 len=512 pl=+0.0001 vl=2.614 clip=0.000 gn=0.23 t=211s
+[standard] update 19/20 reward=+0.101 kl=0.0003 ent=1.781 len=122 pl=-0.0001 vl=6.880 clip=0.000 gn=0.52 t=217s
+[standard] update 20/20 reward=+0.822 kl=0.0000 ent=1.219 len=287 pl=+0.0000 vl=1.612 clip=0.000 gn=0.32 t=231s
+[standard] done in 3.9 min, peak VRAM 6.25 GiB -> /kaggle/working/pa2/outputs/task2_ppo/standard
+[midpoint] held-out reward=+1.491+-0.175 kl=0.0000 ent=0.959 len=316.5 trunc=0.14
+[sft] held-out reward=+1.894+-0.149 kl=0.0000 ent=0.978 len=334.4 trunc=0.09
+[standard] held-out reward=+1.687+-0.159 kl=-0.0001 ent=0.946 len=312.5 trunc=0.11
+Cached PPO rollouts: 32
+Required epsilon values: [0.05, 0.2, 0.5]
+Cache keys: ['clipped_at_max', 'effective_terminal_reward', 'old_logprobs', 'prompt_id', 'raw_terminal_reward', 'ref_logprobs', 'response', 'response_tokens', 'source_index', 'terminated_with_eos', 'values']
+[cached eps=0.05] midpoint clip=0.1543 affected=0.0761 | after 4 steps clip=0.1536 affected=0.0774 surr=-0.0112 step_kl=0.04060
+[cached eps=0.2] midpoint clip=0.0413 affected=0.0197 | after 4 steps clip=0.0413 affected=0.0199 surr=-0.0077 step_kl=0.04062
+[cached eps=0.5] midpoint clip=0.0211 affected=0.0101 | after 4 steps clip=0.0209 affected=0.0100 surr=-0.0052 step_kl=0.04062
+[fork_eps0.05_kl0.1] updates=8 eps=0.05 kl_beta=0.1 prompts/update=1 ppo_epochs=2 max_response=512
+[fork_eps0.05_kl0.1] update 1/8 reward=+0.212 kl=0.0003 ent=1.468 len=512 pl=-0.0000 vl=4.987 clip=0.000 gn=0.21 t=26s
+[fork_eps0.05_kl0.1] update 2/8 reward=+1.541 kl=-0.0002 ent=0.740 len=512 pl=+0.0001 vl=5.792 clip=0.000 gn=0.18 t=53s
+[fork_eps0.05_kl0.1] update 3/8 reward=+2.613 kl=-0.0015 ent=0.287 len=30 pl=+0.0010 vl=10.264 clip=0.017 gn=2.04 t=55s
+[fork_eps0.05_kl0.1] update 4/8 reward=+2.154 kl=0.0000 ent=0.822 len=344 pl=-0.0002 vl=4.890 clip=0.000 gn=0.25 t=73s
+[fork_eps0.05_kl0.1] update 5/8 reward=+1.199 kl=0.0023 ent=1.099 len=11 pl=-0.0003 vl=1.949 clip=0.000 gn=2.39 t=75s
+[fork_eps0.05_kl0.1] update 6/8 reward=+0.231 kl=0.0014 ent=1.425 len=31 pl=+0.0003 vl=2.616 clip=0.000 gn=1.17 t=78s
+[fork_eps0.05_kl0.1] update 7/8 reward=+2.453 kl=0.0003 ent=0.860 len=308 pl=+0.0002 vl=4.473 clip=0.000 gn=0.31 t=94s
+[fork_eps0.05_kl0.1] update 8/8 reward=+1.482 kl=-0.0002 ent=1.274 len=121 pl=+0.0004 vl=7.385 clip=0.000 gn=0.49 t=101s
+[fork_eps0.05_kl0.1] done in 1.7 min, peak VRAM 6.23 GiB -> /kaggle/working/pa2/outputs/task2_ppo/fork_eps0.05_kl0.1
+[fork_eps0.05_kl0.1] held-out reward=+1.482+-0.167 kl=-0.0000 ent=0.930 len=332.7 trunc=0.16
+[fork_eps0.2_kl0.1] updates=8 eps=0.2 kl_beta=0.1 prompts/update=1 ppo_epochs=2 max_response=512
+[fork_eps0.2_kl0.1] update 1/8 reward=+0.212 kl=0.0003 ent=1.468 len=512 pl=-0.0000 vl=4.987 clip=0.000 gn=0.21 t=28s
+[fork_eps0.2_kl0.1] update 2/8 reward=+1.541 kl=-0.0002 ent=0.740 len=512 pl=+0.0001 vl=5.792 clip=0.000 gn=0.18 t=56s
+[fork_eps0.2_kl0.1] update 3/8 reward=+2.613 kl=-0.0015 ent=0.287 len=30 pl=+0.0010 vl=10.264 clip=0.000 gn=2.04 t=59s
+[fork_eps0.2_kl0.1] update 4/8 reward=+2.154 kl=0.0000 ent=0.822 len=344 pl=-0.0002 vl=4.890 clip=0.000 gn=0.25 t=78s
+[fork_eps0.2_kl0.1] update 5/8 reward=+1.199 kl=0.0023 ent=1.099 len=11 pl=-0.0003 vl=1.949 clip=0.000 gn=2.39 t=80s
+[fork_eps0.2_kl0.1] update 6/8 reward=+0.231 kl=0.0014 ent=1.425 len=31 pl=+0.0003 vl=2.616 clip=0.000 gn=1.17 t=82s
+[fork_eps0.2_kl0.1] update 7/8 reward=+2.453 kl=0.0003 ent=0.860 len=308 pl=+0.0002 vl=4.473 clip=0.000 gn=0.31 t=100s
+[fork_eps0.2_kl0.1] update 8/8 reward=+1.482 kl=-0.0002 ent=1.274 len=121 pl=+0.0004 vl=7.385 clip=0.000 gn=0.49 t=107s
+[fork_eps0.2_kl0.1] done in 1.8 min, peak VRAM 6.23 GiB -> /kaggle/working/pa2/outputs/task2_ppo/fork_eps0.2_kl0.1
+[fork_eps0.2_kl0.1] held-out reward=+1.482+-0.167 kl=-0.0000 ent=0.930 len=332.7 trunc=0.16
+[fork_eps0.5_kl0.1] updates=8 eps=0.5 kl_beta=0.1 prompts/update=1 ppo_epochs=2 max_response=512
+[fork_eps0.5_kl0.1] update 1/8 reward=+0.212 kl=0.0003 ent=1.468 len=512 pl=-0.0000 vl=4.987 clip=0.000 gn=0.21 t=28s
+[fork_eps0.5_kl0.1] update 2/8 reward=+1.541 kl=-0.0002 ent=0.740 len=512 pl=+0.0001 vl=5.792 clip=0.000 gn=0.18 t=56s
+[fork_eps0.5_kl0.1] update 3/8 reward=+2.613 kl=-0.0015 ent=0.287 len=30 pl=+0.0010 vl=10.264 clip=0.000 gn=2.04 t=58s
+[fork_eps0.5_kl0.1] update 4/8 reward=+2.154 kl=0.0000 ent=0.822 len=344 pl=-0.0002 vl=4.890 clip=0.000 gn=0.25 t=77s
+[fork_eps0.5_kl0.1] update 5/8 reward=+1.199 kl=0.0023 ent=1.099 len=11 pl=-0.0003 vl=1.949 clip=0.000 gn=2.39 t=79s
+[fork_eps0.5_kl0.1] update 6/8 reward=+0.231 kl=0.0014 ent=1.425 len=31 pl=+0.0003 vl=2.616 clip=0.000 gn=1.17 t=82s
+[fork_eps0.5_kl0.1] update 7/8 reward=+2.453 kl=0.0003 ent=0.860 len=308 pl=+0.0002 vl=4.473 clip=0.000 gn=0.31 t=99s
+[fork_eps0.5_kl0.1] update 8/8 reward=+1.482 kl=-0.0002 ent=1.274 len=121 pl=+0.0004 vl=7.385 clip=0.000 gn=0.49 t=106s
+[fork_eps0.5_kl0.1] done in 1.8 min, peak VRAM 6.23 GiB -> /kaggle/working/pa2/outputs/task2_ppo/fork_eps0.5_kl0.1
+[fork_eps0.5_kl0.1] held-out reward=+1.482+-0.167 kl=-0.0000 ent=0.930 len=332.7 trunc=0.16
+KL beta conditions: [0.0, 0.1, 0.2]
+Fork update budget: 8
+[fork_eps0.2_kl0] updates=8 eps=0.2 kl_beta=0.0 prompts/update=1 ppo_epochs=2 max_response=512
+[fork_eps0.2_kl0] update 1/8 reward=+0.212 kl=0.0003 ent=1.468 len=512 pl=+0.0001 vl=4.987 clip=0.000 gn=0.21 t=26s
+[fork_eps0.2_kl0] update 2/8 reward=+1.541 kl=-0.0001 ent=0.740 len=512 pl=-0.0000 vl=5.795 clip=0.000 gn=0.18 t=52s
+[fork_eps0.2_kl0] update 3/8 reward=+2.613 kl=0.0006 ent=0.288 len=30 pl=-0.0008 vl=10.250 clip=0.000 gn=1.97 t=54s
+[fork_eps0.2_kl0] update 4/8 reward=+2.154 kl=0.0002 ent=0.822 len=344 pl=-0.0000 vl=4.887 clip=0.000 gn=0.25 t=72s
+[fork_eps0.2_kl0] update 5/8 reward=+1.199 kl=-0.0001 ent=1.096 len=11 pl=-0.0008 vl=1.956 clip=0.000 gn=2.39 t=73s
+[fork_eps0.2_kl0] update 6/8 reward=-0.307 kl=0.0000 ent=1.175 len=26 pl=+0.0004 vl=2.245 clip=0.000 gn=1.05 t=76s
+[fork_eps0.2_kl0] update 7/8 reward=+1.974 kl=-0.0003 ent=0.867 len=385 pl=-0.0002 vl=3.941 clip=0.000 gn=0.28 t=95s
+[fork_eps0.2_kl0] update 8/8 reward=+1.211 kl=-0.0002 ent=0.952 len=216 pl=-0.0002 vl=7.388 clip=0.000 gn=0.41 t=106s
+[fork_eps0.2_kl0] done in 1.8 min, peak VRAM 6.23 GiB -> /kaggle/working/pa2/outputs/task2_ppo/fork_eps0.2_kl0
+[fork_eps0.2_kl0] held-out reward=+1.728+-0.151 kl=-0.0001 ent=0.958 len=329.8 trunc=0.12
+[fork_eps0.2_kl0.1] reusing existing adapter at outputs/task2_ppo/fork_eps0.2_kl0.1
+[fork_eps0.2_kl0.1] reusing existing eval metrics
+[fork_eps0.2_kl0.2] updates=8 eps=0.2 kl_beta=0.2 prompts/update=1 ppo_epochs=2 max_response=512
+[fork_eps0.2_kl0.2] update 1/8 reward=+0.212 kl=0.0003 ent=1.468 len=512 pl=+0.0001 vl=4.987 clip=0.000 gn=0.21 t=27s
+[fork_eps0.2_kl0.2] update 2/8 reward=+1.293 kl=0.0001 ent=0.819 len=512 pl=+0.0001 vl=5.651 clip=0.000 gn=0.16 t=54s
+[fork_eps0.2_kl0.2] update 3/8 reward=+2.613 kl=-0.0004 ent=0.287 len=30 pl=+0.0009 vl=10.342 clip=0.000 gn=2.03 t=57s
+[fork_eps0.2_kl0.2] update 4/8 reward=+2.154 kl=-0.0001 ent=0.822 len=344 pl=+0.0000 vl=4.855 clip=0.000 gn=0.26 t=75s
+[fork_eps0.2_kl0.2] update 5/8 reward=+1.199 kl=-0.0000 ent=1.097 len=11 pl=-0.0007 vl=1.948 clip=0.000 gn=2.42 t=77s
+[fork_eps0.2_kl0.2] update 6/8 reward=-0.307 kl=0.0005 ent=1.175 len=26 pl=-0.0004 vl=2.201 clip=0.000 gn=1.04 t=79s
+[fork_eps0.2_kl0.2] update 7/8 reward=+2.553 kl=-0.0001 ent=0.836 len=318 pl=-0.0001 vl=4.335 clip=0.000 gn=0.29 t=96s
+[fork_eps0.2_kl0.2] update 8/8 reward=+1.211 kl=-0.0001 ent=0.952 len=216 pl=-0.0002 vl=7.319 clip=0.000 gn=0.42 t=108s
+[fork_eps0.2_kl0.2] done in 1.8 min, peak VRAM 6.23 GiB -> /kaggle/working/pa2/outputs/task2_ppo/fork_eps0.2_kl0.2
+[fork_eps0.2_kl0.2] held-out reward=+1.807+-0.137 kl=-0.0000 ent=0.971 len=313.2 trunc=0.14
+condition                     sft    midpoint    standard  fork_eps0.05_kl0.1  fork_eps0.2_kl0.1  fork_eps0.5_kl0.1  fork_eps0.2_kl0  fork_eps0.2_kl0.2
+clip_epsilon                  NaN         NaN  2.0000e-01          5.0000e-02         2.0000e-01         5.0000e-01       2.0000e-01         2.0000e-01
+kl_beta                       NaN         NaN  1.0000e-01          1.0000e-01         1.0000e-01         1.0000e-01       0.0000e+00         2.0000e-01
+heldout_reward             1.8936  1.4915e+00  1.6868e+00          1.4818e+00         1.4818e+00         1.4818e+00       1.7276e+00         1.8073e+00
+heldout_reward_se          0.1487  1.7505e-01  1.5934e-01          1.6706e-01         1.6706e-01         1.6706e-01       1.5092e-01         1.3709e-01
+heldout_reward_raw         1.9874  1.6321e+00  1.7962e+00          1.6380e+00         1.6380e+00         1.6380e+00       1.8526e+00         1.9479e+00
+heldout_kl_token           0.0000  6.3377e-06 -5.5829e-05         -2.1810e-05        -2.1810e-05        -2.1810e-05      -5.6392e-05        -1.0642e-05
+heldout_kl_seq             0.0000  2.0062e-03 -1.7446e-02         -7.2552e-03        -7.2552e-03        -7.2552e-03      -1.8596e-02        -3.3331e-03
+heldout_entropy            0.9782  9.5894e-01  9.4644e-01          9.3005e-01         9.3005e-01         9.3005e-01       9.5799e-01         9.7133e-01
+heldout_tokens_mean      334.3750  3.1655e+02  3.1248e+02          3.3266e+02         3.3266e+02         3.3266e+02       3.2977e+02         3.1320e+02
+heldout_tokens_std       267.9323  2.7653e+02  2.6736e+02          2.8558e+02         2.8558e+02         2.8558e+02       2.6466e+02         2.6266e+02
+heldout_tokens_iqr       518.0000  5.2550e+02  4.5575e+02          5.3850e+02         5.3850e+02         5.3850e+02       4.8725e+02         4.0325e+02
+heldout_truncation         0.0938  1.4062e-01  1.0938e-01          1.5625e-01         1.5625e-01         1.5625e-01       1.2500e-01         1.4062e-01
+reward_diff_vs_midpoint    0.4021         NaN  1.9536e-01         -9.6707e-03        -9.6707e-03        -9.6707e-03       2.3610e-01         3.1580e-01
+reward_diff_ci_lo          0.1268         NaN -6.4552e-02         -2.4069e-01        -2.4069e-01        -2.4069e-01      -3.0405e-02         8.2915e-02
+reward_diff_ci_hi          0.6973         NaN  4.8162e-01          2.4469e-01         2.4469e-01         2.4469e-01       5.4795e-01         5.8502e-01
+updates                       NaN         NaN  2.0000e+01          8.0000e+00         8.0000e+00         8.0000e+00       8.0000e+00         8.0000e+00
+tokens_generated              NaN         NaN  4.4820e+03          1.8690e+03         1.8690e+03         1.8690e+03       2.0360e+03         1.9690e+03
+mean_step_kl_k3               NaN         NaN  1.4573e-05          1.7193e-05         1.7193e-05         1.7193e-05       1.9105e-05         1.9242e-05
+max_step_kl_k3                NaN         NaN  3.5036e-05          3.5036e-05         3.5036e-05         3.5036e-05       5.6971e-05         5.1981e-05
+mean_clip_fraction            NaN         NaN  0.0000e+00          2.0833e-03         0.0000e+00         0.0000e+00       0.0000e+00         0.0000e+00
+mean_affected_fraction        NaN         NaN  0.0000e+00          0.0000e+00         0.0000e+00         0.0000e+00       0.0000e+00         0.0000e+00
+max_ratio                     NaN         NaN  1.0460e+00          1.0460e+00         1.0460e+00         1.0460e+00       1.0123e+00         1.0344e+00
+min_ratio                     NaN         NaN  9.8569e-01          9.8569e-01         9.8569e-01         9.8569e-01       9.8569e-01         9.8556e-01
+grad_norm_mean                NaN         NaN  9.6844e-01          8.7980e-01         8.7980e-01         8.7980e-01       8.4422e-01         8.5362e-01
+grad_norm_std                 NaN         NaN  1.4855e+00          8.3043e-01         8.3043e-01         8.3043e-01       8.2136e-01         8.3975e-01
+policy_loss_std               NaN         NaN  3.5937e-04          3.9102e-04         3.9102e-04         3.9102e-04       3.9337e-04         4.3900e-04
+nonfinite_steps               NaN         NaN  0.0000e+00          0.0000e+00         0.0000e+00         0.0000e+00       0.0000e+00         0.0000e+00
+train_reward_mean             NaN         NaN  1.2767e+00          1.4858e+00         1.4858e+00         1.4858e+00       1.3246e+00         1.3660e+00
+train_kl_last                 NaN         NaN  3.8718e-05         -1.5782e-04        -1.5782e-04        -1.5782e-04      -2.2768e-04        -6.5129e-05
+
+standard continuation: wall-clock 231.3 s, peak VRAM 6.252 GiB on Tesla T4
+
+Wrote /kaggle/working/pa2/results/task2_ppo/summary.csv, summary.json, figures/, qualitative_candidates.md

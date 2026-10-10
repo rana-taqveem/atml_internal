@@ -1,3 +1,6 @@
 policy,training_signal,eval_protocol,rm_reward,rm_reward_se,rm_reward_vs_start,kl_token,entropy_token,tokens_mean,truncation_rate,train_wall_clock_s,train_peak_vram_gib,train_updates,train_tokens_generated
 dpo,"offline human preference pairs (UltraFeedback), implicit reward","Task1 protocol: 128 DPO eval prompts, 256-token cap",1.3291521072387695,0.1093140005514303,-0.0317615568637847,0.0003208058478776,0.7735188007354736,168.15625,0.4921875,1534.3,8.388,94.0,
+ppo,"online samples, learned reward model + critic, KL-shaped reward","Task2/3 protocol: 64 RL eval prompts, 768-token cap",1.6868228912353516,0.1593357343616465,0.1953554153442382,-5.582920493907295e-05,0.9464424252510072,312.484375,0.109375,231.3,6.252,20.0,4482.0
 sft (Task1 protocol),none (starting policy),,1.3609136641025543,0.1028608190449707,,0.0,0.763351559638977,166.9140625,0.4765625,,,,
+ppo midpoint,supplied checkpoint,,1.4914674758911133,0.1750527110563398,,6.337659215205349e-06,0.9589449167251588,316.546875,0.140625,,,,
+sft (Task2 protocol),none (starting policy),,1.8936004638671875,0.148747975767548,,0.0,0.9781994819641112,334.375,0.09375,,,,
