@@ -1,0 +1,50 @@
+{
+  "note": "RM scores comparable only within one protocol; Task 5 rewards are on a different scale.",
+  "training_signal": {
+    "sft": "none (starting policy)",
+    "dpo": "offline human preference pairs (UltraFeedback), implicit reward",
+    "ppo": "online samples, learned reward model + critic, KL-shaped reward",
+    "grpo": "online samples, learned reward model, group-relative baseline (no critic)",
+    "rlvr": "online samples, exact final-answer verifier (binary)",
+    "rlaif": "online samples, pairwise AI-judge win rate"
+  },
+  "drift_reward_compute": [
+    {
+      "policy": "dpo",
+      "training_signal": "offline human preference pairs (UltraFeedback), implicit reward",
+      "eval_protocol": "Task1 protocol: 128 DPO eval prompts, 256-token cap",
+      "rm_reward": 1.3291521072387695,
+      "rm_reward_se": 0.1093140005514303,
+      "rm_reward_vs_start": -0.0317615568637847,
+      "kl_token": 0.0003208058478776,
+      "entropy_token": 0.7735188007354736,
+      "tokens_mean": 168.15625,
+      "truncation_rate": 0.4921875,
+      "train_wall_clock_s": 1534.3,
+      "train_peak_vram_gib": 8.388,
+      "train_updates": 94.0,
+      "train_tokens_generated": NaN
+    },
+    {
+      "policy": "sft (Task1 protocol)",
+      "training_signal": "none (starting policy)",
+      "eval_protocol": NaN,
+      "rm_reward": 1.3609136641025543,
+      "rm_reward_se": 0.1028608190449707,
+      "rm_reward_vs_start": NaN,
+      "kl_token": 0.0,
+      "entropy_token": 0.763351559638977,
+      "tokens_mean": 166.9140625,
+      "truncation_rate": 0.4765625,
+      "train_wall_clock_s": NaN,
+      "train_peak_vram_gib": NaN,
+      "train_updates": NaN,
+      "train_tokens_generated": NaN
+    }
+  ],
+  "safety": null,
+  "feedback_source": null,
+  "task5_S_reason": null,
+  "task5_S_outcome": null,
+  "task5_inference_cost": null
+}

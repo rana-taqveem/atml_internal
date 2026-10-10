@@ -201,6 +201,27 @@ against `clean_correct` (reasoning / outcome / filler / gold-distractor), each j
 S_reason = better rate on the reasoning pair, S_outcome = better rate pooled over the two outcome-changing pairs.
 Judge and verifier inference cost is logged.
 
+### Task 6 - Synthesis (no training, CPU)
+
+```bash
+python -m task6_synthesis.summarize     # results/task6_synthesis/: drift/reward/compute, safety, feedback-source tables
+```
+
+### Running on Kaggle
+
+Each task folder has a runner notebook (`task1_dpo/atml-pa2-task1.ipynb` ... `task5_feedback/atml-pa2-task5.ipynb`)
+that clones this branch, installs, downloads assets, runs a smoke test and then the commands above, and zips
+`outputs/` + `results/` for download. Order: Task 1, 2, 3, 5 (independent), then Task 4 (needs the three
+`standard` adapters; attach the task1-3 zips as a Kaggle Dataset). Task 6 runs locally on the downloaded results.
+
+### Attribution
+
+All training/evaluation loops, studies and analysis scripts in `task*/` and `common/policy_eval.py` were written
+for this assignment on top of the course starter code (`common/`, objective helpers, judges, verifier, loaders).
+No external implementation was copied; conventions follow the cited papers (DPO: Rafailov et al. 2023; PPO/GAE:
+Schulman et al. 2017/2016; GRPO: Shao et al. 2024; Dr. GRPO: Liu et al. 2025). Libraries: PyTorch, Transformers,
+PEFT, bitsandbytes, pandas, matplotlib. Coding assistance from an LLM (Claude) was used; all code was reviewed.
+
 ## 6. Reproducibility rules
 
 - Do not alter course-provided data, cached rollouts, or supplied checkpoints.
