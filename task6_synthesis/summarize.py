@@ -15,7 +15,7 @@ from common.logging_utils import load_json, save_json
 
 TRAINING_SIGNAL = {
     "sft": "none (starting policy)",
-    "dpo": "offline human preference pairs (UltraFeedback), implicit reward",
+    "dpo": "offline AI preference pairs (UltraFeedback), implicit reward",
     "ppo": "online samples, learned reward model + critic, KL-shaped reward",
     "grpo": "online samples, learned reward model, group-relative baseline (no critic)",
     "rlvr": "online samples, exact final-answer verifier (binary)",

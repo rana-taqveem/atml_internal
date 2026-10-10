@@ -20,15 +20,18 @@ def fork_name(loss_type: str) -> str:
 def length_conditioned_stats(log_rows) -> dict:
     """Per-completion gradient norm vs completion length, pooled over all updates of one fork.
 
-    Uses the gradient each completion contributed on its own (logged by grpo_update). Dividing by
-    |advantage| removes the reward-driven part, leaving the weight the normalisation gives to a
-    completion of that length.
+    Uses the gradient each completion contributed on its own (including KL).
+    Dividing by |advantage| is a descriptive statistic; it does not remove KL,
+    token content, clipping or model-Jacobian effects. Explicit surrogate token
+    weights, logged separately, test only the changed sequence denominator.
     """
-    L, G, A = [], [], []
+    L, G, A, W = [], [], [], []
     for row in log_rows:
-        for n, g, a in zip(row["seq_lengths"], row["seq_grad_norms"], row["seq_advantages"]):
+        weights = row.get("seq_policy_token_weights", [float("nan")] * len(row["seq_lengths"]))
+        for n, g, a, w in zip(row["seq_lengths"], row["seq_grad_norms"], row["seq_advantages"], weights):
             if g > 0:  # completions with no loss tokens (masked/truncated) are excluded
                 L.append(n), G.append(g), A.append(abs(a))
+                W.append(w)
     L, G, A = np.array(L, float), np.array(G, float), np.array(A, float)
     if len(L) < 2:
         return {}
@@ -46,6 +49,9 @@ def length_conditioned_stats(log_rows) -> dict:
         "mean_grad_per_abs_adv_long": float(per_adv[long_].mean()) if long_.any() else float("nan"),
         "share_of_grad_norm_from_long": float(G[long_].sum() / G.sum()),
         "share_of_tokens_from_long": float(L[long_].sum() / L.sum()),
+        "mean_policy_token_weight_short": float(np.asarray(W)[short].mean()),
+        "mean_policy_token_weight_long": float(np.asarray(W)[long_].mean()) if long_.any() else float("nan"),
+        "gradient_statistic_note": "Full parameter-gradient norms include KL and content; token weights isolate the denominator.",
     }
 
 

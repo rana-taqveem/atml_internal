@@ -7,6 +7,7 @@ import numpy as np
 
 from common.data import load_yaml, prompt_messages, read_jsonl, repo_path, write_jsonl
 from common.generation import batch_generate
+from common.evidence import generation_fingerprint, validate_cached_generation
 from common.logging_utils import save_json, set_seed
 from common.models import clear_gpu, load_policy, load_tokenizer
 from common.policy_eval import length_stats
@@ -97,10 +98,12 @@ def judge_against_sft(judge, rows, gens, policy: str):
         cached = judge._key(r["question"], a["response"], b["response"]) in judge.cache
         t0 = time.perf_counter()
         label = judge.compare(r["question"], a["response"], b["response"])
+        detail = judge.details.get(judge._key(r["question"], a["response"], b["response"]), {})
         if not cached:
             judge_s += time.perf_counter() - t0
             n_calls += 1
         out.append({"id": pid, "policy": policy, "judge": label,
+                    "judge_parse_ambiguous": detail.get("parse_ambiguous"),
                     "score": {"A": 1.0, "TIE": 0.5, "B": 0.0}[label],
                     "verifier": verifier_label(a, b), "policy_correct": a["correct"], "sft_correct": b["correct"]})
     return out, judge_s, n_calls
@@ -156,11 +159,16 @@ def main():
     gens, gen_time = {}, {}
     for name in policy_specs(cfg):
         path = out_dir / f"generations_{name}.jsonl"
+        fingerprint = generation_fingerprint(cfg, policy_specs(cfg)[name], dataset_path(cfg, args.dataset),
+                                             max_prompt_length=512, max_new_tokens=int(cfg["math_max_new_tokens"]))
         if args.skip_existing and path.exists():
             gens[name], gen_time[name] = read_jsonl(path), float("nan")
+            validate_cached_generation(gens[name], [row_id(r) for r in rows], "id", fingerprint, context=str(path))
             print(f"[{name}] reusing {path}")
         else:
             gens[name], gen_time[name] = generate_policy(cfg, tokenizer, rows, name, bs)
+            for rec in gens[name]:
+                rec["generation_fingerprint"] = fingerprint
             write_jsonl(path, gens[name])
 
     judge = PairwiseAIJudge(cfg, repo_path(cfg["results_dir"]) / "task5_feedback" / "judge_cache.json")
@@ -169,6 +177,8 @@ def main():
                "policies": {}}
     for name, recs in gens.items():
         metrics["policies"][name] = summarize_policy(recs, gen_time[name])
+    metrics["policies"]["sft"].update({"ai_pairwise_win_rate_vs_sft": 0.5,
+                                        "pairwise_baseline_note": "self-comparison tie by definition; no judge calls"})
     for name in ["rlvr", "rlaif"]:
         jrecs, judge_s, n_calls = judge_against_sft(judge, rows, gens, name)
         write_jsonl(out_dir / f"judge_{name}_vs_sft.jsonl", jrecs)
@@ -176,6 +186,8 @@ def main():
         metrics["policies"][name].update({
             "ai_pairwise_win_rate_vs_sft": float(np.mean([r["score"] for r in jrecs])),
             "judge_counts_policy_win_tie_loss": [counts["A"], counts["TIE"], counts["B"]],
+            "judge_parse_ambiguous_count": sum(r["judge_parse_ambiguous"] is True for r in jrecs),
+            "judge_parse_status_unknown_count": sum(r["judge_parse_ambiguous"] is None for r in jrecs),
             "verifier_judge_agreement": agreement(jrecs),
             "judge_seconds_per_new_call": (judge_s / n_calls) if n_calls else None,
         })

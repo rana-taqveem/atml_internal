@@ -43,6 +43,9 @@ class PairwiseAIJudge:
             self.cache = json.loads(self.cache_path.read_text(encoding="utf-8"))
         else:
             self.cache = {}
+        # Preserve the fixed judge's decisions while exposing parse-fallback ties for auditing.
+        self.details_path = self.cache_path.with_suffix(".details.json")
+        self.details = json.loads(self.details_path.read_text(encoding="utf-8")) if self.details_path.exists() else {}
 
         self.tokenizer = AutoTokenizer.from_pretrained(
             cfg["ai_judge_model"], padding_side="left", use_fast=True
@@ -95,12 +98,14 @@ class PairwiseAIJudge:
         decoded = self.tokenizer.decode(out[0, ids.shape[1]:], skip_special_tokens=True).strip().upper()
         m = re.search(r"\b(A|B|TIE)\b", decoded)
         result = m.group(1) if m else "TIE"
+        self.details[key] = {"raw_output": decoded, "parse_ambiguous": m is None}
         if swap:
             result = {"A": "B", "B": "A", "TIE": "TIE"}[result]
 
         self.cache[key] = result
         self.cache_path.parent.mkdir(parents=True, exist_ok=True)
         self.cache_path.write_text(json.dumps(self.cache, indent=2), encoding="utf-8")
+        self.details_path.write_text(json.dumps(self.details, indent=2), encoding="utf-8")
         return result
 
     def group_rewards(self, problem: str, responses: list[str]):

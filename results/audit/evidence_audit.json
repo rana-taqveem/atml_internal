@@ -1,0 +1,1156 @@
+{
+  "generated_utc": "2026-10-10T16:14:50.217670+00:00",
+  "code_head": "f2388702ee9fd5749455aa5a68996bac6da173f9",
+  "scope": "Saved-evidence consistency, file presence and local release hashes; not GPU re-execution or report approval.",
+  "checks": [
+    {
+      "check": "release SHA256: cached/grpo_k_cache.jsonl",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: cached/ppo_rollout.pt",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: cached/ppo_rollout_salvage_raw.pt",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_metadata.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy/README.md",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy/adapter_config.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy/adapter_model.safetensors",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy/added_tokens.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy/chat_template.jinja",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy/merges.txt",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy/special_tokens_map.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy/tokenizer.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy/tokenizer_config.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy/training_args.bin",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy/vocab.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy_v3_masked512/README.md",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy_v3_masked512/adapter_config.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy_v3_masked512/adapter_model.safetensors",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy_v3_masked512/added_tokens.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy_v3_masked512/chat_template.jinja",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy_v3_masked512/merges.txt",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy_v3_masked512/special_tokens_map.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy_v3_masked512/tokenizer.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy_v3_masked512/tokenizer_config.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy_v3_masked512/training_args.bin",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/grpo_midpoint_policy_v3_masked512/vocab.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/ppo_midpoint_acceptance.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/ppo_midpoint_policy/README.md",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/ppo_midpoint_policy/adapter_config.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/ppo_midpoint_policy/adapter_model.safetensors",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/ppo_midpoint_policy/added_tokens.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/ppo_midpoint_policy/chat_template.jinja",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/ppo_midpoint_policy/merges.txt",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/ppo_midpoint_policy/special_tokens_map.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/ppo_midpoint_policy/tokenizer.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/ppo_midpoint_policy/tokenizer_config.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/ppo_midpoint_policy/vocab.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/ppo_midpoint_value/added_tokens.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/ppo_midpoint_value/chat_template.jinja",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/ppo_midpoint_value/config.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/ppo_midpoint_value/merges.txt",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/ppo_midpoint_value/model.safetensors",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/ppo_midpoint_value/special_tokens_map.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/ppo_midpoint_value/tokenizer.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/ppo_midpoint_value/tokenizer_config.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/ppo_midpoint_value/vocab.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlaif_metadata.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlaif_policy/README.md",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlaif_policy/adapter_config.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlaif_policy/adapter_model.safetensors",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlaif_policy/added_tokens.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlaif_policy/chat_template.jinja",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlaif_policy/merges.txt",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlaif_policy/special_tokens_map.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlaif_policy/tokenizer.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlaif_policy/tokenizer_config.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlaif_policy/training_args.bin",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlaif_policy/vocab.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlvr_metadata.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlvr_policy/README.md",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlvr_policy/adapter_config.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlvr_policy/adapter_model.safetensors",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlvr_policy/added_tokens.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlvr_policy/chat_template.jinja",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlvr_policy/merges.txt",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlvr_policy/special_tokens_map.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlvr_policy/tokenizer.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlvr_policy/tokenizer_config.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlvr_policy/training_args.bin",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: checkpoints/rlvr_policy/vocab.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: data/dpo_length_balanced_train.jsonl",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: data/dpo_length_stratified_eval.jsonl",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: data/dpo_standard_eval.jsonl",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: data/dpo_standard_train.jsonl",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: data/gsm8k_eval.jsonl",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: data/gsm8k_rl_train.jsonl",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: data/rl_prompt_pool_eval.jsonl",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: data/rl_prompt_pool_train.jsonl",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: data/task5_controlled_reward_diagnostics.jsonl",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: data/xstest_safety_prompts.csv",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: manifests/posttraining_acceptance_summary.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: manifests/source_v2_dpo_length_control_metadata.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: manifests/source_v2_environment.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: manifests/source_v2_release_inventory.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: manifests/source_v2_reward_model_validation.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: manifests/source_v2_sha256.json",
+      "passed": true
+    },
+    {
+      "check": "release SHA256: manifests/source_v2_task4_safety_judge_spec.json",
+      "passed": true
+    },
+    {
+      "check": "DPO sft/standard: count and unique IDs",
+      "passed": true
+    },
+    {
+      "check": "DPO sft/standard: exact fixed ID order",
+      "passed": true
+    },
+    {
+      "check": "DPO sft/standard: recomputed margins/loss/labels",
+      "passed": true
+    },
+    {
+      "check": "DPO sft/standard: aggregate accuracy/loss",
+      "passed": true
+    },
+    {
+      "check": "DPO sft/length_stratified: count and unique IDs",
+      "passed": true
+    },
+    {
+      "check": "DPO sft/length_stratified: exact fixed ID order",
+      "passed": true
+    },
+    {
+      "check": "DPO sft/length_stratified: recomputed margins/loss/labels",
+      "passed": true
+    },
+    {
+      "check": "DPO sft/length_stratified: aggregate accuracy/loss",
+      "passed": true
+    },
+    {
+      "check": "DPO sft: 128 unique generation prompts",
+      "passed": true
+    },
+    {
+      "check": "DPO sft: reward/length/KL aggregates",
+      "passed": true
+    },
+    {
+      "check": "DPO sft: 10 greedy + 50 sampled word-limit responses",
+      "passed": true
+    },
+    {
+      "check": "DPO sft: fixed word-limit IDs and repeated counts",
+      "passed": true
+    },
+    {
+      "check": "DPO standard/standard: count and unique IDs",
+      "passed": true
+    },
+    {
+      "check": "DPO standard/standard: exact fixed ID order",
+      "passed": true
+    },
+    {
+      "check": "DPO standard/standard: recomputed margins/loss/labels",
+      "passed": true
+    },
+    {
+      "check": "DPO standard/standard: aggregate accuracy/loss",
+      "passed": true
+    },
+    {
+      "check": "DPO standard/length_stratified: count and unique IDs",
+      "passed": true
+    },
+    {
+      "check": "DPO standard/length_stratified: exact fixed ID order",
+      "passed": true
+    },
+    {
+      "check": "DPO standard/length_stratified: recomputed margins/loss/labels",
+      "passed": true
+    },
+    {
+      "check": "DPO standard/length_stratified: aggregate accuracy/loss",
+      "passed": true
+    },
+    {
+      "check": "DPO standard: 128 unique generation prompts",
+      "passed": true
+    },
+    {
+      "check": "DPO standard: reward/length/KL aggregates",
+      "passed": true
+    },
+    {
+      "check": "DPO standard: 10 greedy + 50 sampled word-limit responses",
+      "passed": true
+    },
+    {
+      "check": "DPO standard: fixed word-limit IDs and repeated counts",
+      "passed": true
+    },
+    {
+      "check": "DPO standard: full training budget/no skipped updates",
+      "passed": true
+    },
+    {
+      "check": "DPO standard: trained weights present",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.03/standard: count and unique IDs",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.03/standard: exact fixed ID order",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.03/standard: recomputed margins/loss/labels",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.03/standard: aggregate accuracy/loss",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.03/length_stratified: count and unique IDs",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.03/length_stratified: exact fixed ID order",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.03/length_stratified: recomputed margins/loss/labels",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.03/length_stratified: aggregate accuracy/loss",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.03: 128 unique generation prompts",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.03: reward/length/KL aggregates",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.03: 10 greedy + 50 sampled word-limit responses",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.03: fixed word-limit IDs and repeated counts",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.03: full training budget/no skipped updates",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.03: trained weights present",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.1/standard: count and unique IDs",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.1/standard: exact fixed ID order",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.1/standard: recomputed margins/loss/labels",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.1/standard: aggregate accuracy/loss",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.1/length_stratified: count and unique IDs",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.1/length_stratified: exact fixed ID order",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.1/length_stratified: recomputed margins/loss/labels",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.1/length_stratified: aggregate accuracy/loss",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.1: 128 unique generation prompts",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.1: reward/length/KL aggregates",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.1: 10 greedy + 50 sampled word-limit responses",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.1: fixed word-limit IDs and repeated counts",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.1: full training budget/no skipped updates",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.1: trained weights present",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.3/standard: count and unique IDs",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.3/standard: exact fixed ID order",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.3/standard: recomputed margins/loss/labels",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.3/standard: aggregate accuracy/loss",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.3/length_stratified: count and unique IDs",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.3/length_stratified: exact fixed ID order",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.3/length_stratified: recomputed margins/loss/labels",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.3/length_stratified: aggregate accuracy/loss",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.3: 128 unique generation prompts",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.3: reward/length/KL aggregates",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.3: 10 greedy + 50 sampled word-limit responses",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.3: fixed word-limit IDs and repeated counts",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.3: full training budget/no skipped updates",
+      "passed": true
+    },
+    {
+      "check": "DPO beta_0.3: trained weights present",
+      "passed": true
+    },
+    {
+      "check": "DPO length_balanced/standard: count and unique IDs",
+      "passed": true
+    },
+    {
+      "check": "DPO length_balanced/standard: exact fixed ID order",
+      "passed": true
+    },
+    {
+      "check": "DPO length_balanced/standard: recomputed margins/loss/labels",
+      "passed": true
+    },
+    {
+      "check": "DPO length_balanced/standard: aggregate accuracy/loss",
+      "passed": true
+    },
+    {
+      "check": "DPO length_balanced/length_stratified: count and unique IDs",
+      "passed": true
+    },
+    {
+      "check": "DPO length_balanced/length_stratified: exact fixed ID order",
+      "passed": true
+    },
+    {
+      "check": "DPO length_balanced/length_stratified: recomputed margins/loss/labels",
+      "passed": true
+    },
+    {
+      "check": "DPO length_balanced/length_stratified: aggregate accuracy/loss",
+      "passed": true
+    },
+    {
+      "check": "DPO length_balanced: 128 unique generation prompts",
+      "passed": true
+    },
+    {
+      "check": "DPO length_balanced: reward/length/KL aggregates",
+      "passed": true
+    },
+    {
+      "check": "DPO length_balanced: 10 greedy + 50 sampled word-limit responses",
+      "passed": true
+    },
+    {
+      "check": "DPO length_balanced: fixed word-limit IDs and repeated counts",
+      "passed": true
+    },
+    {
+      "check": "DPO length_balanced: full training budget/no skipped updates",
+      "passed": true
+    },
+    {
+      "check": "DPO length_balanced: trained weights present",
+      "passed": true
+    },
+    {
+      "check": "DPO: same generation prompt order across conditions",
+      "passed": true
+    },
+    {
+      "check": "DPO: identical beta-fork training order",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo sft: 64 unique held-out IDs",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo sft: aggregate reward/length/KL",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo midpoint: 64 unique held-out IDs",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo midpoint: aggregate reward/length/KL",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo standard: 64 unique held-out IDs",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo standard: aggregate reward/length/KL",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo standard: updates and finite steps",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo standard: trained weights present",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo fork_eps0.05_kl0.1: 64 unique held-out IDs",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo fork_eps0.05_kl0.1: aggregate reward/length/KL",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo fork_eps0.05_kl0.1: updates and finite steps",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo fork_eps0.05_kl0.1: trained weights present",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo fork_eps0.2_kl0.1: 64 unique held-out IDs",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo fork_eps0.2_kl0.1: aggregate reward/length/KL",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo fork_eps0.2_kl0.1: updates and finite steps",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo fork_eps0.2_kl0.1: trained weights present",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo fork_eps0.5_kl0.1: 64 unique held-out IDs",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo fork_eps0.5_kl0.1: aggregate reward/length/KL",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo fork_eps0.5_kl0.1: updates and finite steps",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo fork_eps0.5_kl0.1: trained weights present",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo fork_eps0.2_kl0: 64 unique held-out IDs",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo fork_eps0.2_kl0: aggregate reward/length/KL",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo fork_eps0.2_kl0: updates and finite steps",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo fork_eps0.2_kl0: trained weights present",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo fork_eps0.2_kl0.2: 64 unique held-out IDs",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo fork_eps0.2_kl0.2: aggregate reward/length/KL",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo fork_eps0.2_kl0.2: updates and finite steps",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo fork_eps0.2_kl0.2: trained weights present",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo: common held-out ID order",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo: common decoding protocol",
+      "passed": true
+    },
+    {
+      "check": "task2_ppo: identical fork prompt schedule",
+      "passed": true
+    }
+  ],
+  "passed": 202,
+  "failed": 0,
+  "data": {
+    "dpo_length_balanced_train.jsonl": {
+      "rows": 1500,
+      "sha256": "15e1126ef1befe35d1011a713d223ed28044f3cb0ab8cbe4acecc033fdbd9bbf",
+      "strata": {
+        "rejected_longer": 500,
+        "preferred_longer": 500,
+        "length_matched": 500
+      }
+    },
+    "dpo_length_stratified_eval.jsonl": {
+      "rows": 246,
+      "sha256": "89e2c56ee2fdaec75fcf1f56ae4802d710ed4ad08f127e097990923017ca7405",
+      "strata": {
+        "rejected_longer": 82,
+        "preferred_longer": 82,
+        "length_matched": 82
+      }
+    },
+    "dpo_standard_eval.jsonl": {
+      "rows": 300,
+      "sha256": "c1f9e7c7e140b4671efd67173a4434946780cf04232aabc03ef317ae621e5079"
+    },
+    "dpo_standard_train.jsonl": {
+      "rows": 1500,
+      "sha256": "8a0e52eb0927b261b35dab887f8f49f5d81bc666adb4621a91481ded277a3c42"
+    },
+    "gsm8k_eval.jsonl": {
+      "rows": 300,
+      "sha256": "24f712750928c18c1a0a6849eebe97b3e01a6c0c0ebf2410d101a3df1872bf4a"
+    },
+    "gsm8k_rl_train.jsonl": {
+      "rows": 1500,
+      "sha256": "0c4663731ad7d1baa201ba318b105af9129c4d9833eab86357adc42adfd73c7c"
+    },
+    "math_transfer_eval.jsonl": {
+      "rows": 100,
+      "sha256": "f24163301035ccd4b66d12b687887fe1e167dd31ef62d6bc62a2fa152dcdcb76"
+    },
+    "rl_prompt_pool_eval.jsonl": {
+      "rows": 200,
+      "sha256": "37051939db20699dff7ec9110599cdb3854890ad9ce700d310715a0784b32a83"
+    },
+    "rl_prompt_pool_train.jsonl": {
+      "rows": 1200,
+      "sha256": "633d500194260bbba777049f82d7c179410998d36eba2259d6e47440661cbb69"
+    },
+    "task5_controlled_reward_diagnostics.jsonl": {
+      "rows": 100,
+      "sha256": "9008b96595bb1419f1326bf02beefd689f09028c2aa6598d7c427394602f036c"
+    },
+    "word_limit_prompts.jsonl": {
+      "rows": 10,
+      "sha256": "4252fb01e078eaa835f9d4b3d6abaaba8033fe68e30dfa2d17c4d6886dd2ea49"
+    }
+  },
+  "task1": {
+    "sft": {
+      "status": "saved",
+      "metrics_file": "results\\task1_dpo\\sft\\eval_metrics.json"
+    },
+    "standard": {
+      "status": "saved",
+      "metrics_file": "results\\task1_dpo\\standard\\eval_metrics.json",
+      "pairs": 1500,
+      "updates": 94,
+      "peak_vram_gib": 8.388,
+      "wall_clock_s": 1534.3,
+      "adapter_sha256": "b18142daca6e6c5686364c0841f83a2674cbceee438711bf0c2951fae0f1b5cd"
+    },
+    "beta_0.03": {
+      "status": "saved",
+      "metrics_file": "results\\task1_dpo\\beta_0.03\\eval_metrics.json",
+      "pairs": 600,
+      "updates": 38,
+      "peak_vram_gib": 8.389,
+      "wall_clock_s": 618.9,
+      "adapter_sha256": "0115b2c3785d9ae34d4414b8fdb588727f4d773d80bfd0473af581e096cf1df0"
+    },
+    "beta_0.1": {
+      "status": "saved",
+      "metrics_file": "results\\task1_dpo\\beta_0.1\\eval_metrics.json",
+      "pairs": 600,
+      "updates": 38,
+      "peak_vram_gib": 8.389,
+      "wall_clock_s": 621.1,
+      "adapter_sha256": "01deca2ec67602e5b84249570161fd9767d54cd9fbb937b4bc5da63dd1d4912e"
+    },
+    "beta_0.3": {
+      "status": "saved",
+      "metrics_file": "results\\task1_dpo\\beta_0.3\\eval_metrics.json",
+      "pairs": 600,
+      "updates": 38,
+      "peak_vram_gib": 8.389,
+      "wall_clock_s": 624.0,
+      "adapter_sha256": "f4aba0090326f5405d916e08a56c68b1dd0a78db58335d7bbc0c0199ba5c867b"
+    },
+    "length_balanced": {
+      "status": "saved",
+      "metrics_file": "results\\task1_dpo\\length_balanced\\eval_metrics.json",
+      "pairs": 1500,
+      "updates": 94,
+      "peak_vram_gib": 8.39,
+      "wall_clock_s": 1188.5,
+      "adapter_sha256": "824a8844a56e578fa0f6c733e4d5295b0e85b4ed65d16d2e8d88d340e49af71a"
+    }
+  },
+  "task2": {
+    "sft": {
+      "status": "saved",
+      "metrics_file": "results\\task2_ppo\\sft\\eval_metrics.json",
+      "decoding": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "do_sample": true,
+        "max_new_tokens": 768,
+        "max_prompt_tokens": 256,
+        "seed": 6304,
+        "missing_eos_penalty": 1.0
+      }
+    },
+    "midpoint": {
+      "status": "saved",
+      "metrics_file": "results\\task2_ppo\\midpoint\\eval_metrics.json",
+      "decoding": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "do_sample": true,
+        "max_new_tokens": 768,
+        "max_prompt_tokens": 256,
+        "seed": 6304,
+        "missing_eos_penalty": 1.0
+      }
+    },
+    "standard": {
+      "status": "saved",
+      "metrics_file": "results\\task2_ppo\\standard\\eval_metrics.json",
+      "decoding": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "do_sample": true,
+        "max_new_tokens": 768,
+        "max_prompt_tokens": 256,
+        "seed": 6304,
+        "missing_eos_penalty": 1.0
+      },
+      "updates": 20,
+      "tokens_generated": 4482,
+      "wall_clock_s": 231.3,
+      "peak_vram_gib": 6.252,
+      "adapter_sha256": "f752df04ddba233d27ee6cf28ba437b93bd3e787e075bab4e4eb31ee26e40fc4",
+      "affected_fraction_max": 0.0
+    },
+    "fork_eps0.05_kl0.1": {
+      "status": "saved",
+      "metrics_file": "results\\task2_ppo\\fork_eps0.05_kl0.1\\eval_metrics.json",
+      "decoding": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "do_sample": true,
+        "max_new_tokens": 768,
+        "max_prompt_tokens": 256,
+        "seed": 6304,
+        "missing_eos_penalty": 1.0
+      },
+      "updates": 8,
+      "tokens_generated": 1869,
+      "wall_clock_s": 100.8,
+      "peak_vram_gib": 6.235,
+      "adapter_sha256": "fbd45eb6cea04ac37f1979e16c11c26de8753f8d06a81e79202cccf3f6c8ec75",
+      "affected_fraction_max": 0.0
+    },
+    "fork_eps0.2_kl0.1": {
+      "status": "saved",
+      "metrics_file": "results\\task2_ppo\\fork_eps0.2_kl0.1\\eval_metrics.json",
+      "decoding": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "do_sample": true,
+        "max_new_tokens": 768,
+        "max_prompt_tokens": 256,
+        "seed": 6304,
+        "missing_eos_penalty": 1.0
+      },
+      "updates": 8,
+      "tokens_generated": 1869,
+      "wall_clock_s": 107.0,
+      "peak_vram_gib": 6.235,
+      "adapter_sha256": "fbd45eb6cea04ac37f1979e16c11c26de8753f8d06a81e79202cccf3f6c8ec75",
+      "affected_fraction_max": 0.0
+    },
+    "fork_eps0.5_kl0.1": {
+      "status": "saved",
+      "metrics_file": "results\\task2_ppo\\fork_eps0.5_kl0.1\\eval_metrics.json",
+      "decoding": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "do_sample": true,
+        "max_new_tokens": 768,
+        "max_prompt_tokens": 256,
+        "seed": 6304,
+        "missing_eos_penalty": 1.0
+      },
+      "updates": 8,
+      "tokens_generated": 1869,
+      "wall_clock_s": 106.3,
+      "peak_vram_gib": 6.235,
+      "adapter_sha256": "fbd45eb6cea04ac37f1979e16c11c26de8753f8d06a81e79202cccf3f6c8ec75",
+      "affected_fraction_max": 0.0
+    },
+    "fork_eps0.2_kl0": {
+      "status": "saved",
+      "metrics_file": "results\\task2_ppo\\fork_eps0.2_kl0\\eval_metrics.json",
+      "decoding": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "do_sample": true,
+        "max_new_tokens": 768,
+        "max_prompt_tokens": 256,
+        "seed": 6304,
+        "missing_eos_penalty": 1.0
+      },
+      "updates": 8,
+      "tokens_generated": 2036,
+      "wall_clock_s": 106.3,
+      "peak_vram_gib": 6.232,
+      "adapter_sha256": "958d3cf766dbdee0056ddf8a7da67ec3699e76d347b4de7f7112aedb6c822aef",
+      "affected_fraction_max": 0.0
+    },
+    "fork_eps0.2_kl0.2": {
+      "status": "saved",
+      "metrics_file": "results\\task2_ppo\\fork_eps0.2_kl0.2\\eval_metrics.json",
+      "decoding": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "do_sample": true,
+        "max_new_tokens": 768,
+        "max_prompt_tokens": 256,
+        "seed": 6304,
+        "missing_eos_penalty": 1.0
+      },
+      "updates": 8,
+      "tokens_generated": 1969,
+      "wall_clock_s": 107.9,
+      "peak_vram_gib": 6.235,
+      "adapter_sha256": "f4a4bff22e8e44f10b15310b4e8d93d8e1c4e616d867a55d5615e7b7fca21af8",
+      "affected_fraction_max": 0.0
+    }
+  },
+  "task3": {
+    "sft": {
+      "status": "missing"
+    },
+    "midpoint": {
+      "status": "missing"
+    },
+    "standard": {
+      "status": "missing"
+    },
+    "fork_grpo": {
+      "status": "missing"
+    },
+    "fork_dr_grpo": {
+      "status": "missing"
+    }
+  },
+  "remaining_files": {
+    "task3_grpo": {
+      "standard/train_summary.json": false,
+      "standard/eval_metrics.json": false,
+      "midpoint/eval_metrics.json": false,
+      "sft/eval_metrics.json": false,
+      "fork_grpo/train_summary.json": false,
+      "fork_dr_grpo/train_summary.json": false,
+      "normalization_study.json": false,
+      "group_size_study.json": true,
+      "summary.csv": false
+    },
+    "task4_safety": {
+      "generated_sft.jsonl": false,
+      "generated_dpo.jsonl": false,
+      "generated_ppo.jsonl": false,
+      "generated_grpo.jsonl": false,
+      "judged_sft.jsonl": false,
+      "judged_dpo.jsonl": false,
+      "judged_ppo.jsonl": false,
+      "judged_grpo.jsonl": false,
+      "manual_audit_sheet.csv": false,
+      "safety_metrics.json": false
+    },
+    "task5_feedback": {
+      "gsm/metrics.json": false,
+      "transfer/metrics.json": false,
+      "diagnostics/diagnostic_metrics.json": false,
+      "summary.json": false
+    }
+  },
+  "adapters": {
+    "checkpoints\\grpo_midpoint_policy\\adapter_model.safetensors": {
+      "exists": true,
+      "sha256": "73a4cfc3be42aa2a5c740ef70f1eb53521d11b38e018e502ee3eae607e676f53"
+    },
+    "checkpoints\\rlvr_policy\\adapter_model.safetensors": {
+      "exists": true,
+      "sha256": "b309564b45c0268e4e5ffb0db5cb100e557a2c407a68ea3fa3de91fe964d92c8"
+    },
+    "checkpoints\\rlaif_policy\\adapter_model.safetensors": {
+      "exists": true,
+      "sha256": "e5a0eaacb3ce32a73fe86fd6a823be21c60a460eee8682493e5cc0f2e1019713"
+    },
+    "outputs\\task1_dpo\\standard\\adapter_model.safetensors": {
+      "exists": true,
+      "sha256": "b18142daca6e6c5686364c0841f83a2674cbceee438711bf0c2951fae0f1b5cd"
+    },
+    "outputs\\task2_ppo\\standard\\adapter_model.safetensors": {
+      "exists": true,
+      "sha256": "f752df04ddba233d27ee6cf28ba437b93bd3e787e075bab4e4eb31ee26e40fc4"
+    },
+    "outputs\\task3_grpo\\standard\\adapter_model.safetensors": {
+      "exists": false,
+      "sha256": null
+    }
+  },
+  "ppo_fork_actual_token_totals": {
+    "fork_eps0.05_kl0.1": 1869,
+    "fork_eps0.2_kl0.1": 1869,
+    "fork_eps0.5_kl0.1": 1869,
+    "fork_eps0.2_kl0": 2036,
+    "fork_eps0.2_kl0.2": 1969
+  },
+  "ppo_equal_actual_generated_tokens": false,
+  "all_required_files_present": false,
+  "manual_audit_complete": false,
+  "manual_report_checks_required": [
+    "Qualitative examples selected and interpreted by the student",
+    "Task 4 blinded manual labels complete",
+    "Equal-token-budget requirement resolved",
+    "8-page main report and accessible public repository"
+  ]
+}

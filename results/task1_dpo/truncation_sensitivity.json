@@ -1,0 +1,307 @@
+{
+  "max_sequence_length": 768,
+  "training_files": {
+    "data/dpo_standard_train.jsonl": {
+      "same_context": 1216,
+      "context_differs": 186,
+      "context_free": 98,
+      "n_pairs": 1500
+    },
+    "data/dpo_length_balanced_train.jsonl": {
+      "same_context": 1403,
+      "context_differs": 97,
+      "context_free": 0,
+      "n_pairs": 1500
+    }
+  },
+  "eval_splits": {
+    "standard": {
+      "pair_counts": {
+        "same_context": 240,
+        "context_differs": 39,
+        "context_free": 21
+      },
+      "conditions": {
+        "standard": {
+          "all": {
+            "n": 300,
+            "preference_accuracy": 0.6366666666666667,
+            "margin_mean": 0.39348348736763
+          },
+          "excluding_context_free": {
+            "n": 279,
+            "preference_accuracy": 0.6451612903225806,
+            "margin_mean": 0.4167010207330027
+          },
+          "same_context": {
+            "n": 240,
+            "preference_accuracy": 0.6375,
+            "margin_mean": 0.45172269493341444
+          },
+          "context_differs": {
+            "n": 39,
+            "preference_accuracy": 0.6923076923076923,
+            "margin_mean": 0.20118302565354568
+          },
+          "context_free": {
+            "n": 21,
+            "preference_accuracy": 0.5238095238095238,
+            "margin_mean": 0.08502197265625
+          }
+        },
+        "beta_0.03": {
+          "all": {
+            "n": 300,
+            "preference_accuracy": 0.61,
+            "margin_mean": 0.13183039685090384
+          },
+          "excluding_context_free": {
+            "n": 279,
+            "preference_accuracy": 0.6200716845878136,
+            "margin_mean": 0.14364268895118468
+          },
+          "same_context": {
+            "n": 240,
+            "preference_accuracy": 0.6083333333333333,
+            "margin_mean": 0.15186450108885766
+          },
+          "context_differs": {
+            "n": 39,
+            "preference_accuracy": 0.6923076923076923,
+            "margin_mean": 0.0930469219501202
+          },
+          "context_free": {
+            "n": 21,
+            "preference_accuracy": 0.47619047619047616,
+            "margin_mean": -0.02510434105282738
+          }
+        },
+        "beta_0.1": {
+          "all": {
+            "n": 300,
+            "preference_accuracy": 0.6,
+            "margin_mean": 0.12504321058591206
+          },
+          "excluding_context_free": {
+            "n": 279,
+            "preference_accuracy": 0.6093189964157706,
+            "margin_mean": 0.13869022682148924
+          },
+          "same_context": {
+            "n": 240,
+            "preference_accuracy": 0.5958333333333333,
+            "margin_mean": 0.14344916691382725
+          },
+          "context_differs": {
+            "n": 39,
+            "preference_accuracy": 0.6923076923076923,
+            "margin_mean": 0.1094044416378706
+          },
+          "context_free": {
+            "n": 21,
+            "preference_accuracy": 0.47619047619047616,
+            "margin_mean": -0.05626714797247024
+          }
+        },
+        "beta_0.3": {
+          "all": {
+            "n": 300,
+            "preference_accuracy": 0.6,
+            "margin_mean": 0.10622856338818867
+          },
+          "excluding_context_free": {
+            "n": 279,
+            "preference_accuracy": 0.6057347670250897,
+            "margin_mean": 0.11997972380730414
+          },
+          "same_context": {
+            "n": 240,
+            "preference_accuracy": 0.5958333333333333,
+            "margin_mean": 0.1292725111047427
+          },
+          "context_differs": {
+            "n": 39,
+            "preference_accuracy": 0.6666666666666666,
+            "margin_mean": 0.06279334043845153
+          },
+          "context_free": {
+            "n": 21,
+            "preference_accuracy": 0.5238095238095238,
+            "margin_mean": -0.07646542503720238
+          }
+        },
+        "length_balanced": {
+          "all": {
+            "n": 300,
+            "preference_accuracy": 0.6233333333333333,
+            "margin_mean": 0.44344221889972685
+          },
+          "excluding_context_free": {
+            "n": 279,
+            "preference_accuracy": 0.6379928315412187,
+            "margin_mean": 0.4695371553889312
+          },
+          "same_context": {
+            "n": 240,
+            "preference_accuracy": 0.6291666666666667,
+            "margin_mean": 0.4827684578796228
+          },
+          "context_differs": {
+            "n": 39,
+            "preference_accuracy": 0.6923076923076923,
+            "margin_mean": 0.38811375544621396
+          },
+          "context_free": {
+            "n": 21,
+            "preference_accuracy": 0.42857142857142855,
+            "margin_mean": 0.09675234840029762
+          }
+        }
+      }
+    },
+    "length_stratified": {
+      "pair_counts": {
+        "same_context": 230,
+        "context_differs": 16,
+        "context_free": 0
+      },
+      "conditions": {
+        "standard": {
+          "all": {
+            "n": 246,
+            "preference_accuracy": 0.5853658536585366,
+            "margin_mean": 0.2639336867061088
+          },
+          "excluding_context_free": {
+            "n": 246,
+            "preference_accuracy": 0.5853658536585366,
+            "margin_mean": 0.2639336867061088
+          },
+          "same_context": {
+            "n": 230,
+            "preference_accuracy": 0.5739130434782609,
+            "margin_mean": 0.270902709338976
+          },
+          "context_differs": {
+            "n": 16,
+            "preference_accuracy": 0.75,
+            "margin_mean": 0.16375398635864258
+          },
+          "context_free": {
+            "n": 0,
+            "preference_accuracy": null,
+            "margin_mean": null
+          }
+        },
+        "beta_0.03": {
+          "all": {
+            "n": 246,
+            "preference_accuracy": 0.5853658536585366,
+            "margin_mean": 0.12562223469338765
+          },
+          "excluding_context_free": {
+            "n": 246,
+            "preference_accuracy": 0.5853658536585366,
+            "margin_mean": 0.12562223469338765
+          },
+          "same_context": {
+            "n": 230,
+            "preference_accuracy": 0.5826086956521739,
+            "margin_mean": 0.13195723347041918
+          },
+          "context_differs": {
+            "n": 16,
+            "preference_accuracy": 0.625,
+            "margin_mean": 0.03455662727355957
+          },
+          "context_free": {
+            "n": 0,
+            "preference_accuracy": null,
+            "margin_mean": null
+          }
+        },
+        "beta_0.1": {
+          "all": {
+            "n": 246,
+            "preference_accuracy": 0.5691056910569106,
+            "margin_mean": 0.11358568435761987
+          },
+          "excluding_context_free": {
+            "n": 246,
+            "preference_accuracy": 0.5691056910569106,
+            "margin_mean": 0.11358568435761987
+          },
+          "same_context": {
+            "n": 230,
+            "preference_accuracy": 0.5652173913043478,
+            "margin_mean": 0.11809241564377494
+          },
+          "context_differs": {
+            "n": 16,
+            "preference_accuracy": 0.625,
+            "margin_mean": 0.048801422119140625
+          },
+          "context_free": {
+            "n": 0,
+            "preference_accuracy": null,
+            "margin_mean": null
+          }
+        },
+        "beta_0.3": {
+          "all": {
+            "n": 246,
+            "preference_accuracy": 0.573170731707317,
+            "margin_mean": 0.09757385118220879
+          },
+          "excluding_context_free": {
+            "n": 246,
+            "preference_accuracy": 0.573170731707317,
+            "margin_mean": 0.09757385118220879
+          },
+          "same_context": {
+            "n": 230,
+            "preference_accuracy": 0.5652173913043478,
+            "margin_mean": 0.10321091879969058
+          },
+          "context_differs": {
+            "n": 16,
+            "preference_accuracy": 0.6875,
+            "margin_mean": 0.016541004180908203
+          },
+          "context_free": {
+            "n": 0,
+            "preference_accuracy": null,
+            "margin_mean": null
+          }
+        },
+        "length_balanced": {
+          "all": {
+            "n": 246,
+            "preference_accuracy": 0.6138211382113821,
+            "margin_mean": 0.43580852776038936
+          },
+          "excluding_context_free": {
+            "n": 246,
+            "preference_accuracy": 0.6138211382113821,
+            "margin_mean": 0.43580852776038936
+          },
+          "same_context": {
+            "n": 230,
+            "preference_accuracy": 0.6043478260869565,
+            "margin_mean": 0.45369548486626665
+          },
+          "context_differs": {
+            "n": 16,
+            "preference_accuracy": 0.75,
+            "margin_mean": 0.17868351936340332
+          },
+          "context_free": {
+            "n": 0,
+            "preference_accuracy": null,
+            "margin_mean": null
+          }
+        }
+      }
+    }
+  }
+}

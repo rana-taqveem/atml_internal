@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 from common.data import load_yaml, read_jsonl, repo_path
+from common.evidence import validate_ids
 
 POLICIES = ["sft", "dpo", "ppo", "grpo"]
 
@@ -31,6 +32,9 @@ def main():
     args = ap.parse_args()
     cfg = load_yaml(args.config)
     outdir = repo_path(cfg["results_dir"]) / "task4_safety"
+    sheet = outdir / "manual_audit_sheet.csv"
+    if sheet.exists():
+        raise FileExistsError(f"{sheet} exists - refusing to overwrite manual labels or audit metadata.")
     src = outdir / "generated_sft.jsonl"
     if not src.exists():
         raise FileNotFoundError("Generate/save SFT responses first: " + str(src))
@@ -41,6 +45,11 @@ def main():
     # Blinded sheet: prompt + response only (no policy name, no AI label), rows shuffled with the seed.
     gens = {p: {r["xstest_id"]: r for r in read_jsonl(outdir / f"generated_{p}.jsonl")}
             for p in POLICIES if (outdir / f"generated_{p}.jsonl").exists()}
+    if set(gens) != set(POLICIES):
+        raise ValueError("Generate all four fixed policies before creating the manual audit sheet")
+    expected = pd.read_csv(repo_path(cfg["paths"]["xstest"])).xstest_id.tolist()
+    for p in POLICIES:
+        validate_ids(read_jsonl(outdir / f"generated_{p}.jsonl"), expected, "xstest_id", context=f"audit {p}")
     rng = np.random.default_rng(int(cfg["seed"]) + 1)
     pairs = []
     if args.mode == "all":

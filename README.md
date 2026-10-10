@@ -4,6 +4,14 @@
 
 ## Quick start
 
+Audit and remaining work: [assignment audit](docs/assignment_audit.md),
+[remaining execution commands](docs/remaining_execution.md).
+Run `python -m scripts.audit_assignment` to check saved evidence, and
+`python -m scripts.preflight_task --task 3 --require-cuda` (or task 4/5) before GPU work.
+See the audit's unresolved DPO truncation and realized-token-budget issues before
+claiming full assignment compliance. New evaluation-cache checks reject partial
+smoke results and generations from different policies/protocols.
+
 ```bash
 git clone https://github.com/AbDu11aHHH/ATML-PA2-LLM-PostTraining.git
 cd ATML-PA2-LLM-PostTraining

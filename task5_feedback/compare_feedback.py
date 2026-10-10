@@ -35,7 +35,7 @@ def policy_table(base) -> pd.DataFrame:
         for split, m in [("gsm", g), ("transfer", t)]:
             for ft, n in m["failure_types"].items():
                 row[f"{split}_{ft}"] = n
-            if "ai_pairwise_win_rate_vs_sft" in m:
+            if "judge_counts_policy_win_tie_loss" in m:
                 row[f"{split}_win_rate_vs_sft"] = m["ai_pairwise_win_rate_vs_sft"]
                 w, ti, lo = m["judge_counts_policy_win_tie_loss"]
                 row[f"{split}_judge_W_T_L"] = f"{w}/{ti}/{lo}"
@@ -44,6 +44,8 @@ def policy_table(base) -> pd.DataFrame:
                 row[f"{split}_n_verifier_decisive"] = agr["n_verifier_decisive"]
                 row[f"{split}_judge_tie_on_verifier_ties"] = agr["judge_tie_rate_on_verifier_ties"]
                 row[f"{split}_exact_label_agreement"] = agr["exact_label_agreement"]
+            elif p == "sft":
+                row[f"{split}_win_rate_vs_sft"] = 0.5  # self-comparison reference
         if "gsm_win_rate_vs_sft" in row:
             row["win_rate_drop"] = row["gsm_win_rate_vs_sft"] - row["transfer_win_rate_vs_sft"]
         rows.append(row)

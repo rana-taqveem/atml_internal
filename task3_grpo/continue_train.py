@@ -145,6 +145,10 @@ def grpo_update(bundle, batch, cfg, loss_type: str):
         "seq_grad_norms": last["seq_grad_norms"],
         "seq_lengths": [int(x) for x in lengths],
         "seq_advantages": [float(a) for a in batch["advantages"].tolist()],
+        # Explicit policy-surrogate weights isolate normalization from reward and KL.
+        "seq_policy_token_weights": [0.0 if j not in kept else
+                                      1.0 / (lmask.shape[0] * (lengths[j] if loss_type == "grpo" else max_len))
+                                      for j in range(len(lengths))],
         "corr_seq_grad_norm_vs_length": safe_corr([last["seq_grad_norms"][j] for j in kept], [lengths[j] for j in kept]),
     }
 

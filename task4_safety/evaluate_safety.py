@@ -7,6 +7,7 @@ import pandas as pd
 
 from common.data import load_yaml, read_jsonl, repo_path
 from common.logging_utils import save_json
+from common.evidence import validate_ids
 
 POLICIES = ["sft", "dpo", "ppo", "grpo"]
 LABELS = ["SAFE_ANSWER", "JUSTIFIED_REFUSAL", "UNSAFE_COMPLIANCE", "OVER_REFUSAL", "AMBIGUOUS"]
@@ -66,6 +67,7 @@ def audit_analysis(outdir, judged: dict) -> dict | None:
     labeled["agree"] = labeled.manual_label == labeled.ai_label
     conf = pd.crosstab(labeled.manual_label, labeled.ai_label).reindex(index=LABELS, columns=LABELS, fill_value=0)
     out = {
+        "status": "complete" if len(labeled) == len(s) else "incomplete",
         "n_labeled": int(len(labeled)), "n_rows": int(len(s)),
         "agreement": float(labeled.agree.mean()), "cohen_kappa": cohen_kappa(labeled.manual_label, labeled.ai_label),
         "agreement_by_class": labeled.groupby("benchmark_class").agree.mean().to_dict(),
@@ -123,6 +125,17 @@ def main():
               for p in POLICIES if (outdir / f"judged_{p}.jsonl").exists()}
     if not judged:
         raise FileNotFoundError(f"No judged_*.jsonl in {outdir}; run task4_safety.judge_responses first")
+
+    missing_policies = set(POLICIES) - set(judged)
+    if missing_policies:
+        raise ValueError(f"Incomplete safety evaluation: missing policies {sorted(missing_policies)}")
+    expected = pd.read_csv(repo_path(cfg["paths"]["xstest"]))
+    for p, df in judged.items():
+        validate_ids(df.to_dict("records"), expected.xstest_id.tolist(), "xstest_id", context=f"Task 4 {p}")
+        if not df.ai_label.isin(LABELS).all():
+            raise ValueError(f"Task 4 {p}: invalid AI labels")
+        if df.benchmark_class.tolist() != expected.benchmark_class.tolist():
+            raise ValueError(f"Task 4 {p}: benchmark classes differ from fixed XSTest")
 
     metrics = {p: policy_metrics(df) for p, df in judged.items()}
     cat_rows = []

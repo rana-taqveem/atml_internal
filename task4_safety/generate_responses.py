@@ -3,7 +3,8 @@ from __future__ import annotations
 import argparse
 import pandas as pd
 
-from common.data import load_yaml, repo_path, write_jsonl
+from common.data import load_yaml, read_jsonl, repo_path, write_jsonl
+from common.evidence import generation_fingerprint, validate_cached_generation
 from common.generation import batch_generate
 from common.models import clear_gpu, load_policy, load_tokenizer
 
@@ -67,15 +68,28 @@ def main():
     print("Policies:", list(policy_specs(cfg)))
     print("XSTest rows:", len(load_xstest(cfg)))
     outdir = repo_path(cfg["results_dir"]) / "task4_safety"
+    expected_ids = load_xstest(cfg)["xstest_id"].tolist()
+    # Check all requested adapters before generating any policy.
+    for name in args.policies or list(policy_specs(cfg)):
+        adapter = policy_specs(cfg)[name]
+        if adapter is not None:
+            for filename in ("adapter_config.json", "adapter_model.safetensors"):
+                if not (repo_path(adapter) / filename).is_file():
+                    raise FileNotFoundError(f"{name}: missing {adapter}/{filename}")
     for name in args.policies or list(policy_specs(cfg)):
         adapter = policy_specs(cfg)[name]
         if adapter is not None and not (repo_path(adapter) / "adapter_config.json").exists():
             raise FileNotFoundError(f"{name}: adapter {adapter} not found (copy the standard Task 1-3 adapter there)")
         path = outdir / f"generated_{name}.jsonl"
+        fingerprint = generation_fingerprint(cfg, adapter, cfg["paths"]["xstest"], max_prompt_length=256,
+                                             max_new_tokens=int(cfg["safety_max_new_tokens"]))
         if args.skip_existing and path.exists():
+            validate_cached_generation(read_jsonl(path), expected_ids, "xstest_id", fingerprint, context=str(path))
             print(f"[{name}] exists, skipping")
             continue
         records = generate_for_policy(cfg, name, batch_size=args.batch_size)  # greedy, fixed prompt order
+        for rec in records:
+            rec["generation_fingerprint"] = fingerprint
         write_jsonl(path, records)
         print(f"[{name}] {len(records)} responses -> {path}", flush=True)
         clear_gpu()

@@ -9,7 +9,9 @@ import argparse
 import numpy as np
 import pandas as pd
 
-from common.data import load_yaml, read_jsonl, repo_path
+from common.data import (encode_prompt_response, load_yaml, preference_responses,
+                         prompt_messages_from_preference, read_jsonl, repo_path)
+from common.models import load_tokenizer
 from common.logging_utils import load_json, save_json
 from common.metrics import safe_corr
 
@@ -142,6 +144,58 @@ def length_mechanism(results_dir, names) -> dict:
             paired[s] = {"accuracy_diff": float(d.mean()), "ci95": [lo, hi],
                          "discordant_pairs": int((d != 0).sum()), "n_pairs": len(d)}
         out["length_balanced_minus_standard"] = paired
+    return out
+
+
+def pair_context_class(tokenizer, row, max_length: int) -> str:
+    """How the course encoder (`encode_prompt_response`) truncated this pair's prompt context.
+
+    'context_free': at least one response kept no prompt token (response >= max_length - 1 tokens);
+    'context_differs': both kept some prompt, but chosen and rejected saw different prompt prefixes;
+    'same_context': both responses were scored with the identical prompt prefix.
+    """
+    msgs = prompt_messages_from_preference(row)
+    prefixes = []
+    for response in preference_responses(row):
+        ids, mask = encode_prompt_response(tokenizer, msgs, response, max_length)
+        prefix = [i for i, m in zip(ids, mask) if not m]
+        if not prefix:
+            return "context_free"
+        prefixes.append(prefix)
+    return "same_context" if prefixes[0] == prefixes[1] else "context_differs"
+
+
+def truncation_sensitivity(results_dir, names, cfg) -> dict:
+    """Held-out metrics split by prompt-context class (evaluation-side sensitivity only).
+
+    This shows how much the *reported held-out numbers* depend on truncated pairs. It cannot show
+    what training without truncation would have produced: every trained condition saw the same
+    encoder during training (counts per training file are reported for that reason).
+    """
+    tok = load_tokenizer(cfg["base_model"])
+    max_len = int(cfg["max_sequence_length"])
+    classes = ["same_context", "context_differs", "context_free"]
+    out = {"max_sequence_length": max_len, "training_files": {}, "eval_splits": {}}
+    for key in ["dpo_standard_train", "dpo_length_train"]:
+        rows = read_jsonl(cfg["paths"][key])
+        cls = [pair_context_class(tok, r, max_len) for r in rows]
+        out["training_files"][cfg["paths"][key]] = {c: cls.count(c) for c in classes} | {"n_pairs": len(rows)}
+    for split, key in [("standard", "dpo_standard_eval"), ("length_stratified", "dpo_length_eval")]:
+        rows = read_jsonl(cfg["paths"][key])
+        cls_of = {}
+        for r in rows:
+            cls_of[(r["prompt_id"], r.get("length_stratum"))] = pair_context_class(tok, r, max_len)
+        entry = {"pair_counts": {c: sum(v == c for v in cls_of.values()) for c in classes}, "conditions": {}}
+        for name in [n for n in names if n != "sft"]:
+            recs = read_jsonl(results_dir / name / f"eval_pairs_{split}.jsonl")
+            groups = {"all": recs, "excluding_context_free": [r for r in recs if cls_of[(r["prompt_id"], r.get("length_stratum"))] != "context_free"]}
+            groups.update({c: [r for r in recs if cls_of[(r["prompt_id"], r.get("length_stratum"))] == c] for c in classes})
+            entry["conditions"][name] = {
+                g: {"n": len(v),
+                    "preference_accuracy": float(np.mean([r["correct"] for r in v])) if v else None,
+                    "margin_mean": float(np.mean([r["margin"] for r in v])) if v else None}
+                for g, v in groups.items()}
+        out["eval_splits"][split] = entry
     return out
 
 
@@ -284,6 +338,7 @@ def main():
         print(df.T.to_string(header=False))
     plot_all(results_dir, results_dir / "figures", df, names)
     save_json(results_dir / "length_mechanism.json", length_mechanism(results_dir, names))
+    save_json(results_dir / "truncation_sensitivity.json", truncation_sensitivity(results_dir, names, cfg))
     for target in ["standard", "length_balanced"]:
         if (results_dir / target / "generations.jsonl").exists():
             (results_dir / f"qualitative_candidates_{target}.md").write_text(

@@ -1,0 +1,639 @@
+{
+  "max_dpo_sequence_length": 768,
+  "preference_sets": {
+    "dpo_standard_train.jsonl": {
+      "responses": 3000,
+      "no_prompt_tokens": 118,
+      "pairs": 1500,
+      "pairs_with_different_prompt_context": 264,
+      "no_prompt_examples": [
+        {
+          "prompt_id": "7c5b4d5a7ef79217c23651fc7f5e287899e603ead62eb2248a8a8caa4818d428",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "24d7753e5614022bc1b16c14069c4cc3075bb8131544818a645498dcd8293f30",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "6ec01ec1c6f33ca0f6beff650adb32441bd8d861647112006bf3914665d1f5ff",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "5055d32b3011b002a2b5c73a71d5795b948426fb1e04fac1df767e29eb5a9819",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "a20171e01ae4d003e13e0c95b872e206e967e72074d6847191f6f5c77ef84467",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "3a486a940b2b6cd63dcdb01f91671c954721f2f145138c1e7c6b57c47ab60f26",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "105dca76a8fb97be757b2d4a00cc2a776a4aa476ddc4e03585e303b408ef7189",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "ba07791fd188dfea0742b5579215be2b8d6070b4a6390031b1692fb75d97edca",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "da3bdae6e5b071baeb442c52fc253e60ce3253c962ff61d4f1ca3e5dec5737c3",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "60d68326cf3495cc1b19b1933a400b1a2394daac62b1a497eba41ba1183ec434",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "60d68326cf3495cc1b19b1933a400b1a2394daac62b1a497eba41ba1183ec434",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "8058a5cfa517b17783c7ed36bd472b33cbf66679c52b4b88531e78f35cb0ccaf",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "8058a5cfa517b17783c7ed36bd472b33cbf66679c52b4b88531e78f35cb0ccaf",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "0e0405b44908984bd338efccb499d0959ce6ad6954dab3f3729dc8a0eeb49ae8",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "ad4341af5ceaad4206f0c6d90129a9d6998876eaec4fb316e20cb3b7f2c6d311",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "e515372d440b38f33aed163b3432a35b5318f13f88ceabba579f044afee26f09",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "a3d191301e08183a3adc2926b344d74150668d31df7c56a9e88a867642758eb7",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "4f6e91d8fa987c443bff40eaedba9eb12fda780ef1135085e96cc452b5c697e9",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "fec3781cf0fc0e2ebb4b59c7405ee05b2b5f89a22804631bf2c20b0daff58217",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "fd70d4c895524011e8b04926686156b96153368dc95b8a45b5f726b9e0c6f084",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "6713375bb184dc03568593a6a33837a898971c30f5ab6221b2ff79371068f36e",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "6b4130187a4349cc44cd928f549297600aaebb09b36fe738c8fa575195d05231",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "74a76b6c935256098b0ef825f9b021d04b664b623eb0fff140628877f279e5d3",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "3e4c72263db5f2de491d990c41c0072dd68c6651e48267054b1ecadb6272dc1c",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "0a5056df3581a3476461fa681dcdf603cfd8032f8cefec5c213adc39c8614a26",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "31e649be5d5807905c8a62cd0d18fdde75c816b11ddeeabc73e23b0c0030d147",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "31e649be5d5807905c8a62cd0d18fdde75c816b11ddeeabc73e23b0c0030d147",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "f432840a468cfeebb663f4fac17f43e7e8a0b260267de73ece5d1c79ad119184",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "a00ecb23c07dd985fcc36fbbc67fed890d6cd487e143d2a31cf747aafc25c96e",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "3f4fa49a1dc7edd43b910393cc33012f8114eb707c8c458633befeacf70ad86c",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "8f38ddf443f44b53dfa40eae37e914e0281b73476ec0a6e3ab515fdef83cf560",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "8dd95fe36be1acbd0cfc8ad6d2ca7f24da21498e9d18dec1da855da0f21c08a7",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "8dd95fe36be1acbd0cfc8ad6d2ca7f24da21498e9d18dec1da855da0f21c08a7",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "ccae2771582474b9f45b90b81873ac4f899582714da6b6884218d0c180b46189",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "f2d16536afb4505854ad9409c7baf4c8eeafecb0e1e5a4fa0918232bcc84ff8a",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "c184124c050c54d1162374c3eb85ada894bcd4e00b1e4ac38e0894b1072442ae",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "b629c5799b8333a80ed23313570b48f109b8a00046dd27202e3165ef5af6f5fe",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "b629c5799b8333a80ed23313570b48f109b8a00046dd27202e3165ef5af6f5fe",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "d0c01a5170bfa1152cfee1c1c423387e27291d54f286b7e15070a5dcddbf3fec",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "68e74d25d6e57bbff18cb3522ad75b35c9ceb9c6595b7aee2b7913846396cc68",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "e7a09745dd1090252574a1c20f893021982612dbd8c8c33714559be860e4497b",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "e7a09745dd1090252574a1c20f893021982612dbd8c8c33714559be860e4497b",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "650fe37b5c46743e17b21aa03ea7387c2ed2d1f071b7a209debb4eb04bd9c1c4",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "650fe37b5c46743e17b21aa03ea7387c2ed2d1f071b7a209debb4eb04bd9c1c4",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "5e9033a2ff51cf59f5971c77ea670b6d1fcaa246a4e9cbe6ffcecaac10a1f4e7",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "2277e0316dd39121eea38280376dbe2a3c596a386456e61a3676c27c71996cbf",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "cdad72267499800bc22448ddb4ac702e0dfb97b5090b52c6ee1a0976279377d2",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "cdad72267499800bc22448ddb4ac702e0dfb97b5090b52c6ee1a0976279377d2",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "8d054a3d9d9ecdb88db0cc99594c2183bf192667284bb273e05b7c1096995375",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "8d054a3d9d9ecdb88db0cc99594c2183bf192667284bb273e05b7c1096995375",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "4ded27b2c64c0f533fd2746b6a23d6d33c546d0a7028c924cb53d14899d7409e",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "06c7e8a20a2c29bd414855b698382a4387da4f7b1cb140a4fd4049d5e1d108c5",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "535981a90bdca67f96558e2d171465c3fcc926fd3a608011ebc30917ac2a5d10",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "eed29fbf6e35f77b8df71a3a76ad1a5ea347daafee88fe8117316190d409e7f2",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "6c3949ffcd8936dc52b97195525f03ccddd163c58a9f350941e369bafbfab997",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "820dc2207744ab9c18d4e90339887913e91e8baab726f806c68b7b504dbc9165",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "ffc38bce555cb1981b6d8cce1f0e8a094bfc9634f8606e6b225f80a8f53282ac",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "bdc58d0f1d03848bb9aadcf33d42b557d918a77aef139f5a8e671aa5b1627f87",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "9fc3bc79c5d1a9b8ea303bdca96029624ffdeba6e1dd582993adf67ffabcb60c",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "565fad0951ccb1385a92c4a942e67bb11c832ffb046b891ca5fed1043a72a8fd",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "565fad0951ccb1385a92c4a942e67bb11c832ffb046b891ca5fed1043a72a8fd",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "1b5e73a6fd7dfb43c5cc491fff8f774fd5bcb065fffa4b12446f42bcd0c6e57b",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "0bdef4c7fc1e20ca14aac9c20785256fa2c8d2175914fe04b9b5fc7886ad5826",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "761fcee78bbe2b15b3d799823c913a7c142107cdc9530a9ab2c60e42663e041b",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "0e38253accaa3b7539c4d78de9897f7889c52075e80c056205d2a05fd0d621eb",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "0e38253accaa3b7539c4d78de9897f7889c52075e80c056205d2a05fd0d621eb",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "742b1084d8df4dd25a6d2520caf1c5dd5cfe37a194a029146eb634f06cd4db2b",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "395343697b5c306849a126974b04ea4cbf0918248e453b3992e3aff66a495b85",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "1c3efe3cc284b06f8c0405ae9bdb1de5ddc3cb3bcee15859847dda8a377af342",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "b6aeb904695b7e192403330354ed57560a6c4cffc5542fb7512e134e03852c29",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "b6aeb904695b7e192403330354ed57560a6c4cffc5542fb7512e134e03852c29",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "943cddf909177bf5ef8561b4a5f22361d0537aaec7676d368456f99a828dd5f1",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "943cddf909177bf5ef8561b4a5f22361d0537aaec7676d368456f99a828dd5f1",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "027f34183e80589b7e3d576d066fc9a63b94d81da073eaa56933373a543b5c6e",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "027f34183e80589b7e3d576d066fc9a63b94d81da073eaa56933373a543b5c6e",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "811ec7c6a6cf9ae902daeabf44b7dc20dd1baf7f30065afa4da5e204d067f17f",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "7cf9592ef75ea80cc565c2d4f9f260a4b3966e6fb0c09d417777347bf756028c",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "7134fa160dde5187a0fc9ecc8f9b5455d86bb9211812f92d5f9dd0881b995479",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "7134fa160dde5187a0fc9ecc8f9b5455d86bb9211812f92d5f9dd0881b995479",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "82f7e77464266a1565df26f1dfb1660a913a62f530e9f5d879404e9cc7d077ee",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "ef8aba816c519f8bfa4b263754771e14ce2b51ebf85e8bf00d8718d76c0b803a",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "ef8aba816c519f8bfa4b263754771e14ce2b51ebf85e8bf00d8718d76c0b803a",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "413ec38191f7d87f42636419740fdc99aec0ab73ccadbd3760d924b84db6120d",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "25bf32d263e3958d6695c133853a91581df6fb26d372322d5b50b4ab23b6e90c",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "b7733589fb059c6feb8f88bffb6f5cb900ab49ead3c7d8dff85ea686a7349d7e",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "b7733589fb059c6feb8f88bffb6f5cb900ab49ead3c7d8dff85ea686a7349d7e",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "9a2b4f83c6646de38230888ad67dc342afb8d3af0959a738d59fdec5f9d73099",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "f4b5b8d7bdda711a7618d7918e9676b8d06e98be2ec71f3c2f3a2d0099b0efe4",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "f4b5b8d7bdda711a7618d7918e9676b8d06e98be2ec71f3c2f3a2d0099b0efe4",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "163c03e0734a6fcaddc9687b499f8c3656ddfaa003915a5095b1dda6a9497f13",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "92c7b04192a601d9321539be3dcce7bfaa969c99da191a303a5370370b0335c6",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "c6aaf557ad557b1a9612308a5350f6ba0a7f82c320f87b0da24fcee0d80aac9e",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "9722397e7af95d12b6ad5e9a856b65f785f5c6e95123455cdbcb2a1eba39ea6e",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "ebe937e53e1891bd917f8039a3079b710362838bfca31428a4c32d13427c96a8",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "efff5bfd21ce867d0bb5ef5b41ec609bed9d036a7af6a5ea7dd789afabede7fe",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "784e2ff097152780405fbf1a758418c5fea5f00e47ae5024f2b87de282d03bdd",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "87bd94034039077b0feb6ce00c261ddb5f37bb176a8f54653486270a0651b160",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "76c8500e313ddcd9d5203219ef95a86ff29b58972e0c0cfbd4311cbcc9e7c86a",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "76c8500e313ddcd9d5203219ef95a86ff29b58972e0c0cfbd4311cbcc9e7c86a",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "a7787f61291b464e479afcefe8cf8f0a73b63a62b78e628d762bf2a3888a5957",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "ca1bcfac4ae9fde27eca166f3121c11e4bed39387368394469e31f097e00d460",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "39d759d7118b84d77773fd862339c297538ee50d0ae94459937fc4645cb60ce6",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "eec80b20733b14c38182dbe38f134d551b133f2f6f6241b207f5399912a0998a",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "9a6bfb1d007897e7e226db65f9d9fa88aec8a4a9f654124589df85bbf2c81e7e",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "e9bcb29069c6e5016a7ee3b455246733c4b58c7efd63b4d5806f99a4e5e5df28",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "6da8e532edb4c3f72409cab548cc39177702fbb97619a1838f55dd651f52ea1d",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "f6b5aaaf7f2c862f0e77b486317e483e5b180ad22237f90b1fea769c83c49d32",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "4ce292769d91dad5f10dc34c8e09f4cd95046e20790672bcc57e2db7a61a9f67",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "c74dbee06cc7484cbd29371ca2b8b042eea7e6b6ce82f01e37f4150100765f9a",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "fdd242beba3d2cc9f158f1918e96c3af5b0540e7fa4dae68e60548d677ea692e",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "ddfc36acc68133f4de3c91d58426d93e14641611c83ef76bd113d719c5b5d5af",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "cd82a5d996e12c9ad6a6b6d559ce4450b29f14504639478e016a330e250a9997",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "d4160e5db8fcd014a813ab1230f19b008ba3934ea722449809d1fd4c291e78bd",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "4805efe054b9aec481c76f9369fb43a099028c1c144aa9e58618890b238e15fd",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "69a7a73e81907af8ff83ad75079c4bdda81909cedf5ee512fa1e5e2dfb3eecfe",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "69a7a73e81907af8ff83ad75079c4bdda81909cedf5ee512fa1e5e2dfb3eecfe",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "492e08e6ce36da25e7eb266af25f53c7b36614b8344bae57c6f7226e7f8a6eb0",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "9a087d0013cb9945adb6b5f5d646317fdf9a1aab7702f1fb4af40065c24e58fc",
+          "response_side": "chosen"
+        }
+      ]
+    },
+    "dpo_standard_eval.jsonl": {
+      "responses": 600,
+      "no_prompt_tokens": 28,
+      "pairs": 300,
+      "pairs_with_different_prompt_context": 53,
+      "no_prompt_examples": [
+        {
+          "prompt_id": "6d41333fcd38e4b75efab869b10d54566e58e989a91e541828b7bb3f558ca008",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "c199653a4cad2251a14ee5c0c554a15536b5086a942ba5a9666a2ed8c7b53ef3",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "acc70578c3f6e8048daf021329222978bd5b41015317e84d8085a163a1f5a523",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "0491583acdc81b2a9cc72ee7521f7e54fb0a200ecb3745bc674738fa0e0ed91d",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "7961ac8875df0523c009d601235d46d12f4005fc071b0b37881c5a08e39ac77d",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "a9656f7719a6241d74687ecadad27b0d299abb29758ead03562c432e081f0d17",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "4efbde2e78790a35dd1458fbb03065ac4dc87fbda44d4a63153bd67036b6d2d1",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "f76dbefa1515c4214e0125d111ce3fda41d2631719c41f6fed193460911ce1bb",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "70a5471e75f4ab09037c89bf019ddf785f07a9d74a63915e4cf32bfcd5f5e465",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "f32980bf904020cd42532d2c16795204fd4edff4db3567e207bb8e23b26c1d52",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "f32980bf904020cd42532d2c16795204fd4edff4db3567e207bb8e23b26c1d52",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "1cad2ea6385eddab9423c6ad5ce7282388cc0c9b2fee26b8184f8f4cd924f106",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "5de48441cc27be3991083664a433712e5fbc50009d0d47d71f83f9f920f8c7d6",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "049b57a16e45f5c0485fbd4b57f34341e55e5f7e00f314eca61bda0780ed9b59",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "049b57a16e45f5c0485fbd4b57f34341e55e5f7e00f314eca61bda0780ed9b59",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "2a4ed7f632dfc21d1dc342051eaf8ea1bcdb528a4fa5913df322c41d84eebe2c",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "2a4ed7f632dfc21d1dc342051eaf8ea1bcdb528a4fa5913df322c41d84eebe2c",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "53bd992fe0b3d86c5fa8676e976f2b6ab2f23a5336a2af475da249aa13256ad3",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "b0226f6961f93ec9d4136e58f6131526ce3baf5438f936a8b8f97f60620705ba",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "b0226f6961f93ec9d4136e58f6131526ce3baf5438f936a8b8f97f60620705ba",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "a0bdd6e1426288b4d7c63ce82e7a74bbde5ad2fa38246bc9199eb2e475e611b4",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "7fb6a6358507c651e8df5f5bd632242b8a23509a13e8888869dcd187c637267f",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "7fb6a6358507c651e8df5f5bd632242b8a23509a13e8888869dcd187c637267f",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "6da92b1b6fc135a6904c71c00dcb956617b5e171ce98e7b4ec0d1a2dd37c2fb0",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "6da92b1b6fc135a6904c71c00dcb956617b5e171ce98e7b4ec0d1a2dd37c2fb0",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "56eb7282c8f703ebdb5753ca76496fa3c76b61f70cbf941b9df6ebc3471ba95b",
+          "response_side": "chosen"
+        },
+        {
+          "prompt_id": "56eb7282c8f703ebdb5753ca76496fa3c76b61f70cbf941b9df6ebc3471ba95b",
+          "response_side": "rejected"
+        },
+        {
+          "prompt_id": "78bc06056b0fb0b54d1d61d894853829b9f3e3aa3820546bd356f84bd2b44a26",
+          "response_side": "rejected"
+        }
+      ]
+    },
+    "dpo_length_balanced_train.jsonl": {
+      "responses": 3000,
+      "no_prompt_tokens": 0,
+      "pairs": 1500,
+      "pairs_with_different_prompt_context": 97,
+      "no_prompt_examples": []
+    },
+    "dpo_length_stratified_eval.jsonl": {
+      "responses": 492,
+      "no_prompt_tokens": 0,
+      "pairs": 246,
+      "pairs_with_different_prompt_context": 16,
+      "no_prompt_examples": []
+    }
+  },
+  "generation_prompt_sets": {
+    "xstest_safety_prompts.csv": {
+      "n": 450,
+      "cap": 256,
+      "max_prompt_tokens": 48,
+      "would_truncate": 0
+    },
+    "gsm8k_eval.jsonl": {
+      "n": 300,
+      "cap": 512,
+      "max_prompt_tokens": 239,
+      "would_truncate": 0
+    },
+    "math_transfer_eval.jsonl": {
+      "n": 100,
+      "cap": 512,
+      "max_prompt_tokens": 114,
+      "would_truncate": 0
+    }
+  }
+}

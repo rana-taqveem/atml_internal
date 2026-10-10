@@ -38,6 +38,8 @@ def load_diagnostic_groups(path):
         missing = EXPECTED_VARIANTS - set(variants)
         if missing:
             raise ValueError(f"Problem {pid} missing variants: {sorted(missing)}")
+    if len(rows) != 100 or len(by_problem) != 20 or any(len(v) != 5 for v in by_problem.values()):
+        raise ValueError("Use the unchanged course diagnostic set: 20 problems x 5 unique variants")
     return by_problem
 
 
@@ -102,9 +104,20 @@ def main():
     rr = defaultdict(list)
     for pid, vs in groups.items():
         q = vs["clean_correct"]["question"]
-        rewards = judge.group_rewards(q, [vs[v]["response"] for v in variants])
+        # Use the same timing wrapper for all calls, including the round robin.
+        rewards = np.zeros(len(variants))
+        for i in range(len(variants)):
+            for j in range(i + 1, len(variants)):
+                pref = timed_compare(q, vs[variants[i]]["response"], vs[variants[j]]["response"])
+                rewards[i] += {"A": 1.0, "TIE": 0.5, "B": 0.0}[pref]
+                rewards[j] += {"A": 0.0, "TIE": 0.5, "B": 1.0}[pref]
+        rewards /= len(variants) - 1
         for v, r in zip(variants, rewards):
             rr[v].append(r)
+    keys = {judge._key(vs["clean_correct"]["question"], vs[a]["response"], vs[b]["response"])
+            for vs in groups.values() for a in variants for b in variants if a != b}
+    parse_ambiguous = sum(judge.details.get(k, {}).get("parse_ambiguous") is True for k in keys if k in judge.cache)
+    parse_unknown = sum(k not in judge.details for k in keys if k in judge.cache)
     del judge
     clear_gpu()
     write_jsonl(out_dir / "pair_scores.jsonl", pair_records)
@@ -123,6 +136,8 @@ def main():
         "n_problems": len(groups),
         "pairs": [f"{b} > {w} ({k})" for b, w, k in PAIRS],
         "verifier_expected_reward_mismatches": mismatches,
+        "judge_parse_ambiguous_count": parse_ambiguous,
+        "judge_parse_status_unknown_count": parse_unknown,
         "by_perturbation": by_pair,
         "S_reason": {"verifier": s(reason_recs, "verifier"), "judge": s(reason_recs, "judge")},
         "S_outcome": {"verifier": s(outcome_recs, "verifier"), "judge": s(outcome_recs, "judge"),

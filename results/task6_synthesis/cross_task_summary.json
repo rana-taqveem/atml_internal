@@ -2,7 +2,7 @@
   "note": "RM scores comparable only within one protocol; Task 5 rewards are on a different scale.",
   "training_signal": {
     "sft": "none (starting policy)",
-    "dpo": "offline human preference pairs (UltraFeedback), implicit reward",
+    "dpo": "offline AI preference pairs (UltraFeedback), implicit reward",
     "ppo": "online samples, learned reward model + critic, KL-shaped reward",
     "grpo": "online samples, learned reward model, group-relative baseline (no critic)",
     "rlvr": "online samples, exact final-answer verifier (binary)",
@@ -11,7 +11,7 @@
   "drift_reward_compute": [
     {
       "policy": "dpo",
-      "training_signal": "offline human preference pairs (UltraFeedback), implicit reward",
+      "training_signal": "offline AI preference pairs (UltraFeedback), implicit reward",
       "eval_protocol": "Task1 protocol: 128 DPO eval prompts, 256-token cap",
       "rm_reward": 1.3291521072387695,
       "rm_reward_se": 0.1093140005514303,
