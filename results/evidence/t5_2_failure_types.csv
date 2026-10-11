@@ -1,0 +1,4 @@
+policy,gsm correct,gsm wrong_final,gsm missing_final_format,gsm truncated_no_final,transfer correct,transfer wrong_final,transfer missing_final_format,transfer truncated_no_final
+sft,85,20,190,5,44,13,43,0
+rlvr,86,22,186,6,46,13,41,0
+rlaif,86,22,185,7,44,13,43,0

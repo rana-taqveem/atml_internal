@@ -1,0 +1,5 @@
+policy,judge 'refusal' label on SAFE,judge 'answer' label on UNSAFE,responses identical to SFT
+sft,0.412,0.115,450/450
+dpo,0.428,0.135,168/450
+ppo,0.400,0.125,367/450
+grpo,0.424,0.120,375/450

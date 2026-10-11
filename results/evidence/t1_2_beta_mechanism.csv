@@ -1,0 +1,4 @@
+beta,grad-norm (pre-clip) mean,clipped updates (>1.0),held-out margin,max beta·m
+0.03,0.67,0/38,0.132,0.004
+0.1,2.19,38/38,0.125,0.013
+0.3,6.49,38/38,0.106,0.032

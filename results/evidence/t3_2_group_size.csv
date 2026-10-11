@@ -1,0 +1,7 @@
+reward,K,groups,informative rate,(random partitions),mean within-group std,var(r − group mean),adv. variance across regroupings,sign flip vs K=8,informative hard/medium/easy
+learned,2,96,0.938,0.947,0.385,0.337,0.531,0.235,0.84/0.97/1.00
+learned,4,48,0.958,0.958,0.541,0.468,0.192,0.127,0.88/1.00/1.00
+learned,8,24,0.958,0.958,0.619,0.560,0.000,0.000,0.88/1.00/1.00
+binarized,2,96,0.188,0.189,0.094,0.047,0.080,0.587,0.00/0.44/0.12
+binarized,4,48,0.354,0.341,0.163,0.076,0.050,0.258,0.00/0.81/0.25
+binarized,8,24,0.458,0.458,0.191,0.082,0.000,0.000,0.00/1.00/0.38

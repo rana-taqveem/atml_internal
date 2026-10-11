@@ -1,0 +1,3 @@
+normalizer,held-out RM ± SE,ΔRM vs midpoint [CI],KL tok,tokens (Δ vs midpoint [CI]),token weight short/long,"corr(grad/|A|, length)",long share: grad / tokens,n completions,train tokens (realized)
+1/T_k,1.607 ± 0.158,"-0.235 [-0.511, +0.025]",0.00005,"326 (+9.9 [-20.5, +38.5])",0.0241/0.0013,-0.78,0.11 / 0.95,23,7936
+1/L_max,1.504 ± 0.159,"-0.338 [-0.651, -0.049]",0.00013,"323 (+7.1 [-16.6, +28.8])",0.0005/0.0005,0.79,0.74 / 0.95,24,7908

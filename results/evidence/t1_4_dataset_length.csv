@@ -1,0 +1,5 @@
+file,pairs,P(chosen longer),'longer wins' acc,chosen/rejected tokens
+standard_train,1500,0.563,0.570,282/240
+length_balanced_train,1500,0.491,0.503,157/152
+standard_eval,300,0.533,0.545,274/244
+length_stratified_eval,246,0.484,0.492,147/145

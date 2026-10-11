@@ -1,0 +1,6 @@
+condition,held-out RM ± SE,"corr(RM, length)"
+sft,1.894 ± 0.149,0.23
+midpoint,1.491 ± 0.175,0.23
+standard,1.687 ± 0.159,0.18
+fork_eps0.2_kl0,1.728 ± 0.151,0.11
+fork_eps0.2_kl0.2,1.807 ± 0.137,0.22

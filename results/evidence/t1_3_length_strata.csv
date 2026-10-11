@@ -1,0 +1,4 @@
+model,preferred_longer,length_matched,rejected_longer,gap rej-pref [CI],per-token-margin acc (pref/match/rej),"corr(logratio, tokens)",gen tokens,word-limit greedy/sampled
+standard,0.488 ± 0.055,0.573 ± 0.055,0.695 ± 0.051,"+0.21 [+0.06, +0.35]",0.66/0.59/0.51,-0.19,168.2,0.40/0.56
+length_balanced,0.451 ± 0.055,0.610 ± 0.054,0.780 ± 0.046,"+0.33 [+0.18, +0.48]",0.68/0.61/0.55,-0.34,167.7,0.40/0.48
+balanced − standard (paired),"-0.04 [-0.10, +0.02] (7 disc.)","+0.04 [-0.04, +0.12] (11 disc.)","+0.09 [+0.04, +0.15] (7 disc.)",-,-,-,-,-

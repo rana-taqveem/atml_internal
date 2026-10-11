@@ -1,0 +1,6 @@
+quantity,first update β=0 ≠ β=0.1
+reward,6
+kl_token_mean,2
+entropy,2
+response_tokens,6
+policy_grad_norm,1

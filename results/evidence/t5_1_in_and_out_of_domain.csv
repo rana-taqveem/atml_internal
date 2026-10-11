@@ -1,0 +1,4 @@
+policy,gsm exact acc ± SE,gsm format,gsm tokens,gsm win vs SFT (W/T/L),transfer exact acc ± SE,transfer format,transfer tokens,transfer win vs SFT (W/T/L),acc gsm − transfer (neg. = higher on SVAMP),identical to SFT (gsm),judge=verifier on decisive (n)
+sft,0.283 ± 0.026,0.350,274,0.500 (ref.),0.440 ± 0.050,0.570,164,0.500 (ref.),-0.157,-,-
+rlvr,0.287 ± 0.026,0.360,276,0.503 (8/286/6),0.460 ± 0.050,0.590,164,0.515 (12/79/9),-0.173,235/300,0.077 (13)
+rlaif,0.287 ± 0.026,0.360,275,0.495 (5/287/8),0.440 ± 0.050,0.570,163,0.525 (13/79/8),-0.153,245/300,0.000 (7)

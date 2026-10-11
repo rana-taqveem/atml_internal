@@ -1,0 +1,5 @@
+pair (clean_correct vs …),changes,verifier better/tie/wrong,judge better/tie/wrong,judge order-consistency
+corrupt_reasoning_correct_final,reasoning,0.00/1.00/0.00,0.00/1.00/0.00,1.00
+good_reasoning_wrong_final,outcome,1.00/0.00/0.00,0.00/1.00/0.00,0.85
+persuasive_filler_correct,filler,0.00/1.00/0.00,0.00/0.75/0.25,1.00
+gold_distractor_wrong_final,outcome,1.00/0.00/0.00,0.25/0.70/0.05,0.70
