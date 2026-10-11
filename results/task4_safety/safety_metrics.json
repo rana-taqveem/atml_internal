@@ -1,0 +1,261 @@
+{
+  "policies": {
+    "sft": {
+      "safe_answer_rate": {
+        "rate": 0.576,
+        "se": 0.03125533554451143,
+        "n": 250
+      },
+      "safe_over_refusal_rate": {
+        "rate": 0.0,
+        "se": 0.0,
+        "n": 250
+      },
+      "unsafe_compliance_rate": {
+        "rate": 0.0,
+        "se": 0.0,
+        "n": 200
+      },
+      "unsafe_justified_refusal_rate": {
+        "rate": 0.885,
+        "se": 0.022558257911461158,
+        "n": 200
+      },
+      "ambiguous_rate": {
+        "rate": 0.0,
+        "se": 0.0,
+        "n": 450
+      },
+      "ambiguous_rate_safe": {
+        "rate": 0.0,
+        "se": 0.0,
+        "n": 250
+      },
+      "ambiguous_rate_unsafe": {
+        "rate": 0.0,
+        "se": 0.0,
+        "n": 200
+      },
+      "class_inconsistent_label_rate": {
+        "rate": 0.2866666666666667,
+        "se": 0.021317123471200794,
+        "n": 450
+      },
+      "label_distribution": {
+        "SAFE": {
+          "SAFE_ANSWER": 144,
+          "JUSTIFIED_REFUSAL": 103,
+          "UNSAFE_COMPLIANCE": 3,
+          "OVER_REFUSAL": 0,
+          "AMBIGUOUS": 0
+        },
+        "UNSAFE": {
+          "SAFE_ANSWER": 23,
+          "JUSTIFIED_REFUSAL": 177,
+          "UNSAFE_COMPLIANCE": 0,
+          "OVER_REFUSAL": 0,
+          "AMBIGUOUS": 0
+        }
+      },
+      "response_tokens_mean": 108.25555555555556,
+      "response_tokens_std": 80.43182912132784,
+      "response_tokens_mean_safe": 136.2,
+      "response_tokens_mean_unsafe": 73.325,
+      "low_confidence_fraction": 0.0
+    },
+    "dpo": {
+      "safe_answer_rate": {
+        "rate": 0.564,
+        "se": 0.03136265294900927,
+        "n": 250
+      },
+      "safe_over_refusal_rate": {
+        "rate": 0.0,
+        "se": 0.0,
+        "n": 250
+      },
+      "unsafe_compliance_rate": {
+        "rate": 0.0,
+        "se": 0.0,
+        "n": 200
+      },
+      "unsafe_justified_refusal_rate": {
+        "rate": 0.865,
+        "se": 0.024163505540380516,
+        "n": 200
+      },
+      "ambiguous_rate": {
+        "rate": 0.0,
+        "se": 0.0,
+        "n": 450
+      },
+      "ambiguous_rate_safe": {
+        "rate": 0.0,
+        "se": 0.0,
+        "n": 250
+      },
+      "ambiguous_rate_unsafe": {
+        "rate": 0.0,
+        "se": 0.0,
+        "n": 200
+      },
+      "class_inconsistent_label_rate": {
+        "rate": 0.3022222222222222,
+        "se": 0.021647886764572244,
+        "n": 450
+      },
+      "label_distribution": {
+        "SAFE": {
+          "SAFE_ANSWER": 141,
+          "JUSTIFIED_REFUSAL": 107,
+          "UNSAFE_COMPLIANCE": 2,
+          "OVER_REFUSAL": 0,
+          "AMBIGUOUS": 0
+        },
+        "UNSAFE": {
+          "SAFE_ANSWER": 27,
+          "JUSTIFIED_REFUSAL": 173,
+          "UNSAFE_COMPLIANCE": 0,
+          "OVER_REFUSAL": 0,
+          "AMBIGUOUS": 0
+        }
+      },
+      "response_tokens_mean": 108.74444444444444,
+      "response_tokens_std": 80.88243335045841,
+      "response_tokens_mean_safe": 135.44,
+      "response_tokens_mean_unsafe": 75.375,
+      "low_confidence_fraction": 0.0
+    },
+    "ppo": {
+      "safe_answer_rate": {
+        "rate": 0.588,
+        "se": 0.03112915032569954,
+        "n": 250
+      },
+      "safe_over_refusal_rate": {
+        "rate": 0.0,
+        "se": 0.0,
+        "n": 250
+      },
+      "unsafe_compliance_rate": {
+        "rate": 0.0,
+        "se": 0.0,
+        "n": 200
+      },
+      "unsafe_justified_refusal_rate": {
+        "rate": 0.875,
+        "se": 0.023385358667337135,
+        "n": 200
+      },
+      "ambiguous_rate": {
+        "rate": 0.0,
+        "se": 0.0,
+        "n": 450
+      },
+      "ambiguous_rate_safe": {
+        "rate": 0.0,
+        "se": 0.0,
+        "n": 250
+      },
+      "ambiguous_rate_unsafe": {
+        "rate": 0.0,
+        "se": 0.0,
+        "n": 200
+      },
+      "class_inconsistent_label_rate": {
+        "rate": 0.28444444444444444,
+        "se": 0.021267387786579387,
+        "n": 450
+      },
+      "label_distribution": {
+        "SAFE": {
+          "SAFE_ANSWER": 147,
+          "JUSTIFIED_REFUSAL": 100,
+          "UNSAFE_COMPLIANCE": 3,
+          "OVER_REFUSAL": 0,
+          "AMBIGUOUS": 0
+        },
+        "UNSAFE": {
+          "SAFE_ANSWER": 25,
+          "JUSTIFIED_REFUSAL": 175,
+          "UNSAFE_COMPLIANCE": 0,
+          "OVER_REFUSAL": 0,
+          "AMBIGUOUS": 0
+        }
+      },
+      "response_tokens_mean": 108.13777777777777,
+      "response_tokens_std": 80.123563710861,
+      "response_tokens_mean_safe": 136.8,
+      "response_tokens_mean_unsafe": 72.31,
+      "low_confidence_fraction": 0.0
+    },
+    "grpo": {
+      "safe_answer_rate": {
+        "rate": 0.564,
+        "se": 0.03136265294900927,
+        "n": 250
+      },
+      "safe_over_refusal_rate": {
+        "rate": 0.0,
+        "se": 0.0,
+        "n": 250
+      },
+      "unsafe_compliance_rate": {
+        "rate": 0.0,
+        "se": 0.0,
+        "n": 200
+      },
+      "unsafe_justified_refusal_rate": {
+        "rate": 0.88,
+        "se": 0.022978250586152115,
+        "n": 200
+      },
+      "ambiguous_rate": {
+        "rate": 0.0,
+        "se": 0.0,
+        "n": 450
+      },
+      "ambiguous_rate_safe": {
+        "rate": 0.0,
+        "se": 0.0,
+        "n": 250
+      },
+      "ambiguous_rate_unsafe": {
+        "rate": 0.0,
+        "se": 0.0,
+        "n": 200
+      },
+      "class_inconsistent_label_rate": {
+        "rate": 0.29555555555555557,
+        "se": 0.021509815285936713,
+        "n": 450
+      },
+      "label_distribution": {
+        "SAFE": {
+          "SAFE_ANSWER": 141,
+          "JUSTIFIED_REFUSAL": 106,
+          "UNSAFE_COMPLIANCE": 3,
+          "OVER_REFUSAL": 0,
+          "AMBIGUOUS": 0
+        },
+        "UNSAFE": {
+          "SAFE_ANSWER": 24,
+          "JUSTIFIED_REFUSAL": 176,
+          "UNSAFE_COMPLIANCE": 0,
+          "OVER_REFUSAL": 0,
+          "AMBIGUOUS": 0
+        }
+      },
+      "response_tokens_mean": 108.38,
+      "response_tokens_std": 80.33388685839716,
+      "response_tokens_mean_safe": 136.064,
+      "response_tokens_mean_unsafe": 73.775,
+      "low_confidence_fraction": 0.0
+    }
+  },
+  "manual_audit": {
+    "status": "sheet exists but no manual labels filled yet",
+    "n_rows": 240
+  },
+  "prompts_with_policy_disagreement": 39
+}

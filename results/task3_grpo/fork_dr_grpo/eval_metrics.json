@@ -1,0 +1,33 @@
+{
+  "n_prompts": 64,
+  "reward_mean": 1.5043768882751465,
+  "reward_std": 1.2733079381176533,
+  "reward_se": 0.15916349226470666,
+  "reward_raw_mean": 1.6450018882751465,
+  "kl_token_mean": 0.0001275026734219864,
+  "kl_seq_mean": 0.04115746498609951,
+  "entropy_token_mean": 0.93597412109375,
+  "response_tokens": {
+    "mean": 322.796875,
+    "std": 272.87778741633474,
+    "median": 268.0,
+    "q1": 50.75,
+    "q3": 567.5,
+    "iqr": 516.75,
+    "n": 64
+  },
+  "eos_rate": 0.859375,
+  "truncation_rate": 0.140625,
+  "decoding": {
+    "temperature": 0.7,
+    "top_p": 0.9,
+    "do_sample": true,
+    "max_new_tokens": 768,
+    "max_prompt_tokens": 256,
+    "seed": 6304,
+    "missing_eos_penalty": 1.0
+  },
+  "name": "fork_dr_grpo",
+  "adapter": "outputs/task3_grpo/fork_dr_grpo",
+  "eval_wall_clock_s": 354.9
+}

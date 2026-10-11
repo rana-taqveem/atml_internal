@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-10T16:14:50.217670+00:00",
-  "code_head": "f2388702ee9fd5749455aa5a68996bac6da173f9",
+  "generated_utc": "2026-10-11T08:21:30.541848+00:00",
+  "code_head": "1c86b249f1c22bf6bf9ff98b6a180d1f74ed004b",
   "scope": "Saved-evidence consistency, file presence and local release hashes; not GPU re-execution or report approval.",
   "checks": [
     {
@@ -810,9 +810,213 @@
     {
       "check": "task2_ppo: identical fork prompt schedule",
       "passed": true
+    },
+    {
+      "check": "task3_grpo sft: 64 unique held-out IDs",
+      "passed": true
+    },
+    {
+      "check": "task3_grpo sft: aggregate reward/length/KL",
+      "passed": true
+    },
+    {
+      "check": "task3_grpo midpoint: 64 unique held-out IDs",
+      "passed": true
+    },
+    {
+      "check": "task3_grpo midpoint: aggregate reward/length/KL",
+      "passed": true
+    },
+    {
+      "check": "task3_grpo standard: 64 unique held-out IDs",
+      "passed": true
+    },
+    {
+      "check": "task3_grpo standard: aggregate reward/length/KL",
+      "passed": true
+    },
+    {
+      "check": "task3_grpo standard: updates and finite steps",
+      "passed": true
+    },
+    {
+      "check": "task3_grpo standard: trained weights present",
+      "passed": true
+    },
+    {
+      "check": "task3_grpo fork_grpo: 64 unique held-out IDs",
+      "passed": true
+    },
+    {
+      "check": "task3_grpo fork_grpo: aggregate reward/length/KL",
+      "passed": true
+    },
+    {
+      "check": "task3_grpo fork_grpo: updates and finite steps",
+      "passed": true
+    },
+    {
+      "check": "task3_grpo fork_grpo: trained weights present",
+      "passed": true
+    },
+    {
+      "check": "task3_grpo fork_dr_grpo: 64 unique held-out IDs",
+      "passed": true
+    },
+    {
+      "check": "task3_grpo fork_dr_grpo: aggregate reward/length/KL",
+      "passed": true
+    },
+    {
+      "check": "task3_grpo fork_dr_grpo: updates and finite steps",
+      "passed": true
+    },
+    {
+      "check": "task3_grpo fork_dr_grpo: trained weights present",
+      "passed": true
+    },
+    {
+      "check": "task3_grpo: common held-out ID order",
+      "passed": true
+    },
+    {
+      "check": "task3_grpo: common decoding protocol",
+      "passed": true
+    },
+    {
+      "check": "task3_grpo: identical fork prompt schedule",
+      "passed": true
+    },
+    {
+      "check": "Task4 generated/sft: all fixed prompt IDs in order",
+      "passed": true
+    },
+    {
+      "check": "Task4 judged/sft: all fixed prompt IDs in order",
+      "passed": true
+    },
+    {
+      "check": "Task4 generated/dpo: all fixed prompt IDs in order",
+      "passed": true
+    },
+    {
+      "check": "Task4 judged/dpo: all fixed prompt IDs in order",
+      "passed": true
+    },
+    {
+      "check": "Task4 generated/ppo: all fixed prompt IDs in order",
+      "passed": true
+    },
+    {
+      "check": "Task4 judged/ppo: all fixed prompt IDs in order",
+      "passed": true
+    },
+    {
+      "check": "Task4 generated/grpo: all fixed prompt IDs in order",
+      "passed": true
+    },
+    {
+      "check": "Task4 judged/grpo: all fixed prompt IDs in order",
+      "passed": true
+    },
+    {
+      "check": "Task4 summary: all four policies",
+      "passed": true
+    },
+    {
+      "check": "Task5 gsm: full problem count",
+      "passed": true
+    },
+    {
+      "check": "Task5 gsm/sft: exact full ID order",
+      "passed": true
+    },
+    {
+      "check": "Task5 gsm/sft: aggregate accuracy/format/length",
+      "passed": true
+    },
+    {
+      "check": "Task5 gsm/rlvr: exact full ID order",
+      "passed": true
+    },
+    {
+      "check": "Task5 gsm/rlvr: aggregate accuracy/format/length",
+      "passed": true
+    },
+    {
+      "check": "Task5 gsm/rlvr: full judge ID order",
+      "passed": true
+    },
+    {
+      "check": "Task5 gsm/rlvr: pairwise win rate",
+      "passed": true
+    },
+    {
+      "check": "Task5 gsm/rlaif: exact full ID order",
+      "passed": true
+    },
+    {
+      "check": "Task5 gsm/rlaif: aggregate accuracy/format/length",
+      "passed": true
+    },
+    {
+      "check": "Task5 gsm/rlaif: full judge ID order",
+      "passed": true
+    },
+    {
+      "check": "Task5 gsm/rlaif: pairwise win rate",
+      "passed": true
+    },
+    {
+      "check": "Task5 transfer: full problem count",
+      "passed": true
+    },
+    {
+      "check": "Task5 transfer/sft: exact full ID order",
+      "passed": true
+    },
+    {
+      "check": "Task5 transfer/sft: aggregate accuracy/format/length",
+      "passed": true
+    },
+    {
+      "check": "Task5 transfer/rlvr: exact full ID order",
+      "passed": true
+    },
+    {
+      "check": "Task5 transfer/rlvr: aggregate accuracy/format/length",
+      "passed": true
+    },
+    {
+      "check": "Task5 transfer/rlvr: full judge ID order",
+      "passed": true
+    },
+    {
+      "check": "Task5 transfer/rlvr: pairwise win rate",
+      "passed": true
+    },
+    {
+      "check": "Task5 transfer/rlaif: exact full ID order",
+      "passed": true
+    },
+    {
+      "check": "Task5 transfer/rlaif: aggregate accuracy/format/length",
+      "passed": true
+    },
+    {
+      "check": "Task5 transfer/rlaif: full judge ID order",
+      "passed": true
+    },
+    {
+      "check": "Task5 transfer/rlaif: pairwise win rate",
+      "passed": true
+    },
+    {
+      "check": "Task5 diagnostics: 80 unique controlled pairs",
+      "passed": true
     }
   ],
-  "passed": 202,
+  "passed": 253,
   "failed": 0,
   "data": {
     "dpo_length_balanced_train.jsonl": {
@@ -1065,50 +1269,118 @@
   },
   "task3": {
     "sft": {
-      "status": "missing"
+      "status": "saved",
+      "metrics_file": "results\\task3_grpo\\sft\\eval_metrics.json",
+      "decoding": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "do_sample": true,
+        "max_new_tokens": 768,
+        "max_prompt_tokens": 256,
+        "seed": 6304,
+        "missing_eos_penalty": 1.0
+      }
     },
     "midpoint": {
-      "status": "missing"
+      "status": "saved",
+      "metrics_file": "results\\task3_grpo\\midpoint\\eval_metrics.json",
+      "decoding": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "do_sample": true,
+        "max_new_tokens": 768,
+        "max_prompt_tokens": 256,
+        "seed": 6304,
+        "missing_eos_penalty": 1.0
+      }
     },
     "standard": {
-      "status": "missing"
+      "status": "saved",
+      "metrics_file": "results\\task3_grpo\\standard\\eval_metrics.json",
+      "decoding": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "do_sample": true,
+        "max_new_tokens": 768,
+        "max_prompt_tokens": 256,
+        "seed": 6304,
+        "missing_eos_penalty": 1.0
+      },
+      "updates": 20,
+      "tokens_generated": 19144,
+      "wall_clock_s": 335.3,
+      "peak_vram_gib": 5.314,
+      "adapter_sha256": "087f1794caed41e227a213664c9a6bf48d67f74feec922abc45ba67798e26fed",
+      "affected_fraction_max": 0
     },
     "fork_grpo": {
-      "status": "missing"
+      "status": "saved",
+      "metrics_file": "results\\task3_grpo\\fork_grpo\\eval_metrics.json",
+      "decoding": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "do_sample": true,
+        "max_new_tokens": 768,
+        "max_prompt_tokens": 256,
+        "seed": 6304,
+        "missing_eos_penalty": 1.0
+      },
+      "updates": 8,
+      "tokens_generated": 7936,
+      "wall_clock_s": 132.9,
+      "peak_vram_gib": 5.302,
+      "adapter_sha256": "cdd5c9d75c54095dd586f379c9fc44e3a83550fe59f9899a322f8bfeacfd6b1f",
+      "affected_fraction_max": 0
     },
     "fork_dr_grpo": {
-      "status": "missing"
+      "status": "saved",
+      "metrics_file": "results\\task3_grpo\\fork_dr_grpo\\eval_metrics.json",
+      "decoding": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "do_sample": true,
+        "max_new_tokens": 768,
+        "max_prompt_tokens": 256,
+        "seed": 6304,
+        "missing_eos_penalty": 1.0
+      },
+      "updates": 8,
+      "tokens_generated": 7908,
+      "wall_clock_s": 140.7,
+      "peak_vram_gib": 5.303,
+      "adapter_sha256": "c466d4fb8d1ef411bcc4ff10d17c2d4a0d170d4c49b78d008c7a573fd75535f3",
+      "affected_fraction_max": 0
     }
   },
   "remaining_files": {
     "task3_grpo": {
-      "standard/train_summary.json": false,
-      "standard/eval_metrics.json": false,
-      "midpoint/eval_metrics.json": false,
-      "sft/eval_metrics.json": false,
-      "fork_grpo/train_summary.json": false,
-      "fork_dr_grpo/train_summary.json": false,
-      "normalization_study.json": false,
+      "standard/train_summary.json": true,
+      "standard/eval_metrics.json": true,
+      "midpoint/eval_metrics.json": true,
+      "sft/eval_metrics.json": true,
+      "fork_grpo/train_summary.json": true,
+      "fork_dr_grpo/train_summary.json": true,
+      "normalization_study.json": true,
       "group_size_study.json": true,
-      "summary.csv": false
+      "summary.csv": true
     },
     "task4_safety": {
-      "generated_sft.jsonl": false,
-      "generated_dpo.jsonl": false,
-      "generated_ppo.jsonl": false,
-      "generated_grpo.jsonl": false,
-      "judged_sft.jsonl": false,
-      "judged_dpo.jsonl": false,
-      "judged_ppo.jsonl": false,
-      "judged_grpo.jsonl": false,
-      "manual_audit_sheet.csv": false,
-      "safety_metrics.json": false
+      "generated_sft.jsonl": true,
+      "generated_dpo.jsonl": true,
+      "generated_ppo.jsonl": true,
+      "generated_grpo.jsonl": true,
+      "judged_sft.jsonl": true,
+      "judged_dpo.jsonl": true,
+      "judged_ppo.jsonl": true,
+      "judged_grpo.jsonl": true,
+      "manual_audit_sheet.csv": true,
+      "safety_metrics.json": true
     },
     "task5_feedback": {
-      "gsm/metrics.json": false,
-      "transfer/metrics.json": false,
-      "diagnostics/diagnostic_metrics.json": false,
-      "summary.json": false
+      "gsm/metrics.json": true,
+      "transfer/metrics.json": true,
+      "diagnostics/diagnostic_metrics.json": true,
+      "summary.json": true
     }
   },
   "adapters": {
@@ -1133,8 +1405,8 @@
       "sha256": "f752df04ddba233d27ee6cf28ba437b93bd3e787e075bab4e4eb31ee26e40fc4"
     },
     "outputs\\task3_grpo\\standard\\adapter_model.safetensors": {
-      "exists": false,
-      "sha256": null
+      "exists": true,
+      "sha256": "087f1794caed41e227a213664c9a6bf48d67f74feec922abc45ba67798e26fed"
     }
   },
   "ppo_fork_actual_token_totals": {
@@ -1145,7 +1417,7 @@
     "fork_eps0.2_kl0.2": 1969
   },
   "ppo_equal_actual_generated_tokens": false,
-  "all_required_files_present": false,
+  "all_required_files_present": true,
   "manual_audit_complete": false,
   "manual_report_checks_required": [
     "Qualitative examples selected and interpreted by the student",

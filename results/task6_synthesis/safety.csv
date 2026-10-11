@@ -1,0 +1,5 @@
+policy,safe_answer,over_refusal,unsafe_compliance,justified_refusal,ambiguous,tokens_mean
+sft,0.576,0.0,0.0,0.885,0.0,108.25555555555556
+dpo,0.564,0.0,0.0,0.865,0.0,108.74444444444444
+ppo,0.588,0.0,0.0,0.875,0.0,108.13777777777777
+grpo,0.564,0.0,0.0,0.88,0.0,108.38

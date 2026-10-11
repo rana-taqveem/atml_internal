@@ -1,0 +1,70 @@
+{
+  "grpo": {
+    "heldout_reward": 1.6074066162109375,
+    "heldout_reward_se": 0.15822252743315227,
+    "heldout_kl_token": 4.722675294033252e-05,
+    "heldout_entropy": 0.983721911907196,
+    "heldout_tokens": {
+      "mean": 325.609375,
+      "std": 276.5715672065901,
+      "median": 258.5,
+      "q1": 51.75,
+      "q3": 590.0,
+      "iqr": 538.25,
+      "n": 64
+    },
+    "heldout_truncation": 0.125,
+    "train_reward_mean": 1.4206409454345703,
+    "train_tokens_mean": 248.0,
+    "tokens_generated": 7936,
+    "length_conditioned": {
+      "n_completions": 23,
+      "median_length": 34.0,
+      "corr_grad_norm_vs_length": -0.49797401102300276,
+      "corr_grad_per_abs_adv_vs_length": -0.782084595278106,
+      "mean_grad_norm_short": 0.5501266157953069,
+      "mean_grad_norm_long": 0.07494810227812691,
+      "mean_grad_per_abs_adv_short": 0.6265940977416671,
+      "mean_grad_per_abs_adv_long": 0.10765719422569471,
+      "share_of_grad_norm_from_long": 0.11102004322251381,
+      "share_of_tokens_from_long": 0.9477163461538461,
+      "mean_policy_token_weight_short": 0.02413779736805116,
+      "mean_policy_token_weight_long": 0.0012560745224678576,
+      "gradient_statistic_note": "Full parameter-gradient norms include KL and content; token weights isolate the denominator."
+    }
+  },
+  "dr_grpo": {
+    "heldout_reward": 1.5043768882751465,
+    "heldout_reward_se": 0.15916349226470666,
+    "heldout_kl_token": 0.0001275026734219864,
+    "heldout_entropy": 0.93597412109375,
+    "heldout_tokens": {
+      "mean": 322.796875,
+      "std": 272.87778741633474,
+      "median": 268.0,
+      "q1": 50.75,
+      "q3": 567.5,
+      "iqr": 516.75,
+      "n": 64
+    },
+    "heldout_truncation": 0.140625,
+    "train_reward_mean": 1.4736347198486328,
+    "train_tokens_mean": 247.125,
+    "tokens_generated": 7908,
+    "length_conditioned": {
+      "n_completions": 24,
+      "median_length": 47.5,
+      "corr_grad_norm_vs_length": 0.8002300941463145,
+      "corr_grad_per_abs_adv_vs_length": 0.7936346829302509,
+      "mean_grad_norm_short": 0.014959078175403798,
+      "mean_grad_norm_long": 0.04206958557673109,
+      "mean_grad_per_abs_adv_short": 0.015428965012673488,
+      "mean_grad_per_abs_adv_long": 0.04907118305064836,
+      "share_of_grad_norm_from_long": 0.7376919396109154,
+      "share_of_tokens_from_long": 0.9548793284365162,
+      "mean_policy_token_weight_short": 0.00048828125,
+      "mean_policy_token_weight_long": 0.00048828125,
+      "gradient_statistic_note": "Full parameter-gradient norms include KL and content; token weights isolate the denominator."
+    }
+  }
+}

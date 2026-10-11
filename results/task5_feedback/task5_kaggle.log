@@ -1,0 +1,236 @@
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+Rows: 300
+Policies: ['sft', 'rlvr', 'rlaif']
+[sft] 8/300
+[sft] 16/300
+[sft] 24/300
+[sft] 32/300
+[sft] 40/300
+[sft] 48/300
+[sft] 56/300
+[sft] 64/300
+[sft] 72/300
+[sft] 80/300
+[sft] 88/300
+[sft] 96/300
+[sft] 104/300
+[sft] 112/300
+[sft] 120/300
+[sft] 128/300
+[sft] 136/300
+[sft] 144/300
+[sft] 152/300
+[sft] 160/300
+[sft] 168/300
+[sft] 176/300
+[sft] 184/300
+[sft] 192/300
+[sft] 200/300
+[sft] 208/300
+[sft] 216/300
+[sft] 224/300
+[sft] 232/300
+[sft] 240/300
+[sft] 248/300
+[sft] 256/300
+[sft] 264/300
+[sft] 272/300
+[sft] 280/300
+[sft] 288/300
+[sft] 296/300
+[sft] 300/300
+[rlvr] 8/300
+[rlvr] 16/300
+[rlvr] 24/300
+[rlvr] 32/300
+[rlvr] 40/300
+[rlvr] 48/300
+[rlvr] 56/300
+[rlvr] 64/300
+[rlvr] 72/300
+[rlvr] 80/300
+[rlvr] 88/300
+[rlvr] 96/300
+[rlvr] 104/300
+[rlvr] 112/300
+[rlvr] 120/300
+[rlvr] 128/300
+[rlvr] 136/300
+[rlvr] 144/300
+[rlvr] 152/300
+[rlvr] 160/300
+[rlvr] 168/300
+[rlvr] 176/300
+[rlvr] 184/300
+[rlvr] 192/300
+[rlvr] 200/300
+[rlvr] 208/300
+[rlvr] 216/300
+[rlvr] 224/300
+[rlvr] 232/300
+[rlvr] 240/300
+[rlvr] 248/300
+[rlvr] 256/300
+[rlvr] 264/300
+[rlvr] 272/300
+[rlvr] 280/300
+[rlvr] 288/300
+[rlvr] 296/300
+[rlvr] 300/300
+[rlaif] 8/300
+[rlaif] 16/300
+[rlaif] 24/300
+[rlaif] 32/300
+[rlaif] 40/300
+[rlaif] 48/300
+[rlaif] 56/300
+[rlaif] 64/300
+[rlaif] 72/300
+[rlaif] 80/300
+[rlaif] 88/300
+[rlaif] 96/300
+[rlaif] 104/300
+[rlaif] 112/300
+[rlaif] 120/300
+[rlaif] 128/300
+[rlaif] 136/300
+[rlaif] 144/300
+[rlaif] 152/300
+[rlaif] 160/300
+[rlaif] 168/300
+[rlaif] 176/300
+[rlaif] 184/300
+[rlaif] 192/300
+[rlaif] 200/300
+[rlaif] 208/300
+[rlaif] 216/300
+[rlaif] 224/300
+[rlaif] 232/300
+[rlaif] 240/300
+[rlaif] 248/300
+[rlaif] 256/300
+[rlaif] 264/300
+[rlaif] 272/300
+[rlaif] 280/300
+[rlaif] 288/300
+[rlaif] 296/300
+[rlaif] 300/300
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:02<00:02,  2.44s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.74s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.85s/it]
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+
+policy  exact acc  format   tokens  trunc  win vs SFT       W/T/L  judge=verifier (decisive)
+sft         0.283   0.350    274.3   0.02       0.500       -/-/-                        nan
+rlvr        0.287   0.360    275.9   0.02       0.503     8/286/6                      0.077
+rlaif       0.287   0.360    275.4   0.02       0.495     5/287/8                      0.000
+Saved /kaggle/working/pa2/results/task5_feedback/gsm/metrics.json
+Diagnostic problems: 20
+Variants/problem: ['clean_correct', 'corrupt_reasoning_correct_final', 'gold_distractor_wrong_final', 'good_reasoning_wrong_final', 'persuasive_filler_correct']
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:03<00:03,  3.63s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.64s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:05<00:00,  2.79s/it]
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+
+perturbation (vs clean_correct)       verifier b/t/w       judge b/t/w  order-consistent
+corrupt_reasoning_correct_final     0.00/1.00/0.00    0.00/1.00/0.00            1.00
+good_reasoning_wrong_final          1.00/0.00/0.00    0.00/1.00/0.00            0.85
+persuasive_filler_correct           0.00/1.00/0.00    0.00/0.75/0.25            1.00
+gold_distractor_wrong_final         1.00/0.00/0.00    0.25/0.70/0.05            0.70
+S_reason  verifier=0.00 judge=0.00
+S_outcome verifier=1.00 judge=0.12
+verifier/expected mismatches: 0
+Saved /kaggle/working/pa2/results/task5_feedback/diagnostics/diagnostic_metrics.json
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+Rows: 100
+Policies: ['sft', 'rlvr', 'rlaif']
+[sft] 8/100
+[sft] 16/100
+[sft] 24/100
+[sft] 32/100
+[sft] 40/100
+[sft] 48/100
+[sft] 56/100
+[sft] 64/100
+[sft] 72/100
+[sft] 80/100
+[sft] 88/100
+[sft] 96/100
+[sft] 100/100
+[rlvr] 8/100
+[rlvr] 16/100
+[rlvr] 24/100
+[rlvr] 32/100
+[rlvr] 40/100
+[rlvr] 48/100
+[rlvr] 56/100
+[rlvr] 64/100
+[rlvr] 72/100
+[rlvr] 80/100
+[rlvr] 88/100
+[rlvr] 96/100
+[rlvr] 100/100
+[rlaif] 8/100
+[rlaif] 16/100
+[rlaif] 24/100
+[rlaif] 32/100
+[rlaif] 40/100
+[rlaif] 48/100
+[rlaif] 56/100
+[rlaif] 64/100
+[rlaif] 72/100
+[rlaif] 80/100
+[rlaif] 88/100
+[rlaif] 96/100
+[rlaif] 100/100
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:02<00:02,  2.49s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.78s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:03<00:00,  1.89s/it]
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+
+policy  exact acc  format   tokens  trunc  win vs SFT       W/T/L  judge=verifier (decisive)
+sft         0.440   0.570    164.0   0.00       0.500       -/-/-                        nan
+rlvr        0.460   0.590    164.1   0.00       0.515     12/79/9                      0.250
+rlaif       0.440   0.570    163.0   0.00       0.525     13/79/8                      0.500
+Saved /kaggle/working/pa2/results/task5_feedback/transfer/metrics.json
+policy                                         sft     rlvr    rlaif
+gsm_exact_acc                                0.283    0.287    0.287
+transfer_exact_acc                            0.44     0.46     0.44
+exact_acc_drop                              -0.157   -0.173   -0.153
+gsm_format                                    0.35     0.36     0.36
+transfer_format                               0.57     0.59     0.57
+gsm_tokens_mean                             274.33  275.877   275.45
+gsm_tokens_std                              84.712   86.299   88.108
+transfer_tokens_mean                        163.96   164.07   162.98
+transfer_tokens_std                         71.746   72.541   70.521
+gsm_truncation                               0.017     0.02    0.023
+transfer_truncation                            0.0      0.0      0.0
+gsm_correct                                     85       86       86
+gsm_wrong_final                                 20       22       22
+gsm_missing_final_format                       190      186      185
+gsm_truncated_no_final                           5        6        7
+gsm_win_rate_vs_sft                            0.5    0.503    0.495
+transfer_correct                                44       46       44
+transfer_wrong_final                            13       13       13
+transfer_missing_final_format                   43       41       43
+transfer_truncated_no_final                      0        0        0
+transfer_win_rate_vs_sft                       0.5    0.515    0.525
+win_rate_drop                                  0.0   -0.012    -0.03
+gsm_judge_W_T_L                                NaN  8/286/6  5/287/8
+gsm_judge_agrees_on_verifier_decisive          NaN    0.077      0.0
+gsm_n_verifier_decisive                        NaN     13.0      7.0
+gsm_judge_tie_on_verifier_ties                 NaN    0.958    0.959
+gsm_exact_label_agreement                      NaN     0.92    0.937
+transfer_judge_W_T_L                           NaN  12/79/9  13/79/8
+transfer_judge_agrees_on_verifier_decisive     NaN     0.25      0.5
+transfer_n_verifier_decisive                   NaN      4.0      2.0
+transfer_judge_tie_on_verifier_ties            NaN    0.792    0.796
+transfer_exact_label_agreement                 NaN     0.77     0.79
+
+                   perturbation      kind mechanism  better_rate  tie_rate  wrong_rate  n_pairs  judge_order_consistency
+corrupt_reasoning_correct_final reasoning  verifier         0.00      1.00        0.00       20                      NaN
+corrupt_reasoning_correct_final reasoning     judge         0.00      1.00        0.00       20                     1.00
+     good_reasoning_wrong_final   outcome  verifier         1.00      0.00        0.00       20                      NaN
+     good_reasoning_wrong_final   outcome     judge         0.00      1.00        0.00       20                     0.85
+      persuasive_filler_correct    filler  verifier         0.00      1.00        0.00       20                      NaN
+      persuasive_filler_correct    filler     judge         0.00      0.75        0.25       20                     1.00
+    gold_distractor_wrong_final   outcome  verifier         1.00      0.00        0.00       20                      NaN
+    gold_distractor_wrong_final   outcome     judge         0.25      0.70        0.05       20                     0.70
+
+S_reason {'verifier': 0.0, 'judge': 0.0}  S_outcome {'verifier': 1.0, 'judge': 0.125, 'judge_good_reasoning_wrong_final_only': 0.0, 'judge_gold_distractor_only': 0.25}
+Saved /kaggle/working/pa2/results/task5_feedback/policy_comparison.csv, diagnostic_comparison.csv, summary.json, qualitative_candidates.md

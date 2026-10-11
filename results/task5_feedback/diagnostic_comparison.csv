@@ -1,0 +1,9 @@
+perturbation,kind,mechanism,better_rate,tie_rate,wrong_rate,n_pairs,judge_order_consistency
+corrupt_reasoning_correct_final,reasoning,verifier,0.0,1.0,0.0,20,
+corrupt_reasoning_correct_final,reasoning,judge,0.0,1.0,0.0,20,1.0
+good_reasoning_wrong_final,outcome,verifier,1.0,0.0,0.0,20,
+good_reasoning_wrong_final,outcome,judge,0.0,1.0,0.0,20,0.85
+persuasive_filler_correct,filler,verifier,0.0,1.0,0.0,20,
+persuasive_filler_correct,filler,judge,0.0,0.75,0.25,20,1.0
+gold_distractor_wrong_final,outcome,verifier,1.0,0.0,0.0,20,
+gold_distractor_wrong_final,outcome,judge,0.25,0.7,0.05,20,0.7

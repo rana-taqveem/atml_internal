@@ -1,0 +1,131 @@
+{
+  "n_problems": 20,
+  "pairs": [
+    "clean_correct > corrupt_reasoning_correct_final (reasoning)",
+    "clean_correct > good_reasoning_wrong_final (outcome)",
+    "clean_correct > persuasive_filler_correct (filler)",
+    "clean_correct > gold_distractor_wrong_final (outcome)"
+  ],
+  "verifier_expected_reward_mismatches": [],
+  "judge_parse_ambiguous_count": 0,
+  "judge_parse_status_unknown_count": 0,
+  "by_perturbation": {
+    "corrupt_reasoning_correct_final": {
+      "kind": "reasoning",
+      "verifier": {
+        "better": 0.0,
+        "tie": 1.0,
+        "wrong": 0.0,
+        "n": 20
+      },
+      "judge": {
+        "better": 0.0,
+        "tie": 1.0,
+        "wrong": 0.0,
+        "n": 20
+      },
+      "judge_swapped_order": {
+        "better": 0.0,
+        "tie": 1.0,
+        "wrong": 0.0,
+        "n": 20
+      },
+      "judge_order_consistency": 1.0
+    },
+    "good_reasoning_wrong_final": {
+      "kind": "outcome",
+      "verifier": {
+        "better": 1.0,
+        "tie": 0.0,
+        "wrong": 0.0,
+        "n": 20
+      },
+      "judge": {
+        "better": 0.0,
+        "tie": 1.0,
+        "wrong": 0.0,
+        "n": 20
+      },
+      "judge_swapped_order": {
+        "better": 0.15,
+        "tie": 0.85,
+        "wrong": 0.0,
+        "n": 20
+      },
+      "judge_order_consistency": 0.85
+    },
+    "persuasive_filler_correct": {
+      "kind": "filler",
+      "verifier": {
+        "better": 0.0,
+        "tie": 1.0,
+        "wrong": 0.0,
+        "n": 20
+      },
+      "judge": {
+        "better": 0.0,
+        "tie": 0.75,
+        "wrong": 0.25,
+        "n": 20
+      },
+      "judge_swapped_order": {
+        "better": 0.0,
+        "tie": 0.75,
+        "wrong": 0.25,
+        "n": 20
+      },
+      "judge_order_consistency": 1.0
+    },
+    "gold_distractor_wrong_final": {
+      "kind": "outcome",
+      "verifier": {
+        "better": 1.0,
+        "tie": 0.0,
+        "wrong": 0.0,
+        "n": 20
+      },
+      "judge": {
+        "better": 0.25,
+        "tie": 0.7,
+        "wrong": 0.05,
+        "n": 20
+      },
+      "judge_swapped_order": {
+        "better": 0.15,
+        "tie": 0.8,
+        "wrong": 0.05,
+        "n": 20
+      },
+      "judge_order_consistency": 0.7
+    }
+  },
+  "S_reason": {
+    "verifier": 0.0,
+    "judge": 0.0
+  },
+  "S_outcome": {
+    "verifier": 1.0,
+    "judge": 0.125,
+    "judge_good_reasoning_wrong_final_only": 0.0,
+    "judge_gold_distractor_only": 0.25
+  },
+  "pointwise_verifier_reward_by_variant": {
+    "clean_correct": 1.0,
+    "corrupt_reasoning_correct_final": 1.0,
+    "gold_distractor_wrong_final": 0.0,
+    "good_reasoning_wrong_final": 0.0,
+    "persuasive_filler_correct": 1.0
+  },
+  "judge_round_robin_win_rate_by_variant": {
+    "clean_correct": 0.49375,
+    "corrupt_reasoning_correct_final": 0.5,
+    "gold_distractor_wrong_final": 0.425,
+    "good_reasoning_wrong_final": 0.48125,
+    "persuasive_filler_correct": 0.6
+  },
+  "inference_cost": {
+    "judge_seconds_per_new_call": 0.4129721585964473,
+    "judge_new_calls": 280,
+    "verifier": "regex + float comparison (CPU, negligible)"
+  }
+}

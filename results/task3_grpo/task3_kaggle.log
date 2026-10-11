@@ -1,0 +1,98 @@
+[standard] updates=20 loss_type=grpo K=4 prompts/update=1 eps=0.2 kl_beta=0.1 max_completion=512 mask_truncated=True
+[standard] update 1/20 reward=+0.847 grp_std=0.461 uninf=0.00 kl=-0.0002 ent=1.298 len=512 trunc=1.00 loss=+0.0000 gn=0.000 t=29s
+[standard] update 2/20 reward=+1.385 grp_std=0.322 uninf=0.00 kl=0.0000 ent=0.780 len=490 trunc=0.75 loss=-0.3404 gn=0.076 t=57s
+[standard] update 3/20 reward=+1.857 grp_std=0.176 uninf=0.00 kl=0.0004 ent=0.234 len=7 trunc=0.00 loss=+0.0000 gn=2.110 t=59s
+[standard] update 4/20 reward=+1.620 grp_std=0.387 uninf=0.00 kl=-0.0000 ent=0.652 len=490 trunc=0.50 loss=-0.3594 gn=0.066 t=88s
+[standard] update 5/20 reward=+1.176 grp_std=0.261 uninf=0.00 kl=0.0004 ent=1.147 len=10 trunc=0.00 loss=+0.0000 gn=1.400 t=90s
+[standard] update 6/20 reward=+0.374 grp_std=0.434 uninf=0.00 kl=-0.0001 ent=1.315 len=51 trunc=0.00 loss=+0.0000 gn=0.820 t=99s
+[standard] update 7/20 reward=+2.657 grp_std=0.469 uninf=0.00 kl=0.0002 ent=0.875 len=292 trunc=0.00 loss=+0.0000 gn=0.158 t=125s
+[standard] update 8/20 reward=+1.450 grp_std=1.186 uninf=0.00 kl=0.0002 ent=1.002 len=132 trunc=0.00 loss=+0.0000 gn=0.652 t=139s
+[standard] update 9/20 reward=+2.238 grp_std=0.230 uninf=0.00 kl=0.0001 ent=1.404 len=379 trunc=0.00 loss=+0.0000 gn=0.138 t=162s
+[standard] update 10/20 reward=+2.610 grp_std=0.817 uninf=0.00 kl=-0.0000 ent=1.075 len=493 trunc=0.50 loss=-0.4673 gn=0.113 t=191s
+[standard] update 11/20 reward=+1.552 grp_std=0.289 uninf=0.00 kl=0.0002 ent=1.192 len=304 trunc=0.00 loss=+0.0000 gn=0.163 t=212s
+[standard] update 12/20 reward=+1.749 grp_std=0.643 uninf=0.00 kl=-0.0003 ent=1.210 len=321 trunc=0.50 loss=+0.4235 gn=0.321 t=240s
+[standard] update 13/20 reward=+1.250 grp_std=0.662 uninf=0.00 kl=-0.0001 ent=0.710 len=82 trunc=0.00 loss=+0.0000 gn=0.316 t=249s
+[standard] update 14/20 reward=+2.943 grp_std=0.000 uninf=1.00 kl=0.0055 ent=0.453 len=2 trunc=0.00 loss=+0.0000 gn=0.008 t=251s
+[standard] update 15/20 reward=+1.913 grp_std=0.286 uninf=0.00 kl=0.0004 ent=1.168 len=212 trunc=0.00 loss=+0.0000 gn=0.200 t=264s
+[standard] update 16/20 reward=+1.664 grp_std=0.000 uninf=1.00 kl=-0.0006 ent=0.325 len=4 trunc=0.00 loss=+0.0000 gn=0.002 t=266s
+[standard] update 17/20 reward=-1.543 grp_std=0.787 uninf=0.00 kl=0.0007 ent=0.823 len=41 trunc=0.00 loss=+0.0000 gn=0.861 t=271s
+[standard] update 18/20 reward=+2.154 grp_std=0.151 uninf=0.00 kl=-0.0000 ent=1.228 len=478 trunc=0.25 loss=+0.2312 gn=0.126 t=300s
+[standard] update 19/20 reward=-1.216 grp_std=1.211 uninf=0.00 kl=0.0002 ent=1.826 len=34 trunc=0.00 loss=+0.0000 gn=0.868 t=306s
+[standard] update 20/20 reward=+1.297 grp_std=0.541 uninf=0.00 kl=-0.0001 ent=0.991 len=452 trunc=0.25 loss=-0.3709 gn=0.092 t=335s
+[standard] done in 5.6 min, peak VRAM 5.31 GiB -> /kaggle/working/pa2/outputs/task3_grpo/standard
+[midpoint] held-out reward=+1.842+-0.140 kl=0.0000 ent=0.978 len=315.7 trunc=0.09
+[sft] held-out reward=+1.894+-0.149 kl=0.0000 ent=0.978 len=334.4 trunc=0.09
+[standard] held-out reward=+1.739+-0.168 kl=0.0001 ent=0.944 len=323.3 trunc=0.12
+Cached prompts: 24
+Group sizes to analyze: [2, 4, 8]
+Cache row keys: ['clipped_at_max', 'completion', 'completion_tokens', 'generation_index', 'prompt_id', 'reward', 'source_index', 'terminated_with_eos']
+
+learned_reward:
+  K  groups  inform.  grp std  var(r-mu)  adv var/part  sign flip   informative rate hard/medium/easy
+  2      96    0.938    0.385      0.337         0.531      0.235   0.84 / 0.97 / 1.00
+  4      48    0.958    0.541      0.468         0.192      0.127   0.88 / 1.00 / 1.00
+  8      24    0.958    0.619      0.560         0.000      0.000   0.88 / 1.00 / 1.00
+
+binarized_reward:
+  K  groups  inform.  grp std  var(r-mu)  adv var/part  sign flip   informative rate hard/medium/easy
+  2      96    0.188    0.094      0.047         0.080      0.587   0.00 / 0.44 / 0.12
+  4      48    0.354    0.163      0.076         0.050      0.258   0.00 / 0.81 / 0.25
+  8      24    0.458    0.191      0.082         0.000      0.000   0.00 / 1.00 / 0.38
+
+Saved /kaggle/working/pa2/results/task3_grpo/group_size_study.json
+Fork updates: 8
+Compare loss_type='grpo' vs loss_type='dr_grpo' from the identical supplied midpoint.
+[fork_grpo] updates=8 loss_type=grpo K=4 prompts/update=1 eps=0.2 kl_beta=0.1 max_completion=512 mask_truncated=True
+[fork_grpo] update 1/8 reward=+0.847 grp_std=0.461 uninf=0.00 kl=-0.0002 ent=1.298 len=512 trunc=1.00 loss=+0.0000 gn=0.000 t=27s
+[fork_grpo] update 2/8 reward=+1.385 grp_std=0.322 uninf=0.00 kl=0.0000 ent=0.780 len=490 trunc=0.75 loss=-0.3404 gn=0.076 t=54s
+[fork_grpo] update 3/8 reward=+1.857 grp_std=0.176 uninf=0.00 kl=0.0004 ent=0.234 len=7 trunc=0.00 loss=+0.0000 gn=2.110 t=57s
+[fork_grpo] update 4/8 reward=+1.620 grp_std=0.387 uninf=0.00 kl=-0.0000 ent=0.652 len=490 trunc=0.50 loss=-0.3594 gn=0.066 t=84s
+[fork_grpo] update 5/8 reward=+1.176 grp_std=0.261 uninf=0.00 kl=0.0004 ent=1.147 len=10 trunc=0.00 loss=+0.0000 gn=1.400 t=87s
+[fork_grpo] update 6/8 reward=+0.374 grp_std=0.434 uninf=0.00 kl=-0.0001 ent=1.315 len=51 trunc=0.00 loss=+0.0000 gn=0.820 t=95s
+[fork_grpo] update 7/8 reward=+2.657 grp_std=0.469 uninf=0.00 kl=0.0002 ent=0.875 len=292 trunc=0.00 loss=+0.0000 gn=0.158 t=120s
+[fork_grpo] update 8/8 reward=+1.450 grp_std=1.186 uninf=0.00 kl=0.0002 ent=1.002 len=132 trunc=0.00 loss=+0.0000 gn=0.652 t=133s
+[fork_grpo] done in 2.2 min, peak VRAM 5.3 GiB -> /kaggle/working/pa2/outputs/task3_grpo/fork_grpo
+[fork_grpo] held-out reward=+1.607+-0.158 kl=0.0000 ent=0.984 len=325.6 trunc=0.12
+[fork_dr_grpo] updates=8 loss_type=dr_grpo K=4 prompts/update=1 eps=0.2 kl_beta=0.1 max_completion=512 mask_truncated=True
+[fork_dr_grpo] update 1/8 reward=+0.847 grp_std=0.461 uninf=0.00 kl=-0.0002 ent=1.298 len=512 trunc=1.00 loss=+0.0000 gn=0.000 t=29s
+[fork_dr_grpo] update 2/8 reward=+1.385 grp_std=0.322 uninf=0.00 kl=0.0000 ent=0.780 len=490 trunc=0.75 loss=-0.2832 gn=0.063 t=57s
+[fork_dr_grpo] update 3/8 reward=+1.857 grp_std=0.176 uninf=0.00 kl=-0.0008 ent=0.233 len=7 trunc=0.00 loss=+0.0025 gn=0.023 t=60s
+[fork_dr_grpo] update 4/8 reward=+2.045 grp_std=0.183 uninf=0.00 kl=0.0001 ent=0.662 len=483 trunc=0.25 loss=-0.0559 gn=0.095 t=89s
+[fork_dr_grpo] update 5/8 reward=+1.375 grp_std=0.265 uninf=0.00 kl=-0.0006 ent=1.121 len=9 trunc=0.00 loss=-0.0004 gn=0.031 t=92s
+[fork_dr_grpo] update 6/8 reward=+0.174 grp_std=0.432 uninf=0.00 kl=-0.0000 ent=1.314 len=51 trunc=0.00 loss=+0.0423 gn=0.041 t=100s
+[fork_dr_grpo] update 7/8 reward=+2.657 grp_std=0.469 uninf=0.00 kl=0.0004 ent=0.875 len=292 trunc=0.00 loss=-0.0723 gn=0.108 t=127s
+[fork_dr_grpo] update 8/8 reward=+1.450 grp_std=1.186 uninf=0.00 kl=0.0001 ent=1.001 len=132 trunc=0.00 loss=-0.1296 gn=0.066 t=141s
+[fork_dr_grpo] done in 2.3 min, peak VRAM 5.3 GiB -> /kaggle/working/pa2/outputs/task3_grpo/fork_dr_grpo
+[fork_dr_grpo] held-out reward=+1.504+-0.159 kl=0.0001 ent=0.936 len=322.8 trunc=0.14
+[grpo] held-out reward=+1.607+-0.158 kl=0.0000 len=325.6 | corr(grad/|A|, len)=-0.782 long share of grad=0.11 (of tokens 0.95)
+[dr_grpo] held-out reward=+1.504+-0.159 kl=0.0001 len=322.8 | corr(grad/|A|, len)=+0.794 long share of grad=0.74 (of tokens 0.95)
+Saved /kaggle/working/pa2/results/task3_grpo/normalization_study.json
+condition                          sft    midpoint    standard   fork_grpo  fork_dr_grpo
+heldout_reward                  1.8936  1.8419e+00      1.7388  1.6074e+00        1.5044
+heldout_reward_se               0.1487  1.4030e-01      0.1683  1.5822e-01        0.1592
+heldout_reward_raw              1.9874  1.9357e+00      1.8638  1.7324e+00        1.6450
+heldout_kl_token                0.0000  3.6431e-05      0.0001  4.7227e-05        0.0001
+heldout_kl_seq                  0.0000  1.1501e-02      0.0342  1.5377e-02        0.0412
+heldout_entropy                 0.9782  9.7824e-01      0.9436  9.8372e-01        0.9360
+heldout_tokens_mean           334.3750  3.1570e+02    323.2969  3.2561e+02      322.7969
+heldout_tokens_std            267.9323  2.6427e+02    272.0243  2.7657e+02      272.8778
+heldout_tokens_iqr            518.0000  4.3100e+02    458.0000  5.3825e+02      516.7500
+heldout_truncation              0.0938  9.3750e-02      0.1250  1.2500e-01        0.1406
+reward_diff_vs_midpoint         0.0517         NaN     -0.1031 -2.3451e-01       -0.3375
+reward_diff_ci_lo              -0.1784         NaN     -0.3399 -5.1121e-01       -0.6509
+reward_diff_ci_hi               0.2751         NaN      0.1270  2.5003e-02       -0.0490
+tokens_diff_vs_midpoint        18.6719         NaN      7.5938  9.9062e+00        7.0938
+tokens_diff_ci_lo              -4.0328         NaN    -20.4852 -2.0472e+01      -16.6437
+tokens_diff_ci_hi              40.6406         NaN     35.9539  3.8547e+01       28.7516
+train_updates                      NaN         NaN     20.0000  8.0000e+00        8.0000
+tokens_generated                   NaN         NaN  19144.0000  7.9360e+03     7908.0000
+train_reward_mean                  NaN         NaN      1.3987  1.4206e+00        1.4736
+train_uninformative_fraction       NaN         NaN      0.1000  0.0000e+00        0.0000
+train_group_std_mean               NaN         NaN      0.4657  4.6224e-01        0.4369
+train_truncated_fraction           NaN         NaN      0.1875  2.8125e-01        0.2500
+grad_norm_mean                     NaN         NaN      0.4245  6.6030e-01        0.0535
+grad_norm_std                      NaN         NaN      0.5368  7.1229e-01        0.0344
+
+standard continuation: wall-clock 335.3 s, peak VRAM 5.314 GiB on Tesla T4
+
+Wrote /kaggle/working/pa2/results/task3_grpo/summary.csv, figures/, qualitative_candidates.md

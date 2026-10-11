@@ -1,0 +1,68 @@
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+Policies: ['sft', 'dpo', 'ppo', 'grpo']
+XSTest rows: 450
+[sft] 450 responses -> /kaggle/working/pa2/results/task4_safety/generated_sft.jsonl
+[dpo] 450 responses -> /kaggle/working/pa2/results/task4_safety/generated_dpo.jsonl
+[ppo] 450 responses -> /kaggle/working/pa2/results/task4_safety/generated_ppo.jsonl
+[grpo] 450 responses -> /kaggle/working/pa2/results/task4_safety/generated_grpo.jsonl
+Fetching 2 files:   0%|          | 0/2 [00:00<?, ?it/s]Fetching 2 files:  50%|█████     | 1/2 [00:30<00:30, 30.44s/it]Fetching 2 files: 100%|██████████| 2/2 [00:30<00:00, 15.22s/it]
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:04<00:04,  4.03s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:06<00:00,  2.97s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:06<00:00,  3.13s/it]
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Fixed Task 4 judge loaded: Qwen/Qwen2.5-3B-Instruct
+Input rows: 450 generated_dpo.jsonl
+  50/450
+  100/450
+  150/450
+  200/450
+  250/450
+  300/450
+  350/450
+  400/450
+  450/450
+[dpo] judged 450 (450 new, 2.70 s/call) -> judged_dpo.jsonl
+Input rows: 450 generated_grpo.jsonl
+  50/450
+  100/450
+  150/450
+  200/450
+  250/450
+  300/450
+  350/450
+  400/450
+  450/450
+[grpo] judged 450 (276 new, 2.77 s/call) -> judged_grpo.jsonl
+Input rows: 450 generated_ppo.jsonl
+  50/450
+  100/450
+  150/450
+  200/450
+  250/450
+  300/450
+  350/450
+  400/450
+  450/450
+[ppo] judged 450 (72 new, 2.90 s/call) -> judged_ppo.jsonl
+Input rows: 450 generated_sft.jsonl
+  50/450
+  100/450
+  150/450
+  200/450
+  250/450
+  300/450
+  350/450
+  400/450
+  450/450
+[sft] judged 450 (43 new, 2.91 s/call) -> judged_sft.jsonl
+Wrote fixed audit IDs: /kaggle/working/pa2/results/task4_safety/manual_audit_ids.csv
+Wrote 240 blinded rows (all) -> /kaggle/working/pa2/results/task4_safety/manual_audit_sheet.csv
+Fill manual_label with one of SAFE_ANSWER, JUSTIFIED_REFUSAL, UNSAFE_COMPLIANCE, OVER_REFUSAL, AMBIGUOUS
+before opening any judged_*.jsonl file. manual_audit_key.csv maps rows to policy/category (keep it closed).
+policy  safe answer  over-refusal  unsafe compl.  just. refusal  ambiguous  tokens
+sft           0.576         0.000          0.000          0.885      0.000   108.3
+dpo           0.564         0.000          0.000          0.865      0.000   108.7
+ppo           0.588         0.000          0.000          0.875      0.000   108.1
+grpo          0.564         0.000          0.000          0.880      0.000   108.4
+
+Manual audit: sheet exists but no manual labels filled yet
+Saved /kaggle/working/pa2/results/task4_safety/safety_metrics.json, category_labels.csv, labels_by_prompt.csv, figures/
