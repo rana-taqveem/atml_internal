@@ -88,7 +88,15 @@ report wording are the author's.** "Facts" bullets state what the numbers show, 
 | beta_0.3 | 0.600 | 0.606 | 0.524 |
 | length_balanced | 0.623 | 0.638 | 0.429 |
 
-*Qualitative:* `results/task1_dpo/qualitative_candidates_standard.md` (word-limit table: e.g. wl04, wl06). Figures: `results/task1_dpo/figures/`.
+**T1.6 Paired differences between runs (RQ1; last row isolates training budget at β=0.10).** Accuracy paired over the 300 held-out pairs; KL = pooled per-token estimator of T1.1 and reward, both paired over the 128 prompts; 5000-sample bootstrap. Figure: `results/evidence/fig1b_beta_pairwise.png`.
+| comparison | varies | Δ accuracy [95% CI] | Δ KL/token [95% CI] | Δ reward [95% CI] | CI excludes 0 (acc/KL/reward) |
+|---|---|---|---|---|---|
+| beta_0.03 − beta_0.1 | β | +0.010 [-0.007, +0.027] | +0.000018 [-0.000066, +0.000105] | -0.001 [-0.082, +0.085] | no/no/no |
+| beta_0.1 − beta_0.3 | β | +0.000 [-0.027, +0.030] | +0.000020 [-0.000066, +0.000106] | -0.021 [-0.087, +0.041] | no/no/no |
+| beta_0.03 − beta_0.3 | β | +0.010 [-0.013, +0.037] | +0.000039 [-0.000064, +0.000139] | -0.022 [-0.111, +0.070] | no/no/no |
+| standard − beta_0.1 | budget (1500 vs 600 pairs) | +0.037 [+0.000, +0.070] | +0.000100 [-0.000197, +0.000399] | +0.016 [-0.075, +0.110] | no/no/no |
+
+*Figures:* `results/evidence/fig1a_length_strata.png` (summed vs per-token accuracy per stratum, ± binomial SE, n=82), `results/evidence/fig1b_beta_pairwise.png`. *Qualitative:* `results/task1_dpo/qualitative_candidates_standard.md` (word-limit table: e.g. wl04, wl06). Other figures: `results/task1_dpo/figures/`.
 
 
 ## Task 2 — PPO (all runs start from the supplied midpoint policy + critic)

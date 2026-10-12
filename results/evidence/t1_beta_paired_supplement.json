@@ -1,0 +1,105 @@
+{
+  "bootstrap": {
+    "seed": 0,
+    "replicates": 5000,
+    "unit": "paired prompt",
+    "interval": "percentile 95%",
+    "n_prompts": 128
+  },
+  "sources": [
+    "results/task1_dpo/beta_0.03/generations.jsonl",
+    "results/task1_dpo/beta_0.1/generations.jsonl",
+    "results/task1_dpo/beta_0.3/generations.jsonl"
+  ],
+  "contrasts": [
+    {
+      "contrast": "beta_0.03 minus beta_0.1",
+      "reward": {
+        "mean_difference": -0.0007712841033935547,
+        "ci95": [
+          -0.07945517897605896,
+          0.0800890147686004
+        ]
+      },
+      "kl_token_mean": {
+        "mean_difference": 2.7172674570863364e-05,
+        "ci95": [
+          -0.00015598581798936806,
+          0.0002354485620834623
+        ]
+      },
+      "kl_token_pooled": {
+        "mean_difference": 1.8146135968191782e-05,
+        "ci95": [
+          -6.500037548271528e-05,
+          0.0001051913834350624
+        ]
+      }
+    },
+    {
+      "contrast": "beta_0.03 minus beta_0.3",
+      "reward": {
+        "mean_difference": -0.021844148635864258,
+        "ci95": [
+          -0.10814064145088195,
+          0.07104324996471395
+        ]
+      },
+      "kl_token_mean": {
+        "mean_difference": 4.9201614402250016e-05,
+        "ci95": [
+          -0.00011773877294203316,
+          0.00022645834864256642
+        ]
+      },
+      "kl_token_pooled": {
+        "mean_difference": 3.851081213814971e-05,
+        "ci95": [
+          -6.118523702927867e-05,
+          0.0001419841271342958
+        ]
+      }
+    },
+    {
+      "contrast": "beta_0.1 minus beta_0.3",
+      "reward": {
+        "mean_difference": -0.021072864532470703,
+        "ci95": [
+          -0.08671214580535888,
+          0.04072236567735662
+        ]
+      },
+      "kl_token_mean": {
+        "mean_difference": 2.202893983138665e-05,
+        "ci95": [
+          -0.00014230276612146043,
+          0.0001862967828770933
+        ]
+      },
+      "kl_token_pooled": {
+        "mean_difference": 2.0364676169957926e-05,
+        "ci95": [
+          -6.906353843683288e-05,
+          0.00010765023927508636
+        ]
+      }
+    }
+  ],
+  "scaled_margin_diagnostics": {
+    "beta_0.03": {
+      "mean_beta_margin": 0.003954911905527115,
+      "max_abs_beta_margin": 0.080313720703125,
+      "fraction_abs_at_least_1": 0.0
+    },
+    "beta_0.1": {
+      "mean_beta_margin": 0.012504321058591209,
+      "max_abs_beta_margin": 0.256231689453125,
+      "fraction_abs_at_least_1": 0.0
+    },
+    "beta_0.3": {
+      "mean_beta_margin": 0.0318685690164566,
+      "max_abs_beta_margin": 0.74791259765625,
+      "fraction_abs_at_least_1": 0.0
+    }
+  }
+}

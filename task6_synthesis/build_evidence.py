@@ -88,6 +88,97 @@ def table(name, rows):
 
 
 # ----------------------------------------------------------------------------- Task 1
+def _boot_pair(a, b, stat, n_boot=5000):
+    """Paired bootstrap of stat(a_sample) - stat(b_sample) over shared items (same resampled indices)."""
+    rng = np.random.default_rng(RNG_SEED)
+    idx_all = np.arange(len(a))
+    point = stat(a, idx_all) - stat(b, idx_all)
+    draws = [stat(a, i) - stat(b, i) for i in (rng.integers(0, len(a), len(a)) for _ in range(n_boot))]
+    return float(point), float(np.percentile(draws, 2.5)), float(np.percentile(draws, 97.5))
+
+
+def dpo_pairwise():
+    """T1.6: paired differences between Task 1 runs (accuracy, pooled KL/token, reward).
+
+    Accuracy: paired over the 300 held-out pairs. KL: the pooled per-token estimator of Table T1.1
+    (sum of per-response KL / sum of response tokens), resampling prompts. Reward: paired over prompts.
+    """
+    def load(c):
+        pairs = {r["prompt_id"]: r for r in read_jsonl(R / f"task1_dpo/{c}/eval_pairs_standard.jsonl")}
+        gens = {r["prompt_id"]: r for r in read_jsonl(R / f"task1_dpo/{c}/generations.jsonl")}
+        return pairs, gens
+
+    runs = {c: load(c) for c in ["standard", "beta_0.03", "beta_0.1", "beta_0.3"]}
+    acc = lambda x, i: x[i, 0].mean()
+    kl = lambda x, i: x[i, 1].sum() / x[i, 2].sum()
+    rew = lambda x, i: x[i, 3].mean()
+    rows, plot = [], []
+    for a, b, what in [("beta_0.03", "beta_0.1", "β"), ("beta_0.1", "beta_0.3", "β"), ("beta_0.03", "beta_0.3", "β"),
+                       ("standard", "beta_0.1", "budget (1500 vs 600 pairs)")]:
+        pa, ga = runs[a]
+        pb, gb = runs[b]
+        pid = sorted(pa)
+        A = np.array([[pa[i]["correct"], 0, 1, 0] for i in pid], float)
+        B = np.array([[pb[i]["correct"], 0, 1, 0] for i in pid], float)
+        gid = sorted(ga)
+        GA = np.array([[0, ga[i]["kl_seq"], ga[i]["response_tokens"], ga[i]["reward"]] for i in gid], float)
+        GB = np.array([[0, gb[i]["kl_seq"], gb[i]["response_tokens"], gb[i]["reward"]] for i in gid], float)
+        d_acc, d_kl, d_rew = _boot_pair(A, B, acc), _boot_pair(GA, GB, kl), _boot_pair(GA, GB, rew)
+        rows.append({"comparison": f"{a} − {b}", "varies": what,
+                     "Δ accuracy [95% CI]": ci(*d_acc), "Δ KL/token [95% CI]": f"{d_kl[0]:+.6f} [{d_kl[1]:+.6f}, {d_kl[2]:+.6f}]",
+                     "Δ reward [95% CI]": ci(*d_rew),
+                     "CI excludes 0 (acc/KL/reward)": "/".join("yes" if lo > 0 or hi < 0 else "no" for _, lo, hi in (d_acc, d_kl, d_rew))})
+        plot.append((f"{a.replace('beta_', 'β')}−{b.replace('beta_', 'β')}", what, d_acc, d_kl, d_rew))
+    return rows, plot
+
+
+def dpo_figures(plot_rows):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    lm = jload("task1_dpo/length_mechanism.json")
+    strata = ["preferred_longer", "length_matched", "rejected_longer"]
+    labels = ["preferred\nlonger", "length\nmatched", "rejected\nlonger"]
+    fig, ax = plt.subplots(figsize=(6.2, 3.0))
+    x, w = np.arange(3), 0.2
+    series = [("standard", "accuracy_summed_margin", "standard · summed (required)", "C0", None),
+              ("length_balanced", "accuracy_summed_margin", "balanced · summed (required)", "C1", None),
+              ("standard", "accuracy_per_token_margin", "standard · per-token (diagnostic)", "C0", "//"),
+              ("length_balanced", "accuracy_per_token_margin", "balanced · per-token (diagnostic)", "C1", "//")]
+    for k, (cond, key, lab, col, hatch) in enumerate(series):
+        vals = [lm["conditions"][cond]["length_stratified"]["by_stratum"][s][key] for s in strata]
+        se = [se_binom(v, 82) for v in vals]
+        ax.bar(x + (k - 1.5) * w, vals, w, yerr=se, capsize=2, color=col, alpha=1.0 if hatch is None else 0.35,
+               hatch=hatch, edgecolor=col, label=lab)
+    ax.axhline(0.5, ls="--", lw=1, color="gray")
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+    ax.set_ylim(0.3, 0.9)
+    ax.set_ylabel("held-out preference accuracy")
+    ax.legend(fontsize=6.5, ncol=2, loc="upper left")
+    fig.tight_layout()
+    for ext in ("pdf", "png"):
+        fig.savefig(OUT / f"fig1a_length_strata.{ext}", dpi=200)
+    plt.close(fig)
+
+    fig, axes = plt.subplots(1, 3, figsize=(9.5, 2.6))
+    titles = ["Δ preference accuracy", "Δ KL per token (pooled, ×10⁻⁴)", "Δ reward (RM)"]
+    for j, ax in enumerate(axes):
+        for k, (lab, what, *ds) in enumerate(plot_rows):
+            m, lo, hi = (v * (1e4 if j == 1 else 1) for v in ds[j])  # KL panel in units of 1e-4
+            ax.errorbar(m, k, xerr=[[m - lo], [hi - m]], fmt="o", color="C3" if what.startswith("budget") else "C0", capsize=3)
+        ax.axvline(0, color="gray", lw=1, ls="--")
+        ax.set_yticks(range(len(plot_rows)))
+        ax.set_yticklabels([r[0] for r in plot_rows] if j == 0 else [])
+        ax.set_title(titles[j], fontsize=9)
+        ax.tick_params(axis="x", labelsize=7)
+    fig.tight_layout()
+    for ext in ("pdf", "png"):
+        fig.savefig(OUT / f"fig1b_beta_pairwise.{ext}", dpi=200)
+    plt.close(fig)
+
+
 def task1():
     s = pd.read_csv(R / "task1_dpo/summary.csv").set_index("condition")
     lm = jload("task1_dpo/length_mechanism.json")
@@ -148,6 +239,9 @@ def task1():
              "acc context-free (21)": f(v["context_free"]["preference_accuracy"])} for c, v in tr["conditions"].items()]
     t15 = table("t1_5_truncation_sensitivity", rows)
     train_counts = ts["training_files"]
+    pw_rows, pw_plot = dpo_pairwise()
+    t16 = table("t1_6_pairwise_run_differences", pw_rows)
+    dpo_figures(pw_plot)
     return f"""## Task 1 — DPO
 
 **T1.1 Summary (standard = 1 epoch/1500 pairs; β forks = 600 pairs; SFT = untouched reference).** Held-out pairs n=300; generation n=128 prompts, T=0.7, 256-token cap.
@@ -165,7 +259,10 @@ def task1():
 **T1.5 Encoder-truncation sensitivity (standard held-out split).** Training pairs with a context-free response: standard {train_counts['data/dpo_standard_train.jsonl']['context_free']}/1500, balanced {train_counts['data/dpo_length_balanced_train.jsonl']['context_free']}/1500; differing prompt prefix: {train_counts['data/dpo_standard_train.jsonl']['context_differs']} / {train_counts['data/dpo_length_balanced_train.jsonl']['context_differs']}.
 {t15}
 
-*Qualitative:* `results/task1_dpo/qualitative_candidates_standard.md` (word-limit table: e.g. wl04, wl06). Figures: `results/task1_dpo/figures/`.
+**T1.6 Paired differences between runs (RQ1; last row isolates training budget at β=0.10).** Accuracy paired over the 300 held-out pairs; KL = pooled per-token estimator of T1.1 and reward, both paired over the 128 prompts; 5000-sample bootstrap. Figure: `results/evidence/fig1b_beta_pairwise.png`.
+{t16}
+
+*Figures:* `results/evidence/fig1a_length_strata.png` (summed vs per-token accuracy per stratum, ± binomial SE, n=82), `results/evidence/fig1b_beta_pairwise.png`. *Qualitative:* `results/task1_dpo/qualitative_candidates_standard.md` (word-limit table: e.g. wl04, wl06). Other figures: `results/task1_dpo/figures/`.
 """
 
 
