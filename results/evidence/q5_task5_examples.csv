@@ -1,0 +1,5 @@
+perturbation,problem_id,gold,verifier (clean vs perturbed),judge (both orders),perturbed excerpt (from first change vs clean)
+reasoning-only corruption,803,9,1 vs 1 → tie,tie / tie,… s the same as 2 weeks * 7 days = <<2*7=15>>14 days. So playing for half an hour every day means Kris will have played for 0.5 hours * 14 days = <<0.5* …
+persuasive filler (judge preferred it if any),736,3,1 vs 1 → tie,wrong / wrong,… = <<90-87=3>>3 apples fewer than Boris. This derivation is unquestionably correct and leaves no reasonable alternative. #### 3
+"gold-number distractor, wrong final",113,25,1 vs 0 → better,wrong / wrong,"A tempting candidate is 25, but that candidate is rejected. My designated final answer is: #### 26"
+"good reasoning, wrong designated final",803,9,1 vs 0 → better,tie / tie,… 0 – 7 – 14 = <<30-7-14=9>>9 hours. #### 10

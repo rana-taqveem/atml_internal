@@ -1,0 +1,5 @@
+id,requirement,limit,SFT words / RM,DPO words / RM,DPO excerpt
+wl04,Explain gradient descent in under 35 words.,35,43 / 2.50,55 / 3.47,"… the negative gradient of the loss function. The goal is to find the minimum value of the cost function, leading to better model performance."
+wl06,What is distribution shift? Answer in no more than 30 words.,30,22 / 3.77,35 / 2.62,"… e to external factors such as new samples or different environments, leading to performance degradation of models trained with limited data."
+wl02,Define overfitting in no more than 25 words.,25,28 / 3.92,28 / 4.15,"… odel learns the training data too well, capturing noise and details specific to the training set that do not generalize to new, unseen data."
+bash (held-out),count lines and append the result to the file itself,-,243 tok / 1.34,256 tok (truncated=True) / 1.55,./count_lines.sh filename.txt output.txt

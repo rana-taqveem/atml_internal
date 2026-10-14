@@ -598,6 +598,8 @@ def main():
                      + md_table(d.round(4).fillna("-")))
     (OUT / "EVIDENCE.md").write_text("\n\n".join(parts) + "\n", encoding="utf-8")
     print(f"Wrote {OUT / 'EVIDENCE.md'} and {len(TABLES)} CSV tables")
+    from task6_synthesis import evidence_extras  # figures, qualitative tables, INDEX.md
+    evidence_extras.main()
 
 
 if __name__ == "__main__":

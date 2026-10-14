@@ -213,6 +213,7 @@ Judge and verifier inference cost is logged.
 
 ```bash
 python -m task6_synthesis.summarize     # results/task6_synthesis/: drift/reward/compute, safety, feedback-source tables
+python -m task6_synthesis.build_evidence  # results/evidence/: EVIDENCE.md, INDEX.md (required evidence -> files), tables, figures, qualitative examples
 ```
 
 ### Running on Kaggle
