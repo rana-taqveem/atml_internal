@@ -160,51 +160,44 @@ def figure_erm_failures(results_dir, out_dir, baseline="erm"):
         # away from the accuracy it is drawn beside.
         row["errors"] = int(round(row["support_n"] * (1 - row["accuracy"] / 100)))
 
-    figure, axes = plt.subplots(1, 2, figsize=(12.4, 4.3))
+    # Horizontal bars: at print size (8 pt, 5.5 in) seven class names and the
+    # per-bar labels only fit side by side along the y axis.
+    figure, axes = plt.subplots(1, 2, figsize=(TEXT_WIDTH, 2.3),
+                                gridspec_kw={"width_ratios": [1, 1.25]})
 
-    # (a) accuracy, weakest first
-    by_accuracy = sorted(rows, key=lambda r: r["accuracy"])
+    # (a) accuracy, weakest at the top, with target support at the bar end
+    by_accuracy = sorted(rows, key=lambda r: r["accuracy"], reverse=True)
     names = [r["class"] for r in by_accuracy]
     values = [r["accuracy"] for r in by_accuracy]
-    bars = axes[0].bar(names, values, color="#4C72B0")
-    for bar, row in zip(bars, by_accuracy):
-        axes[0].text(bar.get_x() + bar.get_width() / 2, row["accuracy"] + 1.5,
-                     f"n={row['support_n']}", ha="center", fontsize=7.5, color="#444")
-    axes[0].set_ylim(0, 108)
-    axes[0].set_ylabel("Target accuracy (%)")
-    axes[0].set_title("(a) Source-only ERM, per class on Sketch")
-    axes[0].tick_params(axis="x", labelsize=8.5)
+    axes[0].barh(names, values, color="#4C72B0")
+    for index, row in enumerate(by_accuracy):
+        axes[0].text(row["accuracy"] + 2, index, f"n={row['support_n']}",
+                     va="center", color="#444")
+    axes[0].set_xlim(0, 135)
+    axes[0].set_xticks([0, 25, 50, 75, 100])
+    axes[0].set_xlabel("Target accuracy (%)")
+    axes[0].set_title("(a) ERM accuracy per class")
 
-    # (b) error counts with cumulative share
-    by_errors = sorted(rows, key=lambda r: r["errors"], reverse=True)
+    # (b) error counts, largest at the top, with the class absorbing most errors
+    by_errors = sorted(rows, key=lambda r: r["errors"])
     names = [r["class"] for r in by_errors]
     counts = [r["errors"] for r in by_errors]
     total = sum(counts)
-    cumulative = np.cumsum(counts) / total * 100
+    top3_share = 100 * sum(sorted(counts, reverse=True)[:3]) / total
 
-    axes[1].bar(names, counts, color="#DD8452")
+    axes[1].barh(names, counts, color="#DD8452")
     for index, row in enumerate(by_errors):
         if row.get("confused_with"):
-            axes[1].text(index, counts[index] + total * 0.012,
-                         f"-> {row['confused_with']}\n({row['confused_count']})",
-                         ha="center", fontsize=7, color="#444")
-
-    twin = axes[1].twinx()
-    twin.plot(names, cumulative, "o-", color="#55A868", linewidth=1.5, markersize=4)
-    twin.set_ylim(0, 105)
-    twin.set_ylabel("cumulative share of errors (%)", color="#55A868")
-    twin.tick_params(axis="y", labelcolor="#55A868")
-    twin.axhline(cumulative[2], color="#55A868", linestyle=":", linewidth=1.0)
-    twin.text(len(names) - 1.4, cumulative[2] + 2.5,
-              f"top 3 = {cumulative[2]:.1f}%", fontsize=8, color="#55A868", ha="right")
-
-    axes[1].set_ylim(0, max(counts) * 1.28)
-    axes[1].set_ylabel("Misclassified target images")
-    axes[1].set_title("(b) Error contribution and dominant confusion")
-    axes[1].tick_params(axis="x", labelsize=8.5)
+            axes[1].text(counts[index] + total * 0.01, index,
+                         f"→ {row['confused_with']} ({row['confused_count']})",
+                         va="center", color="#444")
+    axes[1].set_xlim(0, max(counts) * 1.75)
+    axes[1].set_xlabel("Misclassified target images")
+    axes[1].set_title(f"(b) Errors per class (top 3 = {top3_share:.1f}%)")
 
     for axis in axes:
         tidy(axis)
+        axis.grid(axis="y", visible=False)
     figure.tight_layout()
     save(figure, out_dir, "task2_fig0_erm_failures")
 

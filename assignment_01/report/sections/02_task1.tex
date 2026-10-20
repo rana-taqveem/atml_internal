@@ -1,14 +1,13 @@
 \section{Task 1: Inductive Biases and Feature Representations}
 
 \subsection{Experimental Setup}
-% Brief 2-3 sentence overview of dataset (STL-10), architectures (ResNet-50, ViT-B/16,
-% CLIP ViT-B/32 with a trained linear head and zero-shot prompts), 500-image balanced
-% evaluation subset, and seed 6304.
+ResNet-50~\citep{he2016resnet}, ViT-B/16~\citep{dosovitskiy2021vit} and CLIP~\citep{radford2021clip} heads and zero-shot CLIP are tested on 500 STL-10 images~\citep{coates2011stl10} under colour, translation, patch-shuffle and AdaIN~\citep{huang2017adain} cue-conflict interventions~\citep{geirhos2019texture} (Appendix Table~\ref{tab:setup_task1}).
 
 \subsection{Model's Reliance on Shape, Texture, and Color}
 
-\begin{table}[t]
-  \caption{Top-1 accuracy (Acc, \%), change from each method's clean baseline ($\Delta$, pp) and prediction consistency (C, \%) on 500 STL-10 test images (seed 6304). $\dagger$: significant under a paired McNemar test with Holm correction ($p<0.05$). Hue rotation is $30^{\circ}$; patch shuffle uses a $4\times4$ grid.}
+% [h], not [t]: on page 1 a top float would be placed above the title.
+\begin{table}[h]
+  \caption{Accuracy (Acc, \%), change from clean ($\Delta$, pp) and prediction consistency (C, \%) on 500 STL-10 test images. $\dagger$: significant (paired McNemar, Holm, $p<0.05$).}
   \label{tab:task1_interventions}
   \centering
   \small
@@ -27,21 +26,21 @@
   \end{tabular}
 \end{table}
 
-\begin{figure}[t]
+\begin{figure}[h]
   \centering
-  \includegraphics[width=\textwidth]{figures/task1/fig1_interventions.pdf}
-  \caption{(a) Accuracy change from the clean baseline with 95\% confidence intervals; intervals crossing zero are within sampling noise. (b) Accuracy and (c) prediction consistency against translation distance, averaged over four directions ($N=500$).}
+  \includegraphics{figures/task1/fig1_interventions.pdf}
+  \caption{(a) Accuracy change from clean with 95\% CIs. (b) Accuracy and (c) consistency against translation, averaged over four directions.}
   \label{fig:task1_interventions}
 \end{figure}
 
 Model performance under interventions like color changes (greyscaling or hue modifications) showed no substantial drop in overall performance, suggesting that none of the models gave much importance to the color when making predictions. Removing color altogether cost between 1.4 and 2.4 points, and changing color impacted even less, from 0 to 1.6 points. Although, under the greyscale all four models broke more predictions than they managed to fix, only the zero-shot CLIP change was statistically more reliable.
 
-When the texture of one class is pushed over the shape of another every models showed a strong inclination towards shape bias, with ResNet being the least biased towards shape and appearing to give some importance to texture as well as compared to the rest. Coverage of each model on the cue conflicts gives a different base for these percentages. For ResNet the shape bias is computed from 160 predictions, while for the others from about 180. A lower coverage means the model committed to a cue on fewer images. The models, ViT, the CLIP head, and zero-shot CLIP, predicted a third class on only 17 to 20 of the 200 conflicts, while ResNet did so on 40. Thus, ResNet's shape bias is measured less precisely than the others (Table~\ref{tab:task1_shape_bias}). However it cannot claimed that ResNet's lower coverage follows from its greater reliance on texture or from some other weakness, since a third-class prediction only shows that neither cue won, not which cue caused it.
+When the texture of one class is pushed over the shape of another every model showed a strong inclination towards shape bias, with ResNet being the least biased towards shape and appearing to give some importance to texture as well as compared to the rest. Coverage of each model on the cue conflicts gives a different base for these percentages. For ResNet the shape bias is computed from 160 predictions, while for the others from about 180. A lower coverage means the model committed to a cue on fewer images. The models, ViT, the CLIP head, and zero-shot CLIP, predicted a third class on only 17 to 20 of the 200 conflicts, while ResNet did so on 40. Thus, ResNet's shape bias is measured less precisely than the others (Table~\ref{tab:task1_shape_bias}). However, it cannot be claimed that ResNet's lower coverage follows from its greater reliance on texture or from some other weakness, since a third-class prediction only shows that neither cue won, not which cue caused it.
 
 For the three trained heads (ResNet $+14.5$, CLIP head $+12.0$, ViT $+7.0$ points) the texture class rose into the top two of the ranked class scores more often under conflict than on the clean content image, so texture does influence their scores even though shape still dominates the final decision; zero-shot CLIP showed no such reliable movement.
 
-\begin{table}[t]
-  \caption{Cue-conflict decisions on 200 AdaIN conflict images ($\alpha=0.7$). Shape bias $=N_{\text{shape}}/(N_{\text{shape}}+N_{\text{texture}})$; coverage $=(N_{\text{shape}}+N_{\text{texture}})/200$. Brackets: 95\% intervals (bootstrap for shape bias, Wilson for coverage).}
+\begin{table}[htbp]
+  \caption{Cue-conflict decisions on 200 AdaIN images. Shape bias $=N_s/(N_s+N_t)$, coverage $=(N_s+N_t)/200$; 95\% intervals in brackets.}
   \label{tab:task1_shape_bias}
   \centering
   \footnotesize
@@ -58,17 +57,17 @@ For the three trained heads (ResNet $+14.5$, CLIP head $+12.0$, ViT $+7.0$ point
   \end{tabular}
 \end{table}
 
-\begin{figure}[t]
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=\textwidth]{figures/task1/fig2_cue_and_representation.pdf}
-  \caption{(a) Shape bias with 95\% interval, and coverage ($|$), per method. (b) Cosine stability $I_T$ between clean and transformed features per backbone (1 = unchanged); translation averages four 32-pixel shifts. The two CLIP methods share one backbone.}
+  \includegraphics{figures/task1/fig2_cue_and_representation.pdf}
+  \caption{(a) Shape bias with 95\% interval and coverage ($|$). (b) Cosine stability between clean and transformed features (1 = unchanged).}
   \label{fig:task1_cue_representation}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=\textwidth]{figures/task1/fig3_cue_examples_compact.pdf}
-  \caption{One seeded cue-conflict example per decision pattern (out of 200: all shape 126, split 24, all texture 2, a third class 55), with each method's prediction and whether it follows shape, texture or neither.}
+  \includegraphics{figures/task1/fig3_cue_examples_compact.pdf}
+  \caption{One seeded example per decision pattern (shape / texture class) with each method's prediction. S: shape, T: texture, O: other; ZS: zero-shot CLIP.}
   \label{fig:task1_cue_examples}
 \end{figure}
 
@@ -82,18 +81,15 @@ The variation in model performance can be attributed to the changes introduced b
 
 \subsection{Representation Space Analysis}
 
-For all models, feature representation similarity remained quite stable across translations. For color interventions it drops marginally. However, a substantial decline is observed for patch shuffling ViT(0.63) , ResNet(0.70) , CLIP(0.75). Cue conflicts caused the sharpest drop of all, ResNet(0.44), ViT(0.48), but CLIP managed a good performance of 0.78 points.
-
-On translation interventions the features barely moved, (stayed 0.93 $\sim$ 0.98), and accuracy remains stable. The clearest divergence appears with the cue conflicts, where ResNet's representation moves the furthest of all (dropping to 0.442), while its predictions change only slightly, since 139 of 200 still follow the shape class. A possible explanation is that cosine similarity measures how far the representation moved, not what it still contains, so a large movement does not necessarily remove the information the classifier relies on. In these cases, prediction stability and representation stability come apart.
+For all models, feature representation similarity remained quite stable across translations. For color interventions it drops marginally. The clearest divergence appears with the cue conflicts, where ResNet's representation moves the furthest of all (dropping to 0.442), while its predictions change only slightly, since 139 of 200 still follow the shape class. A possible explanation is that cosine similarity measures how far the representation moved, not what it still contains, so a large movement does not necessarily remove the information the classifier relies on. In these cases, prediction stability and representation stability come apart.
 
 Another interesting finding is observed for ViT on the cue conflicts, where the similarity is 0.505 for stable predictions against 0.264 for flipped ones, showing that the images whose predictions flipped had moved further than those that held. However, under patch shuffling that gap nearly vanishes (0.014 for ResNet), so feature movement barely explains which predictions broke there. Representation change and prediction change therefore agree within a condition, while diverging across conditions.
 
-CLIP lost the most accuracy under shuffling ($-13.8$ points), while ViT moved furthest (0.629 under shuffling) and lost the least ($-6.2$ points).
 
-\begin{figure}[t]
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=\textwidth]{figures/task1/fig4_tsne_strip.pdf}
-  \caption{Joint t-SNE of clean (dots) and transformed (crosses) features per backbone, coloured by class (content class for cue conflicts); coordinates are comparable only within a backbone. In CLIP's patch-shuffle panel the transformed points form a separate cluster although 84.0\% are still classified correctly.}
+  \includegraphics{figures/task1/fig4_tsne_strip.pdf}
+  \caption{Joint t-SNE~\citep{vandermaaten2008tsne} of clean (dots) and transformed (crosses) features per backbone, coloured by class; coordinates are comparable only within a backbone.}
   \label{fig:task1_tsne}
 \end{figure}
 
@@ -109,4 +105,3 @@ A partial architectural link can be drawn between ResNet and ViT. Both were pret
 
 Conversely, CLIP's substantially larger accuracy degradation under patch shuffle ($-12.8$ to $-13.8$ points, compared with $-6.2$ to $-7.8$ for ViT and ResNet) cannot be assigned to architecture, since CLIP differs from ViT in patch size (32 px vs 16 px), supervision (multimodal contrastive) and pretraining scale (400M web pairs) at the same time. The fact that both CLIP variants suffer equally does show that the effect comes from the representation rather than the decision rule.
 
-Definitively isolating these underlying mechanisms would require controlled ablations holding non-architectural factors fixed, such as comparing a supervised ViT-B/16 directly against a CLIP-trained ViT-B/16, or training CNN and Transformer backbones under identical dataset sizes, augmentations, and optimisation recipes.

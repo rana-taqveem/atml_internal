@@ -1,0 +1,94 @@
+\clearpage
+\section{Experimental Configuration}
+\label{app:setup}
+
+Every value below is taken from the task configuration files (\texttt{task*/config.py}) and the saved run metadata. All experiments use seed 6304.
+
+\begin{table}[h]
+  \caption{Task 1: inductive biases and feature representations.}
+  \label{tab:setup_task1}
+  \centering
+  \small
+  \begin{tabular}{@{}p{0.24\textwidth}p{0.72\textwidth}@{}}
+    \toprule
+    \textbf{Setting} & \textbf{Configuration} \\
+    \midrule
+    Data & STL-10 test set; class-balanced evaluation subset of 500 images (50 per class); $224\times224$ inputs. \\
+    Backbones (frozen) & ResNet-50 (ImageNet-1k, \texttt{IMAGENET1K\_V2}), ViT-B/16 (ImageNet-1k), CLIP ViT-B/32. \\
+    Decision methods & Linear head on each frozen backbone; CLIP zero-shot with prompt ``a photo of a \{\}.''. \\
+    Head training & AdamW, lr $10^{-3}$, weight decay $10^{-4}$, batch 64, at most 50 epochs, early stopping patience 5, 20\% validation split. \\
+    Colour interventions & Grayscale; hue rotation by $30^{\circ}$. \\
+    Spatial interventions & Patch shuffle: $4\times4$ grid of $56\times56$ blocks, one fixed non-identity permutation per image. Translation: 8, 16, 32 px in four directions. \\
+    Cue conflict & AdaIN style transfer, $\alpha=0.7$; five class pairs (airplane/bird, bird/car, monkey/truck, car/deer, bird/cat), both directions; 200 images retained after visual review. \\
+    Metrics & Top-1 accuracy, prediction consistency, shape bias, coverage, texture rank, cosine stability $I_T$. \\
+    Statistics & Paired McNemar tests with Holm correction; bootstrap intervals (shape bias), Wilson intervals (coverage). \\
+    Representation plot & $L_2$-normalised features, PCA, then joint t-SNE per backbone (perplexity 30). \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[h]
+  \caption{Task 2: unsupervised domain adaptation on PACS.}
+  \label{tab:setup_task2}
+  \centering
+  \small
+  \begin{tabular}{@{}p{0.24\textwidth}p{0.72\textwidth}@{}}
+    \toprule
+    \textbf{Setting} & \textbf{Configuration} \\
+    \midrule
+    Data & PACS, 7 classes. Sources (labelled): Photo, Art Painting, Cartoon, each split 80/20 stratified into train/validation. Target: Sketch, unlabelled during training, evaluated once in full. \\
+    Model & ResNet-18 (ImageNet, \texttt{IMAGENET1K\_V1}) with a seven-class head, fine-tuned end to end; resize 256, crop 224. \\
+    Optimisation & AdamW, lr $10^{-4}$, weight decay $10^{-4}$, gradient clipping at norm 1.0, at most 30 epochs, early stopping patience 5. \\
+    Batches & 8 images per source domain (24 source) plus 24 target images. \\
+    Model selection & Mean source-validation macro-F1; no target labels. \\
+    DAN & MMD weight $\lambda=1$; three RBF kernels with bandwidths $0.5, 1, 2\times$ the median pairwise squared distance. \\
+    DANN & Domain discriminator (hidden 256, dropout 0.5), domain loss weight 1, gradient reversal up to $\alpha_{\max}=1$. \\
+    CDAN & Class-conditioned domain discriminator with the same settings. \\
+    Controlled study & DANN $\alpha_{\max}\in\{0.25, 0.5, 1\}$, all other settings fixed. \\
+    Separability probe & Balanced logistic regression, $C=1$, 70/30 split; source vs.\ target (chance 50\%). \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[h]
+  \caption{Task 3: domain generalization to Sketch.}
+  \label{tab:setup_task3}
+  \centering
+  \small
+  \begin{tabular}{@{}p{0.24\textwidth}p{0.72\textwidth}@{}}
+    \toprule
+    \textbf{Setting} & \textbf{Configuration} \\
+    \midrule
+    Shared protocol & Identical to Task 2: splits, ResNet-18, optimiser, epoch budget, early stopping, 8 images per source domain per batch. Sketch is loaded only by the final evaluation. \\
+    ERM & The Task 2 Source-only checkpoint, reused unchanged. \\
+    DAN-DG & Classification loss plus the average MMD$^2$ over the three source pairs on the 512-d feature, same kernels as Task 2; $\lambda_{\mathrm{DG}}=1$. \\
+    SAM & Non-adaptive SAM, $\rho=0.05$, on AdamW with the ERM learning rate and weight decay. \\
+    Model selection & Mean source-validation macro-F1. \\
+    Controlled study & $\lambda_{\mathrm{DG}}\in\{0.1, 1, 10\}$, all other settings fixed. \\
+    Separability probe & Multinomial logistic regression, $C=1$, 70/30 split over the three source domains (chance 33.3\%). \\
+    Sharpness proxy & Loss increase after one normalised gradient-ascent step of radius 0.05 on a fixed validation batch of 32 images per source domain. \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[h]
+  \caption{Task 4: open-set recognition on CIFAR-10.}
+  \label{tab:setup_task4}
+  \centering
+  \small
+  \begin{tabular}{@{}p{0.24\textwidth}p{0.72\textwidth}@{}}
+    \toprule
+    \textbf{Setting} & \textbf{Configuration} \\
+    \midrule
+    Known data & CIFAR-10, ten classes; training partition split 90/10 stratified into train/validation; $32\times32$ inputs. \\
+    Unknown data & CIFAR-100, evaluation only, 100 images per class. Near (800): bus, pickup truck, motorcycle, tractor, wolf, fox, leopard, camel. Far (800): bottle, bowl, chair, clock, keyboard, mushroom, sunflower, wardrobe. \\
+    Model & CIFAR ResNet-18: $3\times3$ stride-1 first convolution, no initial max-pooling. \\
+    Vanilla training & SGD, lr 0.1, momentum 0.9, weight decay $5\times10^{-4}$, cosine decay, batch 128, 100 epochs; random crop (padding 4) and horizontal flip; checkpoint with the best validation accuracy. \\
+    GCSC & Vanilla recipe plus RandAugment (2 operations, magnitude 9). \\
+    PROSER & Fine-tuned from the Vanilla checkpoint for 50 epochs, lr $10^{-3}$; 5 dummy classifiers; classifier-placeholder weight $\beta=1$, data-placeholder weight $\gamma=0.1$; manifold mixup after layer 2 with $\lambda\sim\mathrm{Beta}(2,2)$. \\
+    Scores & MSP, MLS, Energy and Mahalanobis (shared diagonal covariance, $\epsilon=10^{-6}$); see Table~\ref{tab:task4_formulas}. \\
+    Rejection threshold & 95th percentile of unknownness on CIFAR-10 validation data. \\
+    Metrics & CSA, AUROC (near, far, all), rejection rates, FPR@95TPR. \\
+    \bottomrule
+  \end{tabular}
+\end{table}

@@ -95,12 +95,12 @@ def figure_interventions(analysis_dir, out_dir):
     left.set_xticklabels(["Gray-\nscale", "Hue\n30°", "Patch\nshuffle"])
     left.set_xlim(-0.55, len(conditions) - 0.45)
     left.set_ylabel("Accuracy change vs clean (pp)")
-    left.set_title("(a) Colour and patch structure", loc="left")
+    left.set_title("(a) Colour, patch", loc="left")
     tidy(left)
 
     for axis, key, title, ylabel in (
-        (middle, "mean_accuracy_pct", "(b) Translation: accuracy", "Top-1 accuracy (%)"),
-        (right, "mean_consistency_pct", "(c) Translation: consistency", "Consistency (%)"),
+        (middle, "mean_accuracy_pct", "(b) Shift: accuracy", "Top-1 accuracy (%)"),
+        (right, "mean_consistency_pct", "(c) Shift: consistency", "Consistency (%)"),
     ):
         for method in METHODS:
             colour, marker = STYLE[method]
@@ -364,18 +364,24 @@ def figure_cue_examples_compact(analysis_dir, conflict_dir, out_dir, per_case=1,
         for index in rng.choice(len(pool), size=min(per_case, len(pool)), replace=False):
             chosen.append((title, pool[int(index)]))
 
+    # Short labels so the text fits a quarter of the page at 8 pt; the caption
+    # spells out the abbreviations.
     short = {"resnet50": "R50", "vit_b_16": "ViT", "clip_vit_b_32": "CLIP",
-             "clip_vit_b_32_zero_shot": "CLIP-ZS"}
+             "clip_vit_b_32_zero_shot": "ZS"}
+    pattern = {"All four follow shape": "all shape", "Methods split: shape vs texture": "split",
+               "All four follow texture": "all texture", "A method answers a third class": "third class"}
+    decision = {"shape": "S", "texture": "T", "other": "O"}
     fig, axes = plt.subplots(1, len(chosen), figsize=(TEXT_WIDTH, 2.25), squeeze=False)
     for axis, (title, row) in zip(axes[0], chosen):
         record = records[row["conflict_id"]]
         with Image.open(conflict_dir / record["image_path"]) as image:
             axis.imshow(image.convert("RGB"))
-        axis.set_title(f"{title}\nshape: {row['content_class']}, texture: {row['style_class']}",
-                       fontsize=6.2, pad=3)
-        lines = [f"{short[m]}: {row[f'{m}_prediction']} ({row[f'{m}_decision']})" for m in METHODS]
-        axis.text(0.5, -0.05, "\n".join(lines), transform=axis.transAxes, fontsize=6.0,
-                  va="top", ha="center", linespacing=1.35)
+        axis.set_title(f"{pattern.get(title, title)}\n{row['content_class']} / {row['style_class']}",
+                       fontsize=8, pad=3)
+        lines = [f"{short[m]}: {row[f'{m}_prediction']} ({decision.get(row[f'{m}_decision'], '?')})"
+                 for m in METHODS]
+        axis.text(0.5, -0.05, "\n".join(lines), transform=axis.transAxes, fontsize=8,
+                  va="top", ha="center", linespacing=1.3)
         axis.set_xticks([])
         axis.set_yticks([])
         for spine in axis.spines.values():
@@ -418,8 +424,8 @@ def figure_tsne_strip(analysis_dir, out_dir, conditions=("cue_conflict", "patch_
                            label="transformed"),
                 plt.Line2D([], [], marker="o", linestyle="", color="#555555", alpha=0.35,
                            markersize=3, label="clean")]
-    fig.legend(handles=handles, loc="lower center", ncol=12, frameon=False, fontsize=6,
-               bbox_to_anchor=(0.5, -0.16), handletextpad=0.1, columnspacing=0.6)
+    fig.legend(handles=handles, loc="lower center", ncol=6, frameon=False, fontsize=8,
+               bbox_to_anchor=(0.5, -0.42), handletextpad=0.1, columnspacing=0.8)
     fig.tight_layout(w_pad=0.3)
     save(fig, out_dir, "fig4_tsne_strip")
 

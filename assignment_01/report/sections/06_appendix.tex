@@ -4,50 +4,74 @@
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.5\textwidth]{figures/task2/fig3_separability.pdf}
-  \caption{Target macro-F1 against source-vs-target separability for the four Task 2 methods; the dotted line marks chance (50\%).}
+  \includegraphics{figures/task2/fig3_separability.pdf}
+  \caption{Target macro-F1 against source-vs-target separability (dotted: chance).}
   \label{fig:task2_separability}
 \end{figure}
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.72\textwidth]{figures/task2/fig5_alignment_study.pdf}
-  \caption{DANN with $\alpha_{\max}\in\{0.25,0.5,1\}$: source macro-F1, target macro-F1 and separability, with the ERM target macro-F1 for reference.}
+  \includegraphics{figures/task2/fig5_alignment_study.pdf}
+  \caption{DANN $\alpha_{\max}$ study: source and target macro-F1, separability, and peak domain loss.}
   \label{fig:task2_alignment_study}
 \end{figure}
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\textwidth]{figures/task3/fig2_method_comparison.pdf}
-  \caption{Mean-source, worst-source and Sketch macro-F1 for all Task 3 models.}
+  \includegraphics{figures/task3/fig2_method_comparison.pdf}
+  \caption{Mean-source, worst-source and Sketch macro-F1.}
   \label{fig:task3_method_comparison}
 \end{figure}
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.62\textwidth]{figures/task3/fig3_alignment_study.pdf}\\[4pt]
-  \includegraphics[width=\textwidth]{figures/task3/fig4_per_class.pdf}
-  \caption{Top: $\lambda_{\mathrm{DG}}$ study (mean source macro-F1, Sketch macro-F1, source separability; dotted line is chance). Bottom: per-class Sketch accuracy change against ERM.}
+  \includegraphics{figures/task3/fig3_alignment_study.pdf}\\[4pt]
+  \includegraphics{figures/task3/fig4_per_class.pdf}
+  \caption{Top: $\lambda_{\mathrm{DG}}$ study. Bottom: per-class Sketch change against ERM.}
   \label{fig:task3_alignment}
 \end{figure}
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\textwidth]{figures/task3/fig5_diagnostics.pdf}
-  \caption{Sketch macro-F1 against (a) source-domain separability and (b) the sharpness proxy $\Delta_{\mathrm{sharp}}$.}
+  \includegraphics{figures/task3/fig5_diagnostics.pdf}
+  \caption{Sketch macro-F1 against (a) source separability and (b) $\Delta_{\mathrm{sharp}}$.}
   \label{fig:task3_diagnostics}
 \end{figure}
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\textwidth]{figures/task3/fig7_per_class_vs_task2.pdf}
-  \caption{Per-class Sketch accuracy change against the shared ERM for DAN (Task 2) and DAN-DG (Task 3).}
+  \includegraphics{figures/task3/fig7_per_class_vs_task2.pdf}
+  \caption{Per-class Sketch change against ERM for DAN (Task 2) and DAN-DG (Task 3).}
   \label{fig:task3_vs_task2}
 \end{figure}
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\textwidth]{figures/task4/fig2_unknown_classes.pdf}
-  \caption{Share of each unknown class accepted by Vanilla under MLS, annotated with the absorbing CIFAR-10 class (100 images per class).}
+  \includegraphics{figures/task4/fig2_unknown_classes.pdf}
+  \caption{Acceptance per unknown class (Vanilla, MLS) with the CIFAR-10 class that absorbs most accepted images.}
   \label{fig:task4_unknown_classes}
+\end{figure}
+
+\begin{table}[h]
+  \caption{Task 4 unknownness scores; larger $u(x)$ means more novel. $z_k$: logits, $p_k$: softmax probabilities, $K=10$; $f(x)$: 512-d penultimate feature, $\mu_c$: class means, $\Sigma$: shared diagonal covariance from CIFAR-10 training features with $\epsilon=10^{-6}$ added to each diagonal entry.}
+  \label{tab:task4_formulas}
+  \centering
+  \small
+  \begin{tabular}{lll}
+    \toprule
+    \textbf{Score} & \textbf{Unknownness} & \textbf{Captures} \\
+    \midrule
+    MSP         & $u(x) = 1-\max_k p_k(x)$ & normalised confidence \\
+    MLS         & $u(x) = -\max_k z_k(x)$ & largest raw logit \\
+    Energy      & $u(x) = -\log\sum_{k=1}^{K} e^{z_k(x)}$ & all logits \\
+    Mahalanobis & $u(x) = \min_c\,(f(x)-\mu_c)^{\top}\Sigma^{-1}(f(x)-\mu_c)$ & distance to nearest class \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics{figures/task4/fig1_osr_scores.pdf}
+  \caption{Unknownness distributions (top) and ROC curves with AUROC (bottom) for MSP, MLS and Mahalanobis on Vanilla.}
+  \label{fig:task4_roc}
 \end{figure}

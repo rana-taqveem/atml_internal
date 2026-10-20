@@ -1,17 +1,10 @@
 \section{Task 3: Domain Generalization}
 
 \subsection{Experimental Setup}
-% Brief 2-3 sentence overview: same PACS protocol as Task 2 (Photo / Art Painting / Cartoon
-% labelled sources), but Sketch is never loaded until the final evaluation script. ERM is
-% the unchanged Task 2 Source-only checkpoint. DAN-DG adds the average pairwise MMD^2 over
-% the three source pairs on the 512-d pre-head feature (same three RBF kernels as Task 2,
-% lambda_DG = 1); SAM uses non-adaptive SAM with rho = 0.05 on AdamW. Same splits, optimiser,
-% epoch budget, patience, 8 images per source domain per batch, and seed 6304; every
-% checkpoint selected on mean source-validation macro-F1. Controlled study: lambda_DG in
-% {0.1, 1, 10}.
+The Task 2 protocol is reused without Sketch until final evaluation~\citep{gulrajani2021search}, comparing ERM, pairwise-source DAN-DG and SAM~\citep{foret2021sam} (Appendix Table~\ref{tab:setup_task3}).
 
-\begin{table}[h]
-  \caption{Source validation accuracy / macro-F1 (\%) per domain, with mean and worst, for ERM, DAN-DG and SAM, and the $\lambda_{\mathrm{DG}}$ study below the rule. Checkpoints were selected on mean macro-F1.}
+\begin{table}[htbp]
+  \caption{Source validation accuracy / macro-F1 (\%) per domain, mean and worst; $\lambda_{\mathrm{DG}}$ study below the rule.}
   \label{tab:task3_source}
   \centering
   \small
@@ -31,8 +24,8 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[h]
-  \caption{Sketch accuracy and macro-F1, change against ERM (pp), source-domain separability (3-way probe, chance 33.3\%) and the sharpness proxy: validation loss $\mathcal L$, loss after a radius-0.05 ascent step $\mathcal L_{+\epsilon}$, and their difference $\Delta_{\mathrm{sharp}}$ (96 images). Plots: Appendix Figs.~\ref{fig:task3_alignment} and \ref{fig:task3_diagnostics}.}
+\begin{table}[htbp]
+  \caption{Sketch results, change against ERM (pp), source separability (chance 33.3\%) and the sharpness proxy: loss $\mathcal L$, loss after a radius-0.05 ascent step $\mathcal L_{+\epsilon}$, and $\Delta_{\mathrm{sharp}}$ (96 images). Plots: Appendix Figs.~\ref{fig:task3_alignment} and~\ref{fig:task3_diagnostics}.}
   \label{tab:task3_target}
   \centering
   \small
@@ -58,8 +51,8 @@
 
 
 
-\begin{table}[t]
-  \caption{Per-class Sketch accuracy (\%) with the change against ERM (pp) in brackets, including target-aware DAN from Task 2. Plots: Appendix Figs.~\ref{fig:task3_alignment} and \ref{fig:task3_vs_task2}.}
+\begin{table}[htbp]
+  \caption{Per-class Sketch accuracy (\%) with change against ERM (pp), including Task 2 DAN. Plots: Appendix Figs.~\ref{fig:task3_alignment} and~\ref{fig:task3_vs_task2}.}
   \label{tab:task3_per_class}
   \centering
   \small
@@ -81,19 +74,18 @@
   \end{tabular}
 \end{table}
 
-Good performance on the source domain does not guarantee good performance on the target domain, and this is visible via the results (Tables~\ref{tab:task3_source} and~\ref{tab:task3_target}). Their worst-performing source macro-F1 is 89.35 and 92.34, respectively. While establishing a possible link between the validation numbers of source domains and the test numbers of the target domains, ERM, as anticipated, performed worst in the target domain, whereas DAN-DG has the lowest mean source accuracy of 91.82 and best target accuracy/macro-F1 of 68.44/72.37. SAM has performed the highest mean source accuracy of 95.16, but still its target accuracy is 3.89 points lower than DAN-DG. Therefore, it is difficult to establish that source validation performance reliably predicts performance on Sketch.
+Good performance on the source domain does not guarantee good performance on the target domain, and this is visible via the results (Tables~\ref{tab:task3_source} and~\ref{tab:task3_target}). DAN-DG's and SAM's worst-performing source macro-F1 is 89.35 and 92.34, respectively. While establishing a possible link between the validation numbers of source domains and the test numbers of the target domains, ERM, as anticipated, performed worst in the target domain, whereas DAN-DG has the lowest mean source accuracy of 91.82 and best target accuracy/macro-F1 of 68.44/72.37. SAM has performed the highest mean source accuracy of 95.16, but still its target accuracy is 3.89 points lower than DAN-DG. Therefore, it is difficult to establish that source validation performance reliably predicts performance on Sketch.
 
 ERM performs very poorly on Sketch for giraffe, dog, horse, and house, with accuracies of 23.51\%, 36.79\%, 45.59\%, and 45.00\%, whereas in the case of DAN-DG, 5 out of 7 classes gained points (house by 48.75 points, horse by 27.45, giraffe by 21.38, and guitar by 12.50). However, for the person, the performance declined by 33.75 points. Therefore, high aggregate source performance hides substantial target-specific class failures, particularly the degradation of person and the continued difficulty of dog recognition.
 
 The art domain is recorded as the worst across all three methods.
 
-\FloatBarrier
 \subsection{Source-Domain Invariance and Class-Discriminative Information}
 
-\begin{figure}[t]
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=\textwidth]{figures/task3/fig1_training_curves.pdf}
-  \caption{(a) Classification loss, (b) weighted pairwise source MMD penalty for DAN-DG, (c) mean source-validation macro-F1. ERM is the reused Task 2 run; curves end at early stopping.}
+  \includegraphics{figures/task3/fig1_training_curves.pdf}
+  \caption{(a) Classification loss, (b) weighted pairwise MMD penalty, (c) mean source-validation macro-F1; ERM is the reused Task 2 run.}
   \label{fig:task3_training}
 \end{figure}
 
@@ -101,7 +93,6 @@ The art domain is recorded as the worst across all three methods.
 
 DAN-DG made the observed source domains slightly less distinguishable, as shown by the source-domain separability score, which decreases to 80.07\% compared with 86.38\% under ERM. Its performance on Sketch also got better, and it reported an increase in macro-F1 from 55.90 to 72.37. These numbers appear to support the claim; however, the results change drastically when $\lambda_{\mathrm{DG}}$ is increased to 10. The separability score fell to 48.84\%, but the macro-F1 on both the Sketch and the source just collapsed to 7.84\% and 16.06\%, respectively. Class-wise, 6 out of 7 classes lost substantial points: guitar fell by 82.40 points, person by 71.25, elephant by 58.38, and both giraffe and horse reached 0\% accuracy. Moreover, in the case of SAM and ERM, the separability is identical at 86.38\%, yet SAM's Sketch macro-F1 is 67.64 against ERM's 55.90. This suggests that excessive source alignment does remove domain-discriminative features, making domains more difficult to distinguish; however, at the same time, it destroys the core semantic structure required for classification. Therefore, moderate invariance among the domains partially improves Sketch recognition, while a stronger push results in loss of critical class-discriminative information, resulting in poor performance on the target domain.
 
-\FloatBarrier
 \subsection{Local Stability and Sketch Performance}
 
 
@@ -112,26 +103,9 @@ However, it does not establish that the local stability ranking enables better p
 \[ \text{DAN-DG} > \text{SAM} > \text{ERM}. \]
 DAN-DG reported the highest sensitivity to a minor perturbation; however, its Sketch macro-F1 is the highest (72.37\%), whereas SAM is much flatter as per the proxy ranking, but it reaches 67.64\%. Nevertheless, SAM does improve over ERM by 8.83 accuracy points and 11.74 macro-F1 points, suggesting that local parameter stability may contribute to some extent to better generalization, but it is difficult to confirm that in every setting SAM will result in better performance on target domains.
 
-\FloatBarrier
 \subsection{Target-Aware DAN versus Target-Free DAN-DG}
 
-Both methods improve substantially over the shared ERM baseline (Table~\ref{tab:task3_target_access})
-
-\begin{table}[h]
-  \caption{Target-aware DAN (Task 2) and target-free DAN-DG (Task 3) against the shared ERM checkpoint.}
-  \label{tab:task3_target_access}
-  \centering
-  \small
-  \begin{tabular}{llcc}
-    \toprule
-    \textbf{Method} & \textbf{Training alignment} & \textbf{Sketch accuracy} & \textbf{Sketch F1} \\
-    \midrule
-    ERM           & None                            & 55.71\% & 55.90\% \\
-    Task 2 DAN    & Source versus unlabeled Sketch  & 67.80\% & 66.84\% \\
-    Task 3 DAN-DG & Pairwise observed sources only  & 68.44\% & 72.37\% \\
-    \bottomrule
-  \end{tabular}
-\end{table}
+Both methods improve substantially over the shared ERM baseline (DAN: Table~\ref{tab:task2_methods}; ERM and DAN-DG: Table~\ref{tab:task3_target}; per class: Table~\ref{tab:task3_per_class}).
 
 DAN used unlabeled Sketch data to align the source features and improved over ERM by 12.09 accuracy points and 10.93 macro-F1 points. DAN-DG, which never had access to the target data (sketches) during training, improved by 12.73 accuracy points and 16.46 macro-F1 points. DAN-DG exceeds target-aware DAN by 0.64 accuracy points and 5.53 macro-F1 points.
 

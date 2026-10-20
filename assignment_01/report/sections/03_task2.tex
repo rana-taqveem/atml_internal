@@ -1,14 +1,10 @@
 \section{Task 2: Unsupervised Domain Adaptation}
 
 \subsection{Experimental Setup}
-% Brief 2-3 sentence overview: PACS (Photo / Art Painting / Cartoon as labelled sources,
-% Sketch as the unlabelled target), ResNet-18 with ImageNet initialisation and a
-% seven-class head fine-tuned end to end, frozen BatchNorm running statistics, AdamW at
-% lr 1e-4 / weight decay 1e-4, at most 30 epochs with patience 5 on mean source-validation
-% macro-F1, domain-balanced batches of 8 per source domain plus 24 target images, seed 6304.
+A ResNet-18 is adapted from PACS~\citep{li2017pacs} sources to Sketch with DAN~\citep{long2015dan} (MMD~\citep{gretton2012kernel}), DANN~\citep{ganin2016dann} and CDAN~\citep{long2018cdan}, selected on source validation only (Appendix Table~\ref{tab:setup_task2}).
 
-\begin{table}[t]
-  \caption{Source-only ERM and three adaptation methods on PACS, Sketch as the unlabelled target. Source columns: macro-F1 on each source validation split (used for checkpoint selection). Sep.: held-out accuracy of a source-vs-target logistic probe (chance 50\%). Lower rows: DANN $\alpha_{\max}$ study (plot in Appendix Fig.~\ref{fig:task2_alignment_study}).}
+\begin{table}[htbp]
+  \caption{Source validation macro-F1, Sketch results and source-vs-target separability (Sep., chance 50\%). Lower rows: DANN $\alpha_{\max}$ study (plot: Appendix Fig.~\ref{fig:task2_alignment_study}).}
   \label{tab:task2_methods}
   \centering
   \small
@@ -33,10 +29,10 @@
 
 \subsection{The Source-Only Domain Gap and Its Failure Modes}
 
-\begin{figure}[t]
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=\textwidth]{figures/task2/fig1_erm_failures.pdf}
-  \caption{Source-only ERM on Sketch. (a) Per-class accuracy, with target support above each bar. (b) Misclassified images per class with the cumulative error share (right axis), annotated with the class that absorbs most errors.}
+  \includegraphics{figures/task2/fig1_erm_failures.pdf}
+  \caption{Source-only ERM on Sketch: (a) per-class accuracy with support $n$; (b) misclassified images per class and the class that absorbs most of them.}
   \label{fig:task2_erm_failures}
 \end{figure}
 
@@ -46,37 +42,37 @@ The most important target failures were found by accounting for the overall erro
 
 \subsection{Domain Separability and Target Recognition}
 
-\begin{figure}[t]
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.75\textwidth]{figures/task2/fig4_per_class.pdf}
-  \caption{Per-class change in Sketch accuracy relative to Source-only ERM (pp) for each adaptation method; bars below zero indicate negative transfer. Separability against target macro-F1: Appendix Fig.~\ref{fig:task2_separability}.}
+  \includegraphics{figures/task2/fig4_per_class.pdf}
+  \caption{Per-class Sketch accuracy change relative to ERM (separability plot: Appendix Fig.~\ref{fig:task2_separability}).}
   \label{fig:task2_per_class}
 \end{figure}
 
 Across all methods, we see a clear enough pattern: the higher the domain separability between source and target domains, the lower the target accuracy scores. The treatment methods like DAN and CDAN were able to fractionally reduce this separability gap, and as the domain separability scores reduced with these methods, so did the accuracy on the target domain improve. DANN, though it performed miserably because of an unstable optimization flow, shows that it has the highest domain separability score and thus has the lowest target-domain accuracy.
 
-DAN or CDAN, showed better adaptation then others. However, this improvement was not uniform across all of the classes. In DAN, the adaptation improved 5 out of 7 classes, with giraffe improving by 27.89 points, house by 55.00 points, and dog by 26.81 points. However, for elephants and persons, it exhibited negative transfer, declining in performance by 1.62 and 1.25 points. Similarly, CDAN also adapted successfully overall and improved 6 out of 7 classes, except elephant, where its performance decreased by 31.62 points. DANN displayed negative transfer overall and reported terrible performance on guitar, person, horse, and elephant. Its target macro-F1 plummeted by 19.19 points relative to ERM, most likely because of the instability it faced during optimization.
+DAN or CDAN showed better adaptation than others. However, this improvement was not uniform across all of the classes. In DAN, the adaptation improved 5 out of 7 classes, with giraffe improving by 27.89 points, house by 55.00 points, and dog by 26.81 points. However, for elephants and persons, it exhibited negative transfer, declining in performance by 1.62 and 1.25 points. Similarly, CDAN also adapted successfully overall and improved 6 out of 7 classes, except elephant, where its performance decreased by 31.62 points. DANN displayed negative transfer overall and reported terrible performance on guitar, person, horse, and elephant. Its target macro-F1 plummeted by 19.19 points relative to ERM, most likely because of the instability it faced during optimization.
 
 Overall, reduced domain separability can be associated with better performance on target recognition for DAN and CDAN.
 
 \subsection{Class-Conditional versus Marginal Alignment}
 
-The results do not clearly support the claim that class conditioning helps preserve class semantic features better. With DAN, the domain separability score reduced down to 89.69 from 99.86 and showed the best target adaptation performance, reaching 66.84\% macro-F1; however, the individual class-wise macro-F1 for DAN is not uniform across the classes, as it performed really well on 5 out of 7 classes (with giraffe $+27.89$, house $+55.00$, and dog $+26.81$ points), and for elephant and person, it saw a marginal decline.
+The results do not clearly support the claim that class conditioning helps preserve class semantic features better. With DAN, the domain separability score reduced down and showed the best target adaptation performance, however, the individual class-wise macro-F1 for DAN is not uniform across the classes.
 
 CDAN also observed an improved domain adaptation and reached a 63.12\% target macro-F1, marginally less than DAN. Overall, it performed well on 6 out of 7 classes and also preserved person and guitar recognition, improving them by 1.25 and 2.47 points, but reduced the adaptation on the elephant class by a massive 31.62 points, and also provided just a 6.51-point gain on the giraffe, whereas on the same giraffe class DAN improved the adaptation by 27.89 points. Thus, the class conditionality might have partially preserved the class-wise consistency, with 6 classes improving; however, it did not manage to improve the overall aggregate for target adaptation.
 
-CDAN does outperform the marginal adversarial alignment DANN, where DANN only reported 36.71\% macro-F1. Overall results may suggest that conditioning can better preserve semantic structure, and it improved aggregate target adaptation relative to ERM but did not outperform DAN,, and stable DAN depicted a good marginal alignment that may outperform CDAN.
+CDAN does outperform the marginal adversarial alignment DANN, where DANN only reported 36.71\% macro-F1. Overall results may suggest that conditioning can better preserve semantic structure, and it improved aggregate target adaptation relative to ERM but did not outperform DAN, and stable DAN depicted a good marginal alignment that may outperform CDAN.
 
 \subsection{Effect of Increasing Alignment Strength}
 
-\begin{figure}[t]
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=\textwidth]{figures/task2/fig2_training_curves.pdf}
-  \caption{(a) Source classification loss; dotted line $\ln 7$ (uniform prediction). (b) Alignment loss: MMD for DAN, domain-classifier loss for DANN and CDAN; dotted line $\ln 2$ (indistinguishable domains). (c) Mean source-validation macro-F1, the selection criterion.}
+  \includegraphics{figures/task2/fig2_training_curves.pdf}
+  \caption{(a) Classification loss (dotted: $\ln 7$). (b) Alignment loss (dotted: $\ln 2$). (c) Mean source-validation macro-F1.}
   \label{fig:task2_training}
 \end{figure}
 
-With DANN(1.0) (Figure~\ref{fig:task2_training}) from epoch 2 onwards, the overall optimization became unstable, as the model's classification loss shot up to 15.21 in the second epoch; the training accuracy dropped to 69.80\%, while the validation F1 moved up to 83.43\%, which tells us the model is making some very confident errors as its training accuracy decreases while its validation score remains high. Source-validation performance then collapsed outright from the 3rd epoch, when the validation macro-F1 plummeted from 83.43\% down to 35.96\% and then eventually reached 7.83\%. Both the probabilistic loss and classification performance now show a total failure. The domain accuracy stayed between 42.29\% and 58.18\%; however, the alignment loss increased from 2.78 at the end of the first epoch to 97.49 in the second, reaching 2,013,773.19 in 7 epochs.
+With DANN(1.0) (Figure~\ref{fig:task2_training}) from epoch 2 onwards, the overall optimization became unstable, as the model's classification loss shot up to 15.21 in the second epoch; the training accuracy dropped to 69.80\%, while the validation F1 moved up to 83.43\%, which tells us the model is making some very confident errors as its training accuracy decreases while its validation score remains high. Source-validation performance then collapsed outright from the 3rd epoch, when the validation macro-F1 plummeted from 83.43\% down to 35.96\% and then eventually reached 7.83\%. The domain accuracy stayed between 42.29\% and 58.18\%; however, the alignment loss increased from 2.78 at the end of the first epoch to 97.49 in the second, reaching 2,013,773.19 in 7 epochs.
 
 As we halve DANN's alignment strength, things do start to get a little better for the source-domain accuracy, as the source macro-F1 gained 7.46 points; however, the reduced alignment strength impacted the target macro-F1, decreasing it by 4.11 points. The pattern repeats when we further reduce the alignment strength, which further increases the model accuracy on source classification; however, it progressively damages target recognition, decreasing target macro-F1 by another 12.19 points. Interestingly, while we have these variations in target F1 score as we decrease the alignment strength, source and target separability remains around 100\%. Therefore, in this scenario, the stronger or weaker adversarial objective failed to produce any measurable domain-invariant features.
 

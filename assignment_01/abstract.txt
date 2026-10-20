@@ -1,0 +1,42 @@
+
+
+
+Introduction and Research Questions
+Modern vision models perform strongly under IID closed-set evaluation, but real-world inputs may differ in appearance, domain, or class composition. This report examines how model architecture and decision rules affect robustness to visual interventions, domain adaptation, domain generalization, and unknown-class detection. It asks which features models rely on, whether alignment and local stability improve transfer, and how reliably confidence- and feature-based scores identify unseen classes. The experiments also investigate class-level failures and trade-offs that aggregate performance measures may conceal.
+
+The modern vision models show high performance under closed-set evaluation, however on real world inputs they tend to struggle because of the inherint complexity of real world data. This report examines how different model architectures and settings affect the model performance given the inputs images may differ in appearance, domain, or class composition. It aim to see the robustness to the visual interventions, domain adaptation, domain generalization, and unknown-class detection. It asks which features models relyon, and how alignment and local stability may improve the prediction on unseen classes. 
+
+
+Real-world images are full of variance and interventions. For any image processing model these variation pose a hard challange to solve as their perform deteriorates drastically under visual intervention, domain shifts and unseen classes. This report investigates such variations across four connected studies. First, it evaluated ResNet, ViT, CLIP models on STL-10 under various interventions like colour changes, translations, patch shuffling and cue conflicts. Model performance remained stable under colour and translation changes, however, disrupting spatial structure of images reduces their accuracy by 6.2–13.8 percentage points. 
+On cue-conflict strong shape bias has been observed across all models, while texture also had an influence but not strong enough to change the rankings. Second, unsupervised domain adaptation is analysed on the PACS dataset, with Sketch as the target domain. A 38.61 point macro-F1 domain gap is observed on source-only ERM. DAN and CDAN improved target recognition; however, class specific negative transfer is also visible, whereas, DANN suffered from optimisation instability. Third, it examined target-free domain generalisation on sketches using DAN-DG and SAM. DAN-DG exhibited the best Sketch macro-F1 of 72.37% exceeding the target-aware DAN, however with stronger alignment push collapsed class-discriminative structure. SAM, in contrast, produce lowest local sharpness proxy failed to achieved better target performance, showing that local flatness of loss alone cannot achieve domain generalisation. Finally, the study examined open set recognition on CIFAR-10. It demonstrated that semantically near unknowns are harder to reject then far ones. Among MLS, MLP, Energy and Mahalanobis, Mahalanobis distance performed the best on far unknowns. GCSC provided modest overall generalisation whereas PROSER offered limited meaningful rejections, given the experiment settings. In a nutshell, the observations show that domain invariance, confidence and local stability are not sufficient individually for reliable generalisation, as, generalisation also depends on preserving the core semantic class structure, stable optimisation and the nature of the domain shift.
+
+MLP→MSP, the SAM wording ("failed to achieved better"), "rankings"→"final decisions", "variation/challange", "their perform", "produce lowest", "then far ones".
+
+Real-world images are full of variance and interventions. For any image processing
+model these variation pose a hard challange to solve as their performance deteriorates
+drastically under visual intervention, domain shifts and unseen classes. This report
+investigates such variations across four connected studies. First, it evaluated ResNet,
+ViT, CLIP models on STL-10 under various interventions like colour changes,
+translations, patch shuffling and cue conflicts. Model performance remained stable
+under colour and translation changes, however, disrupting spatial structure of
+images reduces their accuracy by 6.2–13.8 percentage points. On cue-conflict
+strong shape bias has been observed across all models, while texture also had an
+influence but not strong enough to change the final decisions. Second, unsupervised
+domain adaptation is analysed on the PACS dataset, with Sketch as the target
+domain. A 38.61 point macro-F1 domain gap is observed on source-only ERM.
+DAN and CDAN improved target recognition; however, class specific negative
+transfer is also visible, whereas, DANN suffered from optimisation instability.
+Third, it examined target-free domain generalisation on sketches using DAN-DG
+and SAM. DAN-DG exhibited the best Sketch macro-F1 of 72.37% exceeding
+the target-aware DAN, however with stronger alignment push collapsed class-
+discriminative structure. SAM, in contrast, produced lowest local sharpness proxy
+failed to achieve better target performance, showing that local flatness of loss
+alone cannot achieve domain generalisation. Finally, the study examined open
+set recognition on CIFAR-10. It demonstrated that semantically near unknowns
+are harder to reject than far ones. Among MSP, MLP, Energy and Mahalanobis,
+Mahalanobis distance performed the best on far unknowns. GCSC provided modest
+overall generalisation whereas PROSER offered limited meaningful rejections,
+given the experiment settings. In a nutshell, the observations show that domain
+invariance, confidence and local stability are not sufficient individually for reliable
+generalisation, as, generalisation also depends on preserving the core semantic class
+structure, stable optimisation and the nature of the domain shift.

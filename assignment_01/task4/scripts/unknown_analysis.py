@@ -82,9 +82,9 @@ def figure(rows, results_dir, method, score_name):
                plt.Rectangle((0, 0), 1, 1, color="#55A868")]
     axis.legend(handles, ["near unknown", "far unknown"], fontsize=8)
 
-    axis.set_ylabel(f"Accepted as known (%), {score_name.upper()} at the 95th-percentile threshold")
-    axis.set_title(f"Which unknown classes slip through: {method}", fontsize=11)
-    axis.set_ylim(0, max(values) * 1.35 if values else 1)
+    axis.set_ylabel(f"Accepted as known (%), {score_name.upper()}")
+    # The caption names the model and threshold; a title only costs height.
+    axis.set_ylim(0, max(values) * 1.55 if values else 1)
     axis.tick_params(axis="x", labelrotation=45, labelsize=8.5)
     for label in axis.get_xticklabels():
         label.set_ha("right")

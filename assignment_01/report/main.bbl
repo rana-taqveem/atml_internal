@@ -1,0 +1,184 @@
+\begin{thebibliography}{22}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Coates et~al.(2011)Coates, Ng, and Lee]{coates2011stl10}
+Adam Coates, Andrew Ng, and Honglak Lee.
+\newblock An analysis of single-layer networks in unsupervised feature
+  learning.
+\newblock In \emph{International Conference on Artificial Intelligence and
+  Statistics (AISTATS)}, 2011.
+\newblock URL \url{https://proceedings.mlr.press/v15/coates11a.html}.
+
+\bibitem[Cubuk et~al.(2020)Cubuk, Zoph, Shlens, and Le]{cubuk2020randaugment}
+Ekin~D. Cubuk, Barret Zoph, Jonathon Shlens, and Quoc~V. Le.
+\newblock {RandAugment}: Practical automated data augmentation with a reduced
+  search space.
+\newblock In \emph{IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition Workshops (CVPRW)}, 2020.
+\newblock URL \url{https://arxiv.org/abs/1909.13719}.
+
+\bibitem[Dosovitskiy et~al.(2021)Dosovitskiy, Beyer, Kolesnikov, Weissenborn,
+  Zhai, Unterthiner, Dehghani, Minderer, Heigold, Gelly, Uszkoreit, and
+  Houlsby]{dosovitskiy2021vit}
+Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn,
+  Xiaohua Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg
+  Heigold, Sylvain Gelly, Jakob Uszkoreit, and Neil Houlsby.
+\newblock An image is worth 16x16 words: Transformers for image recognition at
+  scale.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2021.
+\newblock URL \url{https://arxiv.org/abs/2010.11929}.
+
+\bibitem[Foret et~al.(2021)Foret, Kleiner, Mobahi, and Neyshabur]{foret2021sam}
+Pierre Foret, Ariel Kleiner, Hossein Mobahi, and Behnam Neyshabur.
+\newblock Sharpness-aware minimization for efficiently improving
+  generalization.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2021.
+\newblock URL \url{https://arxiv.org/abs/2010.01412}.
+
+\bibitem[Ganin et~al.(2016)Ganin, Ustinova, Ajakan, Germain, Larochelle,
+  Laviolette, Marchand, and Lempitsky]{ganin2016dann}
+Yaroslav Ganin, Evgeniya Ustinova, Hana Ajakan, Pascal Germain, Hugo
+  Larochelle, Fran{\c{c}}ois Laviolette, Mario Marchand, and Victor Lempitsky.
+\newblock Domain-adversarial training of neural networks.
+\newblock \emph{Journal of Machine Learning Research}, 17\penalty0
+  (59):\penalty0 1--35, 2016.
+\newblock URL \url{https://arxiv.org/abs/1505.07818}.
+
+\bibitem[Geirhos et~al.(2019)Geirhos, Rubisch, Michaelis, Bethge, Wichmann, and
+  Brendel]{geirhos2019texture}
+Robert Geirhos, Patricia Rubisch, Claudio Michaelis, Matthias Bethge, Felix~A.
+  Wichmann, and Wieland Brendel.
+\newblock {ImageNet}-trained {CNNs} are biased towards texture; increasing
+  shape bias improves accuracy and robustness.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2019.
+\newblock URL \url{https://arxiv.org/abs/1811.12231}.
+
+\bibitem[Gretton et~al.(2012)Gretton, Borgwardt, Rasch, Sch{\"o}lkopf, and
+  Smola]{gretton2012kernel}
+Arthur Gretton, Karsten~M. Borgwardt, Malte~J. Rasch, Bernhard Sch{\"o}lkopf,
+  and Alexander Smola.
+\newblock A kernel two-sample test.
+\newblock \emph{Journal of Machine Learning Research}, 13:\penalty0 723--773,
+  2012.
+\newblock URL \url{https://jmlr.org/papers/v13/gretton12a.html}.
+
+\bibitem[Gulrajani and Lopez-Paz(2021)]{gulrajani2021search}
+Ishaan Gulrajani and David Lopez-Paz.
+\newblock In search of lost domain generalization.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2021.
+\newblock URL \url{https://arxiv.org/abs/2007.01434}.
+
+\bibitem[He et~al.(2016)He, Zhang, Ren, and Sun]{he2016resnet}
+Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.
+\newblock Deep residual learning for image recognition.
+\newblock In \emph{Proceedings of the IEEE Conference on Computer Vision and
+  Pattern Recognition (CVPR)}, 2016.
+\newblock URL \url{https://arxiv.org/abs/1512.03385}.
+
+\bibitem[Hendrycks and Gimpel(2017)]{hendrycks2017msp}
+Dan Hendrycks and Kevin Gimpel.
+\newblock A baseline for detecting misclassified and out-of-distribution
+  examples in neural networks.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2017.
+\newblock URL \url{https://arxiv.org/abs/1610.02136}.
+
+\bibitem[Huang and Belongie(2017)]{huang2017adain}
+Xun Huang and Serge Belongie.
+\newblock Arbitrary style transfer in real-time with adaptive instance
+  normalization.
+\newblock In \emph{Proceedings of the IEEE International Conference on Computer
+  Vision (ICCV)}, 2017.
+\newblock URL \url{https://arxiv.org/abs/1703.06868}.
+
+\bibitem[Krizhevsky(2009)]{krizhevsky2009cifar}
+Alex Krizhevsky.
+\newblock Learning multiple layers of features from tiny images.
+\newblock Technical report, University of Toronto, 2009.
+\newblock URL
+  \url{https://www.cs.toronto.edu/~kriz/learning-features-2009-TR.pdf}.
+
+\bibitem[Lee et~al.(2018)Lee, Lee, Lee, and Shin]{lee2018mahalanobis}
+Kimin Lee, Kibok Lee, Honglak Lee, and Jinwoo Shin.
+\newblock A simple unified framework for detecting out-of-distribution samples
+  and adversarial attacks.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2018.
+\newblock URL \url{https://arxiv.org/abs/1807.03888}.
+
+\bibitem[Li et~al.(2017)Li, Yang, Song, and Hospedales]{li2017pacs}
+Da~Li, Yongxin Yang, Yi-Zhe Song, and Timothy~M. Hospedales.
+\newblock Deeper, broader and artier domain generalization.
+\newblock In \emph{Proceedings of the IEEE International Conference on Computer
+  Vision (ICCV)}, 2017.
+\newblock URL \url{https://arxiv.org/abs/1710.03077}.
+
+\bibitem[Liu et~al.(2020)Liu, Wang, Owens, and Li]{liu2020energy}
+Weitang Liu, Xiaoyun Wang, John~D. Owens, and Yixuan Li.
+\newblock Energy-based out-of-distribution detection.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2020.
+\newblock URL \url{https://arxiv.org/abs/2010.03759}.
+
+\bibitem[Long et~al.(2015)Long, Cao, Wang, and Jordan]{long2015dan}
+Mingsheng Long, Yue Cao, Jianmin Wang, and Michael~I. Jordan.
+\newblock Learning transferable features with deep adaptation networks.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2015.
+\newblock URL \url{https://arxiv.org/abs/1502.02791}.
+
+\bibitem[Long et~al.(2018)Long, Cao, Wang, and Jordan]{long2018cdan}
+Mingsheng Long, Zhangjie Cao, Jianmin Wang, and Michael~I. Jordan.
+\newblock Conditional adversarial domain adaptation.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2018.
+\newblock URL \url{https://arxiv.org/abs/1705.10667}.
+
+\bibitem[Radford et~al.(2021)Radford, Kim, Hallacy, Ramesh, Goh, Agarwal,
+  Sastry, Askell, Mishkin, Clark, Krueger, and Sutskever]{radford2021clip}
+Alec Radford, Jong~Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh,
+  Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark,
+  Gretchen Krueger, and Ilya Sutskever.
+\newblock Learning transferable visual models from natural language
+  supervision.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2021.
+\newblock URL \url{https://arxiv.org/abs/2103.00020}.
+
+\bibitem[van~der Maaten and Hinton(2008)]{vandermaaten2008tsne}
+Laurens van~der Maaten and Geoffrey Hinton.
+\newblock Visualizing data using {t-SNE}.
+\newblock \emph{Journal of Machine Learning Research}, 9:\penalty0 2579--2605,
+  2008.
+\newblock URL \url{https://jmlr.org/papers/v9/vandermaaten08a.html}.
+
+\bibitem[Vaze et~al.(2022)Vaze, Han, Vedaldi, and Zisserman]{vaze2022osr}
+Sagar Vaze, Kai Han, Andrea Vedaldi, and Andrew Zisserman.
+\newblock Open-set recognition: a good closed-set classifier is all you need?
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2022.
+\newblock URL \url{https://arxiv.org/abs/2110.06207}.
+
+\bibitem[Verma et~al.(2019)Verma, Lamb, Beckham, Najafi, Mitliagkas, Lopez-Paz,
+  and Bengio]{verma2019manifold}
+Vikas Verma, Alex Lamb, Christopher Beckham, Amir Najafi, Ioannis Mitliagkas,
+  David Lopez-Paz, and Yoshua Bengio.
+\newblock Manifold mixup: Better representations by interpolating hidden
+  states.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2019.
+\newblock URL \url{https://arxiv.org/abs/1806.05236}.
+
+\bibitem[Zhou et~al.(2021)Zhou, Ye, and Zhan]{zhou2021proser}
+Da-Wei Zhou, Han-Jia Ye, and De-Chuan Zhan.
+\newblock Learning placeholders for open-set recognition.
+\newblock In \emph{Proceedings of the IEEE/CVF Conference on Computer Vision
+  and Pattern Recognition (CVPR)}, 2021.
+\newblock URL \url{https://arxiv.org/abs/2103.15086}.
+
+\end{thebibliography}

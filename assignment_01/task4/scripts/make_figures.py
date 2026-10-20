@@ -103,7 +103,8 @@ def model_comparison_figure(results_dir, dpi=200):
     return output
 
 
-def run(results_dir=None, output_path=None, dpi=200):
+def run(results_dir=None, output_path=None, dpi=200, roc=True):
+    """Score distributions (top) and, with roc=True, ROC curves (bottom)."""
     import matplotlib
     matplotlib.use("Agg")                       # no display on Colab/Kaggle
     import matplotlib.pyplot as plt
@@ -129,9 +130,12 @@ def run(results_dir=None, output_path=None, dpi=200):
     if not available:
         raise SystemExit(f"figure_scores.json has none of {SCORES}.")
 
-    figure, axes = plt.subplots(2, len(available), figsize=(4.2 * len(available), 7.0))
-    if len(available) == 1:
-        axes = axes.reshape(2, 1)
+    # Drawn at print size (5.5 in text width), so these are printed point sizes.
+    plt.rcParams.update({"font.size": 8, "axes.titlesize": 8.5, "axes.labelsize": 8,
+                         "xtick.labelsize": 8, "ytick.labelsize": 8, "legend.fontsize": 8})
+    rows = 2 if roc else 1
+    figure, axes = plt.subplots(rows, len(available), figsize=(5.5, 3.9 if roc else 2.0))
+    axes = np.asarray(axes).reshape(rows, len(available))
 
     colors = {"test": "#4C72B0", "near": "#DD8452", "far": "#55A868"}
     names = {"test": "known (CIFAR-10 test)", "near": "near unknown", "far": "far unknown"}
@@ -158,26 +162,33 @@ def run(results_dir=None, output_path=None, dpi=200):
         top.set_title(LABELS[score_name])
         top.set_xlabel("unknownness  u(x)")
         top.set_ylabel("density" if column == 0 else "")
-        if column == 0:
-            top.legend(fontsize=7, loc="upper right")
+        top.set_yticks([])  # densities differ by orders of magnitude across scores
 
-        # Bottom: ROC, unknown treated as the positive class.
+        # Bottom: ROC, unknown treated as the positive class. AUROCs go in the
+        # title: a legend inside a 1.7 in panel covers the curves.
+        if not roc:
+            continue
         bottom = axes[1, column]
+        aurocs = []
         for split, values, color in (("near", near, colors["near"]),
                                      ("far", far, colors["far"])):
             false_positive, true_positive = roc_curve(known, values)
-            bottom.plot(false_positive, true_positive, color=color, linewidth=1.6,
-                        label=f"{split}  AUROC {auroc(known, values):.3f}")
+            bottom.plot(false_positive, true_positive, color=color, linewidth=1.4)
+            aurocs.append(auroc(known, values))
         bottom.plot([0, 1], [0, 1], color="grey", linestyle=":", linewidth=1.0)
-        bottom.set_xlabel("false positive rate (known accepted as unknown)")
+        bottom.set_title(f"AUROC near {aurocs[0]:.3f}\nfar {aurocs[1]:.3f}")
+        bottom.set_xlabel("false positive rate")
         bottom.set_ylabel("true positive rate" if column == 0 else "")
         bottom.set_xlim(0, 1)
         bottom.set_ylim(0, 1)
-        bottom.legend(fontsize=7, loc="lower right")
+        bottom.set_xticks([0, 0.5, 1])
+        bottom.set_yticks([0, 0.5, 1])
 
-    figure.suptitle("Post-hoc novelty scores on the frozen Vanilla model", fontsize=11)
-    figure.tight_layout(rect=(0, 0, 1, 0.97))
-    print_ready(figure, min_height_in=4.2)
+    handles, labels = axes[0, 0].get_legend_handles_labels()
+    figure.tight_layout(rect=(0, 0, 1, 0.9 if roc else 0.82))
+    figure.legend(handles, labels, loc="upper center", ncol=4, frameon=False,
+                  handlelength=1.4, columnspacing=1.0, bbox_to_anchor=(0.5, 1.0))
+    print_ready(figure, min_height_in=3.9 if roc else 2.0)
 
     output_path = output_path or os.path.join(results_dir, "figure_osr_scores.png")
     figure.savefig(output_path, dpi=dpi, bbox_inches="tight")
@@ -193,7 +204,10 @@ def main():
     parser.add_argument("--output", default=None)
     parser.add_argument("--dpi", type=int, default=200)
     args = parser.parse_args()
-    run(results_dir=args.results_dir, output_path=args.output, dpi=args.dpi)
+    output = run(results_dir=args.results_dir, output_path=args.output, dpi=args.dpi)
+    # Distributions only: the compact version the report shows in the main text.
+    run(results_dir=args.results_dir, output_path=output.replace(".png", "_dist.png"),
+        dpi=args.dpi, roc=False)
     model_comparison_figure(args.results_dir or task_config.TASK_RESULTS_DIR, dpi=args.dpi)
 
 

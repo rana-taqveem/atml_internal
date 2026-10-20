@@ -28,8 +28,34 @@ def print_ready(fig, width_in=TEXT_WIDTH_IN, min_height_in=2.0, min_font_pt=MIN_
         if text.get_text() and text.get_fontsize() < min_font_pt:
             text.set_fontsize(min_font_pt)
 
+    _layout(fig)
+
+    # Labels and legends at 8 pt can reach past the canvas, and savefig's tight
+    # bounding box would then make the PDF wider than width_in, so LaTeX would
+    # shrink it again. Narrow the canvas by the overflow until it fits.
+    # Stop at 85% of the target: overflow that survives that much narrowing
+    # comes from text wider than its panel, which narrowing cannot fix.
+    for _ in range(6):
+        overflow = _drawn_width(fig) - width_in
+        width, height = fig.get_size_inches()
+        if overflow <= 0.02 or width - overflow < 0.85 * width_in:
+            break
+        fig.set_size_inches(width - overflow, height)
+        _layout(fig)
+    return fig
+
+
+def _layout(fig):
+    # A figure-level legend means the figure reserved its own margins with
+    # tight_layout(rect=...); a plain tight_layout would lay panels over it.
+    if fig.legends:
+        return
     try:
         fig.tight_layout()
     except (ValueError, RuntimeError):
         pass  # figures with a figure-level legend lay themselves out
-    return fig
+
+
+def _drawn_width(fig):
+    renderer = fig.canvas.get_renderer()
+    return fig.get_tightbbox(renderer).width
