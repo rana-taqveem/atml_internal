@@ -265,7 +265,7 @@ def main_train(cfg, max_hours=None):
                 with torch.autocast(**ac):
                     l = vlm.loss(mb, feats, cap)
                 (scaler.scale(l.sum() / per_update)).backward()
-                loss_val += float(l.sum())
+                loss_val += float(l.detach().sum())
             scaler.unscale_(opt)
             params = [p for g in groups for p in g["params"]]
             gn = float(torch.nn.utils.clip_grad_norm_(params, tcfg["clip"]))

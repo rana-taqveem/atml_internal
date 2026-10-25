@@ -289,7 +289,7 @@ def train(cfg, variant, max_hours=None, smoke_updates=None, store=None):
                 ls, _ = sft_loss_sum(model, input_ids, attn, labels)
             loss = ls / n_tok
             scaler.scale(loss).backward()
-            loss_sum += float(ls)
+            loss_sum += float(ls.detach())
         scaler.unscale_(opt)
         omega = l2sp.omega_and_grad(add_grad=True) if l2sp else None
         params = [p for g in opt.param_groups for p in g["params"]]
