@@ -169,12 +169,22 @@ class TrainData:
         return int(sum(self.offsets[i + 1] - self.offsets[i] - self.prompt_lens[i]
                        for i in self.update_examples(u)))
 
-    def microbatches(self, u: int, pad_id: int):
+    def microbatches(self, u: int, pad_id: int, split_above: int = 1200):
+        """Fixed-order microbatches of 2. A microbatch whose padded length exceeds split_above
+        is run one example at a time; the update's gradient is unchanged because the loss is a
+        token sum normalised by the update's total response tokens (memory safety only)."""
         import torch
 
         idx = list(self.update_examples(u))
+        groups = []
         for s in range(0, len(idx), self.mb):
-            exs = [self.example(i) for i in idx[s:s + self.mb]]
+            g = idx[s:s + self.mb]
+            if max(len(self.example(i)[0]) for i in g) > split_above:
+                groups += [[i] for i in g]
+            else:
+                groups.append(g)
+        for g in groups:
+            exs = [self.example(i) for i in g]
             L = max(len(e[0]) for e in exs)
             input_ids = torch.full((len(exs), L), pad_id, dtype=torch.long)
             attn = torch.zeros((len(exs), L), dtype=torch.long)

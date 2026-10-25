@@ -12,7 +12,8 @@ from common.store import Store
 from common.utils import load_config
 
 VARIANTS = ["full", "l2sp", "lora16", "oplora16", "lora4"]   # launch order
-TRAIN_HOURS = {"full": 3.5, "l2sp": 3.8, "lora16": 3.0, "oplora16": 3.2, "lora4": 3.0}
+# measured on Kaggle T4 (smoke: ~7.2 s/update; OPLoRA ~9 s/update) + checkpoint uploads
+TRAIN_HOURS = {"full": 2.8, "l2sp": 2.9, "lora16": 2.7, "oplora16": 3.3, "lora4": 2.6}
 
 
 def jobs(smoke: bool, config: str) -> list[Job]:
@@ -34,7 +35,7 @@ def jobs(smoke: bool, config: str) -> list[Job]:
             cmd += ["--limit", "16"]
         deps = [f"train_{spec['variant']}"] if spec["variant"] else ["data"]
         js.append(Job(f"eval_{cond}", cmd, f"results/task1/eval/{cond}{sfx}/scores.json",
-                      deps=deps, hours=0.2 if smoke else 0.9))
+                      deps=deps, hours=0.2 if smoke else 0.8))
     all_train = [f"train_{v}" for v in VARIANTS]
     if not smoke:
         js.append(Job("qualitative", ["-m", "task1_finetune.qualitative", *c],

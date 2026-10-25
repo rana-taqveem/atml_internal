@@ -32,7 +32,7 @@ from common.utils import (append_jsonl, dir_size_bytes, ensure_dir, env_info, gp
 from task1_finetune import adapters as ad
 from task1_finetune.data import TrainData, get_tokenizer
 
-CE_CHUNK = 1024
+CE_CHUNK = 512
 
 
 def out_dir(variant):

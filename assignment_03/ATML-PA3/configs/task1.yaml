@@ -49,7 +49,7 @@ eval:
   gsm8k_max_gen_toks: 1024
   likelihood_tasks: [hellaswag, boolq, arc_easy]
   max_length: 4096
-  batch_size_gen: 32
+  batch_size_gen: 64
   batch_size_ll: 32
 
 diagnostics:

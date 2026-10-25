@@ -76,7 +76,8 @@ def run_jobs(jobs: list[Job], gpus: list[str], hours: float, margin: float = 0.4
             if budget < 0.25:
                 continue
             gpu = free.pop(0) if j.gpu else None
-            env = dict(os.environ, PYTHONUNBUFFERED="1")
+            env = dict(os.environ, PYTHONUNBUFFERED="1",
+                       PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True")
             if gpu is not None:
                 env["CUDA_VISIBLE_DEVICES"] = gpu
             cmd = [sys.executable, *j.cmd]

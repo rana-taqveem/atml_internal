@@ -23,10 +23,9 @@
 ## Plan
 | Session | Platform | Notebook / MODE | What happens | Est. |
 |---|---|---|---|---|
-| 1 | Kaggle T4×2 | task1, `smoke` | 20 updates × 5 variants, 16-example evals; check per-update time and memory in the log | ~1 h |
-| 2 | Kaggle T4×2 | task1, `full` | data → Full FT ‖ L2-SP, then LoRA-16 ‖ OPLoRA-16 | ~11 h |
-| 3 | Kaggle T4×2 | task1, `full` (same notebook) | LoRA-4 + baseline/finished evals | ~6–9 h |
-| 4 | Kaggle T4×2 | task1, `full` | remaining evals, diagnostics, qualitative, summary | ~3–5 h |
+| 1 | Kaggle T4×2 | task1, `smoke` | done 2026-10-26: all 13 jobs OK in 25 min; ~7.2 s/update, peak 12.6 GB (L2-SP) | 25 min |
+| 2 | Kaggle T4×2 | task1, `full` | GPU0: Full FT → LoRA-16 → LoRA-4; GPU1: L2-SP → OPLoRA-16 → evaluations | ~11.3 h |
+| 3 | Kaggle T4×2 | task1, `full` (same notebook) | remaining evaluations, diagnostics, qualitative, summary | ~3–4 h |
 | in parallel | Colab T4 | task3-colab, `LIMIT=2` then `0` | live generation, resumes per question | 2–5 h |
 | next week | Kaggle T4 (or Colab) | task2, `smoke` then `full` | features → training → evaluation | ~5–6 h |
 
