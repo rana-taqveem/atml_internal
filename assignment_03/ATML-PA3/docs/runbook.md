@@ -9,6 +9,17 @@
    `assignment_03/ATML-PA3/task1_finetune/atml-pa3-task1.ipynb`. Settings: Accelerator **GPU T4 ×2**,
    Internet **on**.
 
+## Launch checklist (every Kaggle session)
+1. Notebook *Settings*: Accelerator **GPU T4 x2**, Internet **On** (needs a phone-verified account).
+2. *Add-ons → Secrets*: `HF_TOKEN` and `GITHUB_TOKEN` both present **and ticked** for this notebook.
+3. Config cell: `MODE` as intended (`"smoke"` once, then `"full"`).
+4. Click **Save Version → Save & Run All (Commit) → Save**. Do *not* use the interactive Run button
+   for long jobs: an interactive session stops when the browser closes or goes idle.
+5. You can close the tab and switch off the laptop. Within ~2 minutes the version log should show
+   `PREFLIGHT OK`; if it shows `PREFLIGHT FAILED`, the run stops immediately and the message says what to fix.
+6. Check progress any time: Kaggle → *Your Work* → the notebook → *Versions* → *Logs*
+   (runner prints a status line per job every ~10 min), or the files appearing in the HF store repo.
+
 ## Plan
 | Session | Platform | Notebook / MODE | What happens | Est. |
 |---|---|---|---|---|

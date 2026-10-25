@@ -22,7 +22,11 @@ def secret(name):
     except Exception:
         return os.environ.get(name)
 
-os.environ["HF_TOKEN"] = secret("HF_TOKEN")
+hf = secret("HF_TOKEN")
+if not hf:
+    raise RuntimeError("HF_TOKEN secret not found: Add-ons > Secrets, add HF_TOKEN and tick it for this notebook")
+os.environ["HF_TOKEN"] = hf
+os.environ["GIT_TERMINAL_PROMPT"] = "0"   # fail instead of waiting for a password
 if STORE_REPO:
     os.environ["PA3_STORE_REPO"] = STORE_REPO
 gh = secret("GITHUB_TOKEN")
@@ -32,12 +36,18 @@ url = REPO.replace("https://", f"https://{gh}@") if gh else REPO
 KAGGLE = os.path.exists("/kaggle/working")
 WORK = "/kaggle/working" if KAGGLE else "/content"
 CLONE = "/tmp/pa3" if KAGGLE else "/content/pa3"
-if not os.path.exists(CLONE):
-    subprocess.run(["git", "clone", "--depth", "1", "-b", BRANCH, url, CLONE], check=True)
-else:
-    subprocess.run(["git", "-C", CLONE, "pull", "--ff-only"], check=True)
+cmd = (["git", "clone", "--depth", "1", "-b", BRANCH, url, CLONE] if not os.path.exists(CLONE)
+       else ["git", "-C", CLONE, "pull", "--ff-only"])
+r = subprocess.run(cmd, capture_output=True, text=True)
+if r.returncode != 0:  # never print the URL (it contains the token)
+    raise RuntimeError("git clone/pull failed - check the GITHUB_TOKEN secret (read access to the repo):\n"
+                       + r.stderr.replace(gh or "<none>", "***"))
 os.chdir(f"{CLONE}/assignment_03/ATML-PA3")
-subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-r", "requirements.txt"], check=True)
+sys.path.insert(0, os.getcwd())
+import torch  # keep the platform's CUDA build of torch; fail fast if requirements conflict
+open("/tmp/pa3_constraints.txt", "w").write(f"torch=={torch.__version__}\n")
+subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-r", "requirements.txt",
+                "-c", "/tmp/pa3_constraints.txt"], check=True)
 print(subprocess.run(["git", "log", "-1", "--oneline"], capture_output=True, text=True).stdout)
 !nvidia-smi --query-gpu=name,memory.total --format=csv
 '''
@@ -48,6 +58,37 @@ shutil.make_archive(f"{WORK}/{ZIP_NAME}", "zip", ".", RESULTS_DIR)
 if os.path.exists("logs"):
     shutil.make_archive(f"{WORK}/{ZIP_NAME}_logs", "zip", ".", "logs")
 print("wrote", f"{WORK}/{ZIP_NAME}.zip")
+'''
+
+PREFLIGHT = r'''# --- Preflight: stop within a minute if anything is misconfigured (no GPU time wasted) ---
+import importlib, shutil, time, torch
+from common.store import Store
+problems = []
+n = torch.cuda.device_count()
+print("GPUs:", n, [torch.cuda.get_device_name(i) for i in range(n)])
+if n < NEED_GPUS:
+    problems.append(f"need {NEED_GPUS} GPU(s), found {n}: Settings > Accelerator must be '{GPU_LABEL}'")
+free = shutil.disk_usage(os.getcwd()).free / 1e9
+print(f"free disk: {free:.0f} GB")
+if free < NEED_DISK_GB:
+    problems.append(f"only {free:.0f} GB free disk, need {NEED_DISK_GB} GB")
+for m in ["transformers", "lm_eval", "math_verify", "huggingface_hub"]:
+    try:
+        importlib.import_module(m)
+    except Exception as e:
+        problems.append(f"import {m} failed: {e}")
+try:
+    st = Store(); print(st)
+    probe = f"results/_preflight/{int(time.time())}.txt"
+    os.makedirs(os.path.dirname(probe), exist_ok=True)
+    open(probe, "w").write("ok")
+    st.push(probe); assert st.exists(probe); st.delete("results/_preflight")
+    print("HF store: write/read/delete OK")
+except Exception as e:
+    problems.append(f"HF store not usable (token needs WRITE access): {e}")
+if problems:
+    raise RuntimeError("PREFLIGHT FAILED:\n - " + "\n - ".join(problems))
+print("PREFLIGHT OK")
 '''
 
 
@@ -109,6 +150,7 @@ GPUS = "0,1"
 ONLY = ""                # optional comma-separated job names, e.g. "train_full,train_l2sp"
 '''),
     code(SETUP),
+    code("NEED_GPUS, GPU_LABEL, NEED_DISK_GB = 2, 'GPU T4 x2', 40\n" + PREFLIGHT),
     code('''# --- Run all pending Task 1 jobs ---
 args = ["--gpus", GPUS, "--hours", str(HOURS)]
 if MODE == "smoke":
@@ -146,6 +188,7 @@ HOURS = 11.3
 GPUS = "0"               # Task 2 is a single sequential run; one GPU is enough
 '''),
     code(SETUP),
+    code("NEED_GPUS, GPU_LABEL, NEED_DISK_GB = 1, 'GPU T4', 15\n" + PREFLIGHT),
     code('''# --- Run all pending Task 2 jobs ---
 args = ["--gpus", GPUS, "--hours", str(HOURS)] + (["--smoke"] if MODE == "smoke" else [])
 !python -m task2_vlm.run_all {" ".join(args)}
@@ -174,6 +217,7 @@ LIMIT = 0                # 0 = all 50 questions; e.g. 2 for a quick smoke test
 RUN_OFFLINE = False      # True re-runs the CPU-only offline analysis (~30-60 min)
 '''),
     code(SETUP),
+    code("NEED_GPUS, GPU_LABEL, NEED_DISK_GB = 1, 'T4 GPU', 15\n" + PREFLIGHT),
     code('''# --- Data: supplied rollouts (Google Drive) + fixed splits ---
 !python -m task3_ttc.data
 if RUN_OFFLINE:
