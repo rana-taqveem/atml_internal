@@ -1,0 +1,128 @@
+% PA3 report skeleton. Structure, figure/table slots and data wiring only.
+% All prose (abstract, methods, analysis, captions) must be written by the author:
+% the PA3 policy forbids generative-AI-written report text. Fill every [AUTHOR] marker.
+\documentclass{article}
+\usepackage[preprint]{neurips_2026}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,graphicx,booktabs,caption,microtype,array}
+\usepackage[hidelinks]{hyperref}
+\setcitestyle{authoryear,square,comma}
+\graphicspath{{figures/}}
+\newcommand{\AUTHOR}[1]{\textcolor{red}{[AUTHOR: #1]}}
+\usepackage{xcolor}
+
+\title{\AUTHOR{title}}
+\author{\AUTHOR{name, roll number}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\AUTHOR{abstract}. Code: \url{[LINK REQUIRED: public GitHub repository]}
+\end{abstract}
+
+\section{Introduction}
+\AUTHOR{brief introduction}
+
+\section{Experimental setup}
+\AUTHOR{concise methods for Tasks 1--3; deviations from the prescribed setup (see README, ``Implementation choices'')}
+
+% =====================================================================
+\section{Task 1: LLM fine-tuning}
+\subsection{Results and analysis}
+% RQ1 specialization/retention, RQ2 restrictions, RQ3 parameter changes, RQ4 cost, RQ5 behavior
+
+\begin{table}[t]
+\centering\small
+\input{../results/task1/summary/benchmarks_table.tex}
+\caption{\AUTHOR{caption: benchmark scores for the seven evaluation conditions, changes from baseline in pp}}
+\label{tab:t1-bench}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.55\linewidth]{task1/sft_loss.pdf}\hfill
+\includegraphics[width=0.42\linewidth]{task1/tradeoff.pdf}
+\caption{\AUTHOR{caption: SFT loss curves; GSM8K change vs mean non-math change}}
+\label{fig:t1-loss}
+\end{figure}
+
+\begin{table}[t]
+\centering\small
+\input{../results/task1/summary/resources_table.tex}
+\caption{\AUTHOR{caption: resources}}
+\label{tab:t1-res}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{task1/diagnostics.pdf}
+\caption{\AUTHOR{caption: $\rho_k$, $\eta$ and $R(z)$ on down\_proj, layers 0/13/27}}
+\label{fig:t1-diag}
+\end{figure}
+
+\AUTHOR{analysis organised by the five research questions; L2-SP penalty and displacement
+(results/task1/train/*/summary.json, figures/task1/l2sp\_penalty.pdf); qualitative findings
+from results/task1/qualitative/annotation\_sheet\_42.csv}
+
+% =====================================================================
+\section{Task 2: Vision-language model and visual grounding}
+\subsection{Results and analysis}
+% RQ1 visual interface, RQ2 grounding, RQ3 measuring image use, RQ4 capabilities and cost
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{task2/learning_curves.pdf}
+\caption{\AUTHOR{caption: training loss, dev caption loss and answer NLL by image condition; dotted lines mark stage boundaries}}
+\label{fig:t2-curves}
+\end{figure}
+
+\begin{table}[t]
+\centering\small
+\resizebox{\linewidth}{!}{\input{../results/task2/summary/final_table.tex}}
+\caption{\AUTHOR{caption: final-test results under four image conditions, 95\% pair-bootstrap intervals}}
+\label{tab:t2-final}
+\end{table}
+
+\AUTHOR{analysis; qualitative examples from results/task2/eval/qualitative\_examples.json with the stated selection rule; resources from results/task2/summary/resources.json}
+
+% =====================================================================
+\section{Task 3: Test-time compute}
+\subsection{Results and analysis}
+% RQ1 exploration/selection, RQ2 evidence/consensus, RQ3 breadth/refinement, RQ4 adaptive, RQ5 compute/reliability
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{task3/accuracy_vs_n.pdf}
+\caption{\AUTHOR{caption: held-out accuracy and oracle coverage vs candidate budget}}
+\label{fig:t3-acc}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{task3/failure_decomposition.pdf}
+\caption{\AUTHOR{caption: sampling vs selection failures}}
+\label{fig:t3-dec}
+\end{figure}
+
+\begin{table}[t]
+\centering\small
+\input{../results/task3/summary/methods_table.tex}
+\caption{\AUTHOR{caption: method comparison at $N=32$, held-out split}}
+\label{tab:t3-methods}
+\end{table}
+
+\AUTHOR{signal analysis (results/task3/signals/), live comparison (results/task3/summary/live.csv,
+results/task3/live/meta.json), adaptive stopping (results/task3/summary/adaptive.csv)}
+
+\section{Conclusion}
+\AUTHOR{brief conclusion}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\appendix
+\section{Additional results}
+\AUTHOR{appendix}
+\end{document}

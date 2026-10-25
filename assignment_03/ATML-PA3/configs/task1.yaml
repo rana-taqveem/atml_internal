@@ -1,0 +1,63 @@
+# Task 1: LLM fine-tuning (all values from the PA3 handout, Section 1)
+model_id: Qwen/Qwen3-0.6B
+enable_thinking: false
+
+data:
+  metamath_id: meta-math/MetaMathQA
+  metamath_file: MetaMathQA-395K.json
+  gsm8k_id: openai/gsm8k
+  n_train: 40000
+  max_len: 2048
+  cache_dir: data/task1
+
+train:
+  microbatch: 2
+  grad_accum: 16              # effective batch 32 -> 1250 updates
+  updates: 1250
+  betas: [0.9, 0.999]
+  eps: 1.0e-8
+  weight_decay: 0.01
+  warmup: 38
+  clip: 1.0
+  gradient_checkpointing: true
+  checkpoint_updates: [312, 625, 937, 1250]   # 9984 / 20000 / 29984 / 40000 examples
+  midpoint_update: 625
+  log_every: 1
+
+variants:
+  full:     {kind: full, lr: 2.0e-5, l2sp_lambda: 0.0}
+  l2sp:     {kind: full, lr: 2.0e-5, l2sp_lambda: 1.0e-3}
+  lora4:    {kind: lora, lr: 2.0e-4, r: 4,  alpha: 8}
+  lora16:   {kind: lora, lr: 2.0e-4, r: 16, alpha: 32}
+  oplora16: {kind: oplora, lr: 2.0e-4, r: 16, alpha: 32, k: 128}
+
+lora:
+  dropout: 0.05
+  targets: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+
+eval:
+  # seven evaluation conditions: name -> (variant, stage)
+  conditions:
+    baseline:   {variant: null,     stage: null}
+    full_mid:   {variant: full,     stage: u0625}
+    full:       {variant: full,     stage: final}
+    l2sp:       {variant: l2sp,     stage: final}
+    lora4:      {variant: lora4,    stage: final}
+    lora16:     {variant: lora16,   stage: final}
+    oplora16:   {variant: oplora16, stage: final}
+  gsm8k_task: gsm8k_cot
+  gsm8k_max_gen_toks: 1024
+  likelihood_tasks: [hellaswag, boolq, arc_easy]
+  max_length: 4096
+  batch_size_gen: 32
+  batch_size_ll: 32
+
+diagnostics:
+  layers: [0, 13, 27]
+  module: down_proj
+  k: 128
+  probe_per_set: 32
+
+qualitative:
+  questions_url: https://raw.githubusercontent.com/emergent-misalignment/emergent-misalignment/main/evaluation/first_plot_questions.yaml
+  max_new_tokens: 512

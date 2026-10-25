@@ -1,0 +1,3 @@
+inherit: task1_tiny.yaml
+qualitative:
+  max_new_tokens: 16

@@ -1,0 +1,13 @@
+inherit: ../configs/task1.yaml
+model_id: outputs/tiny-qwen3
+run_suffix: _smoke
+data:
+  n_train: 640
+  cache_dir: data/task1_tiny
+eval:
+  conditions:
+    full_mid: {variant: full, stage: u0002}
+variants:
+  oplora16: {k: 16}
+diagnostics:
+  k: 16

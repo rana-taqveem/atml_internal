@@ -1,0 +1,7 @@
+{
+  "figures": [
+    "report/figures/task3/accuracy_vs_n",
+    "report/figures/task3/accuracy_vs_cost",
+    "report/figures/task3/failure_decomposition"
+  ]
+}

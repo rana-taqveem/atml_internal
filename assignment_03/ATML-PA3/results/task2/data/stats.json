@@ -1,0 +1,48 @@
+{
+  "vqa_candidates": {
+    "train": 71969,
+    "val": 33925,
+    "dropped_train": {
+      "same_consensus": 20867,
+      "low_agreement": 106115,
+      "answer_type_differs": 1443
+    },
+    "dropped_val": {
+      "low_agreement": 50449,
+      "same_consensus": 9976,
+      "answer_type_differs": 794
+    }
+  },
+  "n_images": 14597,
+  "n_train_images": 14069,
+  "n_eval_images": 528,
+  "captions_train_examples": 18000,
+  "grounding_pool": {
+    "presence": 20000,
+    "counting": 20000
+  },
+  "grounding_dev": {
+    "presence": 12,
+    "counting": 12
+  },
+  "grounding_test": {
+    "presence": 32,
+    "counting": 32
+  },
+  "vqa_train": {
+    "yes/no": 640,
+    "other": 640,
+    "number": 256
+  },
+  "vqa_dev": {
+    "yes/no": 12,
+    "other": 12,
+    "number": 8
+  },
+  "vqa_test": {
+    "yes/no": 36,
+    "other": 36,
+    "number": 24
+  },
+  "eval_suites_image_disjoint": true
+}

@@ -1,0 +1,13 @@
+# downloaded datasets, images, feature caches and token caches (re-created by the scripts)
+data/*
+!data/task1_static/
+# checkpoints, merged models, local test models
+outputs/
+logs/
+# large per-rollout intermediates (re-created by task3_ttc.offline / adaptive)
+results/task3/offline/selections_*.parquet
+results/task3/adaptive/states_*.parquet
+results/task3_test/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/

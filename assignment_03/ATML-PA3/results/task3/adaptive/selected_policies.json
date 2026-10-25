@@ -1,0 +1,178 @@
+{
+  "math": {
+    "agreement": {
+      "family": "agreement",
+      "tau": 0.625,
+      "gamma": null,
+      "dev_acc": 0.8260000000000001,
+      "dev_cost": 7088.955499999999,
+      "dev_target": 0.815,
+      "eval": {
+        "acc": 0.736375,
+        "cost": 10138.771124999997,
+        "rollouts": 11.823,
+        "stop_dist": {
+          "4": 0.663,
+          "8": 0.058375,
+          "16": 0.01325,
+          "32": 0.265375
+        }
+      },
+      "diff_vs_fixed32": -0.0014999999999999987,
+      "diff_lo": -0.004999999999999999,
+      "diff_hi": 0.0016281249999999983,
+      "early_stops": 0.734625,
+      "incorrect_early_stops": 0.0825,
+      "incorrect_early_recoverable_by_fixed32": 0.07727272727272727,
+      "mean_pool_correct_frac_incorrect_early": 0.1315340909090909
+    },
+    "quality": {
+      "family": "quality",
+      "tau": 0.5,
+      "gamma": 0.0,
+      "dev_acc": 0.8215,
+      "dev_cost": 5479.528499999999,
+      "dev_target": 0.815,
+      "eval": {
+        "acc": 0.7317500000000001,
+        "cost": 7663.055375,
+        "rollouts": 9.0075,
+        "stop_dist": {
+          "4": 0.763625,
+          "8": 0.058125,
+          "16": 0.0135,
+          "32": 0.16475
+        }
+      },
+      "diff_vs_fixed32": -0.0061249999999999985,
+      "diff_lo": -0.011999999999999997,
+      "diff_hi": -0.0006249999999999995,
+      "early_stops": 0.83525,
+      "incorrect_early_stops": 0.144,
+      "incorrect_early_recoverable_by_fixed32": 0.11371527777777778,
+      "mean_pool_correct_frac_incorrect_early": 0.13753255208333334
+    },
+    "fixed_sc": {
+      "4": {
+        "acc": 0.6919999999999998,
+        "cost": 2679.6941250000004,
+        "rollouts": 4.0,
+        "stop_dist": {
+          "4": 1.0
+        }
+      },
+      "8": {
+        "acc": 0.7178749999999999,
+        "cost": 5344.108500000001,
+        "rollouts": 8.0,
+        "stop_dist": {
+          "8": 1.0
+        }
+      },
+      "16": {
+        "acc": 0.7311250000000001,
+        "cost": 10677.74275,
+        "rollouts": 16.0,
+        "stop_dist": {
+          "16": 1.0
+        }
+      },
+      "32": {
+        "acc": 0.737875,
+        "cost": 21347.0175,
+        "rollouts": 32.0,
+        "stop_dist": {
+          "32": 1.0
+        }
+      }
+    }
+  },
+  "mathvista": {
+    "agreement": {
+      "family": "agreement",
+      "tau": 0.5,
+      "gamma": null,
+      "dev_acc": 0.636,
+      "dev_cost": 3705.4309999999996,
+      "dev_target": 0.6325,
+      "eval": {
+        "acc": 0.6207499999999999,
+        "cost": 3060.48375,
+        "rollouts": 9.011000000000001,
+        "stop_dist": {
+          "4": 0.745,
+          "8": 0.075875,
+          "16": 0.01925,
+          "32": 0.159875
+        }
+      },
+      "diff_vs_fixed32": -0.010499999999999999,
+      "diff_lo": -0.020753124999999997,
+      "diff_hi": 0.0012500000000000018,
+      "early_stops": 0.840125,
+      "incorrect_early_stops": 0.24575,
+      "incorrect_early_recoverable_by_fixed32": 0.17497456765005087,
+      "mean_pool_correct_frac_incorrect_early": 0.20603382502543235
+    },
+    "quality": {
+      "family": "quality",
+      "tau": 0.5,
+      "gamma": 0.0,
+      "dev_acc": 0.6395000000000001,
+      "dev_cost": 4120.647,
+      "dev_target": 0.6325,
+      "eval": {
+        "acc": 0.6255,
+        "cost": 3427.686875,
+        "rollouts": 10.216,
+        "stop_dist": {
+          "4": 0.676,
+          "8": 0.1,
+          "16": 0.0285,
+          "32": 0.1955
+        }
+      },
+      "diff_vs_fixed32": -0.005749999999999997,
+      "diff_lo": -0.014374999999999997,
+      "diff_hi": 0.004003125,
+      "early_stops": 0.8045,
+      "incorrect_early_stops": 0.216875,
+      "incorrect_early_recoverable_by_fixed32": 0.15619596541786743,
+      "mean_pool_correct_frac_incorrect_early": 0.2005043227665706
+    },
+    "fixed_sc": {
+      "4": {
+        "acc": 0.5798749999999999,
+        "cost": 1111.591625,
+        "rollouts": 4.0,
+        "stop_dist": {
+          "4": 1.0
+        }
+      },
+      "8": {
+        "acc": 0.605125,
+        "cost": 2229.902,
+        "rollouts": 8.0,
+        "stop_dist": {
+          "8": 1.0
+        }
+      },
+      "16": {
+        "acc": 0.6185,
+        "cost": 4461.8425,
+        "rollouts": 16.0,
+        "stop_dist": {
+          "16": 1.0
+        }
+      },
+      "32": {
+        "acc": 0.63125,
+        "cost": 8897.7575,
+        "rollouts": 32.0,
+        "stop_dist": {
+          "32": 1.0
+        }
+      }
+    }
+  }
+}

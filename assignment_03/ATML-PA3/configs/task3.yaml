@@ -1,0 +1,43 @@
+# Task 3: test-time compute (values from the PA3 handout, Section 3)
+data:
+  drive_folder: https://drive.google.com/drive/folders/1utX-Gfi9vvaoi1mi0pzNpDGL1o1fAh23
+  raw_dir: data/task3_raw
+  cache_dir: data/task3
+  mathvista_meta_url: https://raw.githubusercontent.com/lupantech/MathVista/main/data/testmini.json
+  datasets:
+    math: qwen25-math
+    mathvista: qwen25vl-mathvista
+
+split:
+  n_dev: 200
+  n_live: 50
+
+offline:
+  budgets: [1, 2, 4, 8, 16, 32]
+  n_orders: 10
+  n_boot: 1000
+  quantiles: [0.05, 0.95]
+
+adaptive:
+  checkpoints: [4, 8, 16]
+  max_n: 32
+  taus: [0.5, 0.625, 0.75, 0.875, 1.0]
+  gammas: [0.0, 0.1, 0.25, 0.5]
+  tolerance_pp: 1.0
+
+live:
+  model_id: Qwen/Qwen2.5-3B-Instruct
+  revision: aa8e72537993ba99e69dfaafa59ed015b17504d1
+  dataset_id: DigitalLearningGmbH/MATH-lighteval
+  dataset_revision: 0530c78699ea5e8eb5530600900e1f328b48acad
+  system: "You are a helpful assistant."
+  suffix: "Think step by step inside <think> </think> tags, then give your final answer inside \\boxed{}."
+  revise: "Review the solution above. Identify and correct any errors; if it is correct, retain its answer. Give your final answer inside \\boxed{}."
+  temperature: 0.7
+  top_p: 0.8
+  top_k: 20
+  repetition_penalty: 1.0
+  single_cap: 3072
+  parallel_cap: 1024
+  n_parallel: 3
+  revision_cap: 2048

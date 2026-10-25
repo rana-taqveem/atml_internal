@@ -1,0 +1,6 @@
+# Kaggle smoke test: 20 updates per variant, evaluation on a few examples.
+inherit: task1.yaml
+run_suffix: _smoke
+eval:
+  conditions:
+    full_mid: {variant: full, stage: u0010}

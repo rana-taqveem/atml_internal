@@ -1,0 +1,8 @@
+inherit: ../configs/task3.yaml
+live:
+  model_id: outputs/tiny-qwen3
+  revision: null
+  single_cap: 24
+  parallel_cap: 8
+  revision_cap: 16
+  out_dir: results/task3_test/live

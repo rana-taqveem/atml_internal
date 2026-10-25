@@ -1,0 +1,14 @@
+# torch is taken from the Kaggle/Colab image (CUDA build); versions below were used for development.
+transformers==5.20.2
+accelerate==1.15.0
+lm_eval==0.4.13
+math-verify[antlr4_13_2]==0.9.0
+huggingface_hub>=1.32.0
+datasets>=4.0
+safetensors>=0.6
+pyyaml
+pandas>=2.2
+pyarrow>=17
+scipy
+matplotlib
+gdown>=5.2

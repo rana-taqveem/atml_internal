@@ -1,0 +1,39 @@
+{
+  "methods": {
+    "math": [
+      "first",
+      "sc",
+      "logp",
+      "cert",
+      "cert_rwc",
+      "logp_rwc",
+      "shortest"
+    ],
+    "mathvista": [
+      "first",
+      "sc",
+      "logp",
+      "cert",
+      "cert_rwc",
+      "logp_rwc",
+      "shortest",
+      "vision",
+      "vision_rwc",
+      "visconf",
+      "visconf_rwc",
+      "tokvisconf",
+      "tokvisconf_rwc"
+    ]
+  },
+  "budgets": [
+    1,
+    2,
+    4,
+    8,
+    16,
+    32
+  ],
+  "orders": 10,
+  "bootstrap": 1000,
+  "seed": 6304
+}

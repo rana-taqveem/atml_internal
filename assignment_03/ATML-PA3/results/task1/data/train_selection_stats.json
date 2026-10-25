@@ -1,0 +1,15 @@
+{
+  "scanned": 40002,
+  "excluded_empty": 0,
+  "excluded_gsm8k_overlap": 0,
+  "excluded_too_long": 2,
+  "n_selected": 40000,
+  "last_source_index": 40001,
+  "metamath_revision": "aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18",
+  "total_tokens": 9908423,
+  "total_response_tokens": 7100056,
+  "mean_len": 247.710575,
+  "max_len": 1941,
+  "mean_response_len": 177.5014,
+  "normalization": "NFKC + lowercase + whitespace collapse"
+}
