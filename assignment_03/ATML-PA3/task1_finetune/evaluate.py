@@ -142,7 +142,23 @@ def run_lm_eval(model_dir, ecfg, limit, gen: bool, batch_size):
     return lm_eval.simple_evaluate(model_args=margs, tasks=ecfg["likelihood_tasks"], **kw)
 
 
+def gsm8k_scores(rows, seconds=None):
+    """Aggregate GSM8K metrics from per-example rows (lm-eval's exact_match is the mean of the
+    per-example values, so this reproduces its aggregate exactly)."""
+    n = max(1, len(rows))
+    return {"flexible_extract": sum(r["correct_flexible-extract"] for r in rows) / n,
+            "strict_match": sum(r["correct_strict-match"] for r in rows) / n,
+            "n": len(rows),
+            "truncation_rate": sum(r["truncated"] for r in rows) / n,
+            "extractable_rate": sum(r["extractable_flexible"] for r in rows) / n,
+            "mean_response_tokens": sum(r["n_tokens"] for r in rows) / n,
+            "seconds": seconds}
+
+
 def evaluate(cfg, cond, limit=None, store=None, parts=("gsm8k", "ll")):
+    """Each part runs in its own process (run_all schedules eval_<c>_gsm8k and eval_<c>_ll), so
+    the likelihood stage starts with an empty GPU. Parts write scores_<part>.json; the merged
+    scores.json is written once both parts exist."""
     store = store or Store()
     device = "cuda" if torch.cuda.is_available() else "cpu"
     smoke = limit is not None
@@ -152,47 +168,59 @@ def evaluate(cfg, cond, limit=None, store=None, parts=("gsm8k", "ll")):
         print(f"[eval {cond}] already done"); return read_json(out / "scores.json")
     ecfg = cfg["eval"]
     tok = get_tokenizer(cfg["model_id"])
-    model_dir, info = materialize(cfg, cond, store, device)
-    scores = {"condition": cond, **cfg["eval"]["conditions"][cond], **info, "limit": limit}
-    if torch.cuda.is_available():
-        torch.cuda.reset_peak_memory_stats()
+    expected_n = limit or 1319
 
-    if "gsm8k" in parts:
-        t0 = time.perf_counter()
-        res = run_lm_eval(model_dir, ecfg, limit, True, ecfg["batch_size_gen"])
-        task = ecfg["gsm8k_task"]
-        rows = _gsm_rows(res["samples"][task], tok, ecfg["gsm8k_max_gen_toks"])
-        with open(out / "samples_gsm8k.jsonl", "w", encoding="utf-8") as f:
-            for r in rows:
-                f.write(json.dumps(r, ensure_ascii=False) + "\n")
-        m = res["results"][task]
-        scores["gsm8k"] = {
-            "flexible_extract": m.get("exact_match,flexible-extract"),
-            "strict_match": m.get("exact_match,strict-match"),
-            "n": len(rows),
-            "truncation_rate": sum(r["truncated"] for r in rows) / max(1, len(rows)),
-            "extractable_rate": sum(r["extractable_flexible"] for r in rows) / max(1, len(rows)),
-            "mean_response_tokens": sum(r["n_tokens"] for r in rows) / max(1, len(rows)),
-            "seconds": time.perf_counter() - t0}
-        del res; gc.collect()
+    if "gsm8k" in parts and not (out / "scores_gsm8k.json").exists():
+        samples = out / "samples_gsm8k.jsonl"
+        rows = [json.loads(l) for l in open(samples, encoding="utf-8")] if samples.exists() else []
+        if len(rows) == expected_n and len({r["doc_id"] for r in rows}) == expected_n:
+            # complete per-example outputs from an earlier run that crashed after GSM8K
+            part = {"gsm8k": gsm8k_scores(rows), "gsm8k_source": "reconstructed from samples_gsm8k.jsonl"}
+        else:
+            model_dir, info = materialize(cfg, cond, store, device)
+            if torch.cuda.is_available():
+                torch.cuda.reset_peak_memory_stats()
+            t0 = time.perf_counter()
+            res = run_lm_eval(model_dir, ecfg, limit, True, ecfg["batch_size_gen"])
+            rows = _gsm_rows(res["samples"][ecfg["gsm8k_task"]], tok, ecfg["gsm8k_max_gen_toks"])
+            with open(samples, "w", encoding="utf-8") as f:
+                for r in rows:
+                    f.write(json.dumps(r, ensure_ascii=False) + "\n")
+            m = res["results"][ecfg["gsm8k_task"]]
+            part = {"gsm8k": gsm8k_scores(rows, time.perf_counter() - t0), **info,
+                    "gsm8k_lm_eval_aggregate": {"flexible_extract": m.get("exact_match,flexible-extract"),
+                                                "strict_match": m.get("exact_match,strict-match")},
+                    "gsm8k_gpu": gpu_memory()}
+        write_json(part, out / "scores_gsm8k.json")
+        store.push(eval_dir(cond, smoke), f"eval {cond} gsm8k")
 
-    if "ll" in parts:
+    if "ll" in parts and not (out / "scores_ll.json").exists():
+        model_dir, info = materialize(cfg, cond, store, device)
+        if torch.cuda.is_available():
+            torch.cuda.reset_peak_memory_stats()
         t0 = time.perf_counter()
         res = run_lm_eval(model_dir, ecfg, limit, False, ecfg["batch_size_ll"])
+        part = {**info}
         for task in ecfg["likelihood_tasks"]:
             m = res["results"][task]
             rows = _ll_rows(res["samples"][task])
             with open(out / f"samples_{task}.jsonl", "w", encoding="utf-8") as f:
                 for r in rows:
                     f.write(json.dumps(r) + "\n")
-            scores[task] = {"acc": m.get("acc,none"), "acc_norm": m.get("acc_norm,none"),
-                            "n": len(rows)}
-        scores["likelihood_seconds"] = time.perf_counter() - t0
+            part[task] = {"acc": m.get("acc,none"), "acc_norm": m.get("acc_norm,none"), "n": len(rows)}
+        part.update({"likelihood_seconds": time.perf_counter() - t0, "ll_gpu": gpu_memory()})
+        write_json(part, out / "scores_ll.json")
+        store.push(eval_dir(cond, smoke), f"eval {cond} ll")
 
-    scores.update({"gpu": gpu_memory(), "env": env_info()})
-    write_json(scores, out / "scores.json")
-    store.push(eval_dir(cond, smoke), f"eval {cond}")
-    return scores
+    if (out / "scores_gsm8k.json").exists() and (out / "scores_ll.json").exists():
+        scores = {"condition": cond, **cfg["eval"]["conditions"][cond], "limit": limit,
+                  **read_json(out / "scores_gsm8k.json"), **read_json(out / "scores_ll.json"),
+                  "env": env_info()}
+        write_json(scores, out / "scores.json")
+        store.push(eval_dir(cond, smoke), f"eval {cond}")
+        return scores
+    store.push(eval_dir(cond, smoke), f"eval {cond} partial")  # marks finished parts done for the runner
+    return {"condition": cond, "parts_done": sorted(f.stem for f in out.glob("scores_*.json"))}
 
 
 def main():

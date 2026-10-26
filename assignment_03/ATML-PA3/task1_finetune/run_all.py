@@ -29,13 +29,17 @@ def jobs(smoke: bool, config: str) -> list[Job]:
         js.append(Job(f"train_{v}", cmd, f"results/task1/train/{v}{sfx}/summary.json",
                       deps=["data"], hours=0.15 if smoke else TRAIN_HOURS[v],
                       budget_flag=None if smoke else "--max-hours"))
+    # two processes per condition so the likelihood stage starts with an empty GPU
     for cond, spec in cfg["eval"]["conditions"].items():
         cmd = ["-m", "task1_finetune.evaluate", *c, "--condition", cond]
         if smoke:
             cmd += ["--limit", "16"]
         deps = [f"train_{spec['variant']}"] if spec["variant"] else ["data"]
-        js.append(Job(f"eval_{cond}", cmd, f"results/task1/eval/{cond}{sfx}/scores.json",
-                      deps=deps, hours=0.2 if smoke else 0.8))
+        edir = f"results/task1/eval/{cond}{sfx}"
+        js.append(Job(f"eval_{cond}_gsm8k", cmd + ["--parts", "gsm8k"], f"{edir}/scores_gsm8k.json",
+                      deps=deps, hours=0.15 if smoke else 0.75))
+        js.append(Job(f"eval_{cond}", cmd + ["--parts", "ll"], f"{edir}/scores.json",
+                      deps=[f"eval_{cond}_gsm8k"], hours=0.15 if smoke else 0.35))
     all_train = [f"train_{v}" for v in VARIANTS]
     if not smoke:
         js.append(Job("qualitative", ["-m", "task1_finetune.qualitative", *c],

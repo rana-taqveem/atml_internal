@@ -50,7 +50,7 @@ eval:
   likelihood_tasks: [hellaswag, boolq, arc_easy]
   max_length: 4096
   batch_size_gen: 64
-  batch_size_ll: 32
+  batch_size_ll: 8              # (B, L, 152k-vocab) logits: 32 needed 11.5 GB
 
 diagnostics:
   layers: [0, 13, 27]

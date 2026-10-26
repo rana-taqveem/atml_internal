@@ -1,0 +1,12 @@
+{
+  "k": 128,
+  "layers": [
+    0,
+    13,
+    27
+  ],
+  "module": "down_proj",
+  "z_source": "starting model, FP32, last prompt token, unpadded",
+  "delta_full": "W_trained(FP32 master) - W0",
+  "delta_adapter": "(alpha/r) B~ A~"
+}

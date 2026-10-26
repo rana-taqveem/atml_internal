@@ -1,0 +1,41 @@
+{
+  "variant": "l2sp",
+  "kind": "full",
+  "lr": 2e-05,
+  "l2sp_lambda": 0.001,
+  "trainable_params": 596049920,
+  "total_params": 596049920,
+  "updates": 1250,
+  "examples": 40000,
+  "peak_allocated_gb": 12.228219032287598,
+  "peak_reserved_gb": 13.0546875,
+  "device": "Tesla T4",
+  "train_seconds": 9270.091380608997,
+  "ckpt_seconds": 366.3425093730016,
+  "skipped_updates": 0,
+  "checkpoint_sizes": {
+    "recovery": 7153004923,
+    "weights_u0625": 2395664111,
+    "weights_final": 2395664111
+  },
+  "displacement": {
+    "u0625": 6.439281738147081,
+    "final": 6.270101102416209
+  },
+  "env": {
+    "torch": "2.11.0+cu128",
+    "transformers": "5.20.2",
+    "peft": "0.20.0",
+    "lm_eval": "0.4.13",
+    "numpy": "2.1.3",
+    "pandas": "2.3.3",
+    "peak_allocated_gb": 12.228219032287598,
+    "peak_reserved_gb": 13.0546875,
+    "device": "Tesla T4"
+  },
+  "smoke": false,
+  "train_hours": 2.575025383502499,
+  "l2sp_reference_bytes": 1192099840,
+  "l2sp_reference_setup_seconds": 0.052039438999997856,
+  "l2sp_penalty_seconds_this_session": 177.284471977993
+}

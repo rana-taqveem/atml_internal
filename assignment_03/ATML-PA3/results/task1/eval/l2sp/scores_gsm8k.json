@@ -1,0 +1,12 @@
+{
+  "gsm8k": {
+    "flexible_extract": 0.6489764973464746,
+    "strict_match": 0.0,
+    "n": 1319,
+    "truncation_rate": 0.00530705079605762,
+    "extractable_rate": 1.0,
+    "mean_response_tokens": 138.10235026535253,
+    "seconds": null
+  },
+  "gsm8k_source": "reconstructed from samples_gsm8k.jsonl"
+}
