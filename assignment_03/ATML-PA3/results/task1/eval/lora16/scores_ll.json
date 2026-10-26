@@ -1,0 +1,36 @@
+{
+  "merged_modules": 196,
+  "merge_check": {
+    "fp32": {
+      "max_abs_diff": 0.00010061264038085938,
+      "mean_abs_diff": 5.592329216597136e-06,
+      "argmax_agreement": 1.0
+    },
+    "fp16": {
+      "max_abs_diff": 0.12158203125,
+      "mean_abs_diff": 0.0080078961327672,
+      "argmax_agreement": 0.9882352948188782
+    }
+  },
+  "hellaswag": {
+    "acc": 0.3768173670583549,
+    "acc_norm": 0.47032463652658835,
+    "n": 10042
+  },
+  "boolq": {
+    "acc": 0.708256880733945,
+    "acc_norm": null,
+    "n": 3270
+  },
+  "arc_easy": {
+    "acc": 0.6553030303030303,
+    "acc_norm": 0.6342592592592593,
+    "n": 2376
+  },
+  "likelihood_seconds": 673.066671524,
+  "ll_gpu": {
+    "peak_allocated_gb": 6.868952751159668,
+    "peak_reserved_gb": 7.392578125,
+    "device": "Tesla T4"
+  }
+}

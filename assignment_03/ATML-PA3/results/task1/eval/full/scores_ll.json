@@ -1,0 +1,23 @@
+{
+  "hellaswag": {
+    "acc": 0.3730332603067118,
+    "acc_norm": 0.45887273451503685,
+    "n": 10042
+  },
+  "boolq": {
+    "acc": 0.5889908256880734,
+    "acc_norm": null,
+    "n": 3270
+  },
+  "arc_easy": {
+    "acc": 0.6616161616161617,
+    "acc_norm": 0.6359427609427609,
+    "n": 2376
+  },
+  "likelihood_seconds": 741.4223667159999,
+  "ll_gpu": {
+    "peak_allocated_gb": 6.868952751159668,
+    "peak_reserved_gb": 6.943359375,
+    "device": "Tesla T4"
+  }
+}

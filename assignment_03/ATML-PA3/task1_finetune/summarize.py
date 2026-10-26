@@ -99,14 +99,18 @@ def training_tables():
 def plot_losses(logs):
     import matplotlib.pyplot as plt
 
-    fig, ax = plt.subplots(figsize=(TEXT_WIDTH * 0.55, 2.2))
+    fig, axes = plt.subplots(1, 2, figsize=(TEXT_WIDTH, 2.1), gridspec_kw={"wspace": 0.28})
     for v, df in logs.items():
         sm = df["loss_sft"].rolling(25, min_periods=1).mean()
-        ax.plot(df["update"], df["loss_sft"], color=T1_COLORS[v], alpha=0.18, lw=0.6)
-        ax.plot(df["update"], sm, color=T1_COLORS[v], label=T1_LABELS[v])
-    ax.set_xlabel("Optimizer update")
-    ax.set_ylabel("SFT loss (nats/token)")
-    ax.legend(ncol=1)
+        axes[0].plot(df["update"], sm, color=T1_COLORS[v], label=T1_LABELS[v])
+        z = df["update"] >= 100
+        axes[1].plot(df["update"][z], sm[z], color=T1_COLORS[v], label=T1_LABELS[v])
+    axes[0].set_ylabel("SFT loss (nats/token)")
+    axes[0].set_title("All updates (25-update moving average)")
+    axes[1].set_title("Updates 100-1250 (zoom)")
+    for ax in axes:
+        ax.set_xlabel("Optimizer update")
+    axes[1].legend(ncol=2, fontsize=6)
     save(fig, f"{FIG}/sft_loss")
 
 
@@ -143,13 +147,19 @@ def plot_diagnostics():
     fig, axes = plt.subplots(1, 3, figsize=(TEXT_WIDTH, 2.1), gridspec_kw={"wspace": 0.6})
     x = np.arange(len(layers))
     width = 0.8 / len(conds)
+    markers = dict(zip(layers, ["o", "s", "^"]))
     for i, c in enumerate(conds):
         d = wdf[wdf["condition"] == c].set_index("layer").loc[layers]
         axes[0].bar(x + i * width, d["rho_k"], width * 0.92, color=T1_COLORS[c], label=T1_LABELS[c])
+        for xi, val in zip(x + i * width, d["rho_k"]):
+            if val < 1e-3:  # e.g. OPLoRA, ~1e-8 by construction
+                axes[0].text(xi, 0.003, "0", ha="center", va="bottom", fontsize=5.5,
+                             color=T1_COLORS[c])
         axes[1].bar(x + i * width, d["eta"], width * 0.92, color=T1_COLORS[c])
         m = adf[(adf["condition"] == c) & (adf["set"] == "math")].set_index("layer").loc[layers]["mean"]
         n = adf[(adf["condition"] == c) & (adf["set"] == "nonmath")].set_index("layer").loc[layers]["mean"]
-        axes[2].scatter(n, m, color=T1_COLORS[c], s=14, zorder=3)
+        for l in layers:
+            axes[2].scatter(n.loc[l], m.loc[l], color=T1_COLORS[c], marker=markers[l], s=16, zorder=3)
     for ax, t in zip(axes[:2], [r"$\rho_k$ (k=128)", r"$\eta=\|\Delta W\|_F/\|W_0\|_F$"]):
         ax.set_xticks(x + 0.4 - width / 2, [f"L{l}" for l in layers]); ax.set_title(t)
     axes[1].set_yscale("log")
@@ -160,6 +170,10 @@ def plot_diagnostics():
         ax.xaxis.set_minor_formatter(NullFormatter()); ax.yaxis.set_minor_formatter(NullFormatter())
     axes[2].set_xlabel("mean R(z), HellaSwag"); axes[2].set_ylabel("mean R(z), GSM8K")
     axes[2].set_title("Mean R(z) per layer")
+    from matplotlib.lines import Line2D
+
+    lh = [Line2D([], [], marker=markers[l], ls="", color="#52514e", label=f"layer {l}") for l in layers]
+    axes[2].legend(handles=lh, fontsize=6, loc="lower right")
     fig.legend(*axes[0].get_legend_handles_labels(), loc="upper center", ncol=6,
                bbox_to_anchor=(0.5, 1.12))
     save(fig, f"{FIG}/diagnostics")
@@ -175,8 +189,9 @@ def plot_benchmarks(df):
     for _, r in d.iterrows():
         ax.scatter(r["nonmath_mean_delta_pp"], r["gsm8k_delta_pp"], color=T1_COLORS[r["condition"]],
                    s=22, zorder=3)
+        off = {"lora16": (4, 4), "oplora16": (-46, 2), "lora4": (4, -8)}.get(r["condition"], (3, 2))
         ax.annotate(r["label"], (r["nonmath_mean_delta_pp"], r["gsm8k_delta_pp"]),
-                    fontsize=6, xytext=(3, 2), textcoords="offset points", color="#52514e")
+                    fontsize=6, xytext=off, textcoords="offset points", color="#52514e")
     ax.axhline(0, color="#bbb", lw=0.8); ax.axvline(0, color="#bbb", lw=0.8)
     ax.set_xlabel("Mean non-math change (pp)")
     ax.set_ylabel("GSM8K change (pp)")

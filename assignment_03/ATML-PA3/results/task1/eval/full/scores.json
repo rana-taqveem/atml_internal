@@ -1,0 +1,48 @@
+{
+  "condition": "full",
+  "variant": "full",
+  "stage": "final",
+  "limit": null,
+  "gsm8k": {
+    "flexible_extract": 0.6444275966641395,
+    "strict_match": 0.0,
+    "n": 1319,
+    "truncation_rate": 0.006823351023502654,
+    "extractable_rate": 1.0,
+    "mean_response_tokens": 140.12509476876423,
+    "seconds": null
+  },
+  "gsm8k_source": "reconstructed from samples_gsm8k.jsonl",
+  "hellaswag": {
+    "acc": 0.3730332603067118,
+    "acc_norm": 0.45887273451503685,
+    "n": 10042
+  },
+  "boolq": {
+    "acc": 0.5889908256880734,
+    "acc_norm": null,
+    "n": 3270
+  },
+  "arc_easy": {
+    "acc": 0.6616161616161617,
+    "acc_norm": 0.6359427609427609,
+    "n": 2376
+  },
+  "likelihood_seconds": 741.4223667159999,
+  "ll_gpu": {
+    "peak_allocated_gb": 6.868952751159668,
+    "peak_reserved_gb": 6.943359375,
+    "device": "Tesla T4"
+  },
+  "env": {
+    "torch": "2.11.0+cu128",
+    "transformers": "5.20.2",
+    "peft": "0.20.0",
+    "lm_eval": "0.4.13",
+    "numpy": "2.1.3",
+    "pandas": "2.3.3",
+    "peak_allocated_gb": 6.868952751159668,
+    "peak_reserved_gb": 6.943359375,
+    "device": "Tesla T4"
+  }
+}
