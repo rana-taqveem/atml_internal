@@ -95,7 +95,14 @@ def cache(cfg, store=None):
 
 
 def load_features(cfg):
-    """Feature array (torch fp16, CPU) and key->row index."""
+    """Feature array (torch fp16, CPU) and key->row index; fetched from the run store when a
+    new session does not have the cache on local disk."""
+    index_path = cfg["data"].get("feature_index", INDEX)
+    if not rel(cfg["data"]["feature_file"]).exists() or not rel(index_path).exists():
+        store = Store()
+        for path in (cfg["data"]["feature_file"], index_path):
+            if not rel(path).exists() and not store.pull(path):
+                raise FileNotFoundError(f"{path} not found locally or in the run store; run task2_vlm.features")
     arr = np.load(rel(cfg["data"]["feature_file"]), mmap_mode="r")
     return torch.from_numpy(np.ascontiguousarray(arr)), read_json(cfg["data"].get("feature_index", INDEX))
 
