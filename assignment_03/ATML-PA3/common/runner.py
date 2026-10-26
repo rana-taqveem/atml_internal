@@ -56,6 +56,12 @@ def run_jobs(jobs: list[Job], gpus: list[str], hours: float, margin: float = 0.4
             ok = proc.returncode == 0 and store.exists(by_name[name].done)
             status[name] = "done" if ok else f"failed({proc.returncode})"
             print(f"[runner] {name} -> {status[name]} ({remaining():.2f} h left)", flush=True)
+            if not ok:  # surface the error in the notebook log itself
+                lines = (logdir / f"{name}.log").read_text(encoding="utf-8", errors="ignore").splitlines()
+                tail = [l for l in lines if l.strip() and "it/s]" not in l and "s/it]" not in l][-40:]
+                print(f"[runner] ---- last lines of logs/{name}.log ----", flush=True)
+                for l in tail:
+                    print(f"[runner] | {l[-300:]}", flush=True)
             if gpu is not None:
                 free.append(gpu)
             del running[name]
