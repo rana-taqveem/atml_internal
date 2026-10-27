@@ -1,0 +1,38 @@
+{
+  "updates": 4500,
+  "examples": 72000,
+  "calibration": {
+    "rule": "mean text-token embedding norm (training captions/questions) / mean initial connector output norm (512 random training images)",
+    "text_norm": 0.8707402348518372,
+    "visual_norm_init": 15.857622146606445,
+    "scale": 0.05490988492965698
+  },
+  "stage_seconds": {
+    "caption": 2747.8163827490057,
+    "instruct": 2057.1510959169946,
+    "vqa": 999.8575774530018
+  },
+  "stage_peak_gb": {
+    "caption": 1.4395899772644043,
+    "instruct": 1.5443501472473145,
+    "vqa": 1.542783260345459
+  },
+  "trainable_by_stage": {
+    "caption": 1837056,
+    "instruct": 6424576,
+    "vqa": 6424576
+  },
+  "skipped_updates": 9,
+  "train_hours": 1.6124514044775005,
+  "env": {
+    "torch": "2.11.0+cu128",
+    "transformers": "5.20.2",
+    "peft": "0.20.0",
+    "lm_eval": "0.4.13",
+    "numpy": "2.1.3",
+    "pandas": "2.3.3",
+    "peak_allocated_gb": 1.542783260345459,
+    "peak_reserved_gb": 1.595703125,
+    "device": "Tesla T4"
+  }
+}

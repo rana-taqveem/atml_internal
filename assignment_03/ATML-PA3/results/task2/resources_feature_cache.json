@@ -1,0 +1,16 @@
+{
+  "download_seconds": 113.21411108970642,
+  "downloaded_bytes": 2371796216,
+  "feature_seconds": 249.36948704719543,
+  "n_images": 14597,
+  "feature_bytes": 4394514560,
+  "peak_allocated_gb": 0.8573751449584961,
+  "peak_reserved_gb": 0.904296875,
+  "device": "Tesla T4",
+  "dtype": "float16",
+  "shape": [
+    14597,
+    196,
+    768
+  ]
+}

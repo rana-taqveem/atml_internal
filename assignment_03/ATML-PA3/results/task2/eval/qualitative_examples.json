@@ -1,0 +1,326 @@
+{
+  "grounding": {
+    "both_correct": {
+      "testp0": [
+        {
+          "k": 0,
+          "question": "Does this image contain an oven?",
+          "image_id": 572510,
+          "reference": "yes",
+          "predictions": {
+            "correct": "yes",
+            "complementary": "no",
+            "mismatched": "no",
+            "none": "No, the image does not contain an oven."
+          }
+        },
+        {
+          "k": 1,
+          "question": "Does this image contain an oven?",
+          "image_id": 115859,
+          "reference": "no",
+          "predictions": {
+            "correct": "no",
+            "complementary": "yes",
+            "mismatched": "no",
+            "none": "No, the image does not contain an oven."
+          }
+        }
+      ],
+      "testp1": [
+        {
+          "k": 0,
+          "question": "Does this image contain a clock?",
+          "image_id": 547106,
+          "reference": "yes",
+          "predictions": {
+            "correct": "yes",
+            "complementary": "no",
+            "mismatched": "no",
+            "none": "No, the image does not contain a clock."
+          }
+        },
+        {
+          "k": 1,
+          "question": "Does this image contain a clock?",
+          "image_id": 78892,
+          "reference": "no",
+          "predictions": {
+            "correct": "no",
+            "complementary": "yes",
+            "mismatched": "no",
+            "none": "No, the image does not contain a clock."
+          }
+        }
+      ],
+      "testp3": [
+        {
+          "k": 0,
+          "question": "Does this image contain a hair drier?",
+          "image_id": 64155,
+          "reference": "yes",
+          "predictions": {
+            "correct": "yes",
+            "complementary": "no",
+            "mismatched": "no",
+            "none": "No, the image does not contain a hair drier."
+          }
+        },
+        {
+          "k": 1,
+          "question": "Does this image contain a hair drier?",
+          "image_id": 391499,
+          "reference": "no",
+          "predictions": {
+            "correct": "no",
+            "complementary": "yes",
+            "mismatched": "no",
+            "none": "No, the image does not contain a hair drier."
+          }
+        }
+      ]
+    },
+    "identical_answers": {
+      "testp2": [
+        {
+          "k": 0,
+          "question": "Does this image contain a traffic light?",
+          "image_id": 490306,
+          "reference": "yes",
+          "predictions": {
+            "correct": "no",
+            "complementary": "no",
+            "mismatched": "no",
+            "none": "No, the image does not contain a traffic light."
+          }
+        },
+        {
+          "k": 1,
+          "question": "Does this image contain a traffic light?",
+          "image_id": 570693,
+          "reference": "no",
+          "predictions": {
+            "correct": "no",
+            "complementary": "no",
+            "mismatched": "no",
+            "none": "No, the image does not contain a traffic light."
+          }
+        }
+      ],
+      "testp13": [
+        {
+          "k": 0,
+          "question": "Does this image contain a bed?",
+          "image_id": 423742,
+          "reference": "yes",
+          "predictions": {
+            "correct": "no",
+            "complementary": "no",
+            "mismatched": "no",
+            "none": "No, the image does not contain a bed."
+          }
+        },
+        {
+          "k": 1,
+          "question": "Does this image contain a bed?",
+          "image_id": 189936,
+          "reference": "no",
+          "predictions": {
+            "correct": "no",
+            "complementary": "no",
+            "mismatched": "no",
+            "none": "No, the image does not contain a bed."
+          }
+        }
+      ],
+      "testp16": [
+        {
+          "k": 0,
+          "question": "Does this image contain a couch?",
+          "image_id": 113367,
+          "reference": "yes",
+          "predictions": {
+            "correct": "no",
+            "complementary": "no",
+            "mismatched": "no",
+            "none": "No, the image does not contain a couch."
+          }
+        },
+        {
+          "k": 1,
+          "question": "Does this image contain a couch?",
+          "image_id": 302067,
+          "reference": "no",
+          "predictions": {
+            "correct": "no",
+            "complementary": "no",
+            "mismatched": "no",
+            "none": "No, the image does not contain a couch."
+          }
+        }
+      ]
+    }
+  },
+  "vqa": {
+    "both_correct": {
+      "v347170000_218294002": [
+        {
+          "k": 0,
+          "question": "Is the man wearing an undershirt?",
+          "image_id": 347170,
+          "reference": "yes",
+          "predictions": {
+            "correct": "yes",
+            "complementary": "no",
+            "mismatched": "no",
+            "none": "No, the man is not wearing an undershirt."
+          }
+        },
+        {
+          "k": 1,
+          "question": "Is the man wearing an undershirt?",
+          "image_id": 218294,
+          "reference": "no",
+          "predictions": {
+            "correct": "no",
+            "complementary": "yes",
+            "mismatched": "no",
+            "none": "No, the man is not wearing an undershirt."
+          }
+        }
+      ],
+      "v510877000_321683010": [
+        {
+          "k": 0,
+          "question": "Is the horse grazing?",
+          "image_id": 510877,
+          "reference": "yes",
+          "predictions": {
+            "correct": "yes",
+            "complementary": "no",
+            "mismatched": "no",
+            "none": "No, the horse is not grazing."
+          }
+        },
+        {
+          "k": 1,
+          "question": "Is the horse grazing?",
+          "image_id": 321683,
+          "reference": "no",
+          "predictions": {
+            "correct": "no",
+            "complementary": "yes",
+            "mismatched": "no",
+            "none": "No, the horse is not grazing."
+          }
+        }
+      ],
+      "v132362002_54355009": [
+        {
+          "k": 0,
+          "question": "Are they serving peppers?",
+          "image_id": 132362,
+          "reference": "yes",
+          "predictions": {
+            "correct": "yes",
+            "complementary": "no",
+            "mismatched": "no",
+            "none": "No, they are not serving peppers."
+          }
+        },
+        {
+          "k": 1,
+          "question": "Are they serving peppers?",
+          "image_id": 54355,
+          "reference": "no",
+          "predictions": {
+            "correct": "no",
+            "complementary": "yes",
+            "mismatched": "no",
+            "none": "No, they are not serving peppers."
+          }
+        }
+      ]
+    },
+    "identical_answers": {
+      "v412798003_248112013": [
+        {
+          "k": 0,
+          "question": "Is this a stadium?",
+          "image_id": 412798,
+          "reference": "yes",
+          "predictions": {
+            "correct": "no",
+            "complementary": "no",
+            "mismatched": "no",
+            "none": "No, this is not a stadium."
+          }
+        },
+        {
+          "k": 1,
+          "question": "Is this a stadium?",
+          "image_id": 248112,
+          "reference": "no",
+          "predictions": {
+            "correct": "no",
+            "complementary": "no",
+            "mismatched": "no",
+            "none": "No, this is not a stadium."
+          }
+        }
+      ],
+      "v312343002_389503004": [
+        {
+          "k": 0,
+          "question": "Is there a rainbow in this picture?",
+          "image_id": 312343,
+          "reference": "yes",
+          "predictions": {
+            "correct": "no",
+            "complementary": "no",
+            "mismatched": "no",
+            "none": "Yes, there is a rainbow in the picture."
+          }
+        },
+        {
+          "k": 1,
+          "question": "Is there a rainbow in this picture?",
+          "image_id": 389503,
+          "reference": "no",
+          "predictions": {
+            "correct": "no",
+            "complementary": "no",
+            "mismatched": "no",
+            "none": "Yes, there is a rainbow in the picture."
+          }
+        }
+      ],
+      "v188631000_377183005": [
+        {
+          "k": 0,
+          "question": "Is there a light on?",
+          "image_id": 188631,
+          "reference": "yes",
+          "predictions": {
+            "correct": "no",
+            "complementary": "no",
+            "mismatched": "no",
+            "none": "No, there is no light on."
+          }
+        },
+        {
+          "k": 1,
+          "question": "Is there a light on?",
+          "image_id": 377183,
+          "reference": "no",
+          "predictions": {
+            "correct": "no",
+            "complementary": "no",
+            "mismatched": "no",
+            "none": "No, there is no light on."
+          }
+        }
+      ]
+    }
+  }
+}

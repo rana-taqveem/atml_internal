@@ -1,0 +1,64 @@
+{
+  "train_hours": 1.6124514044775005,
+  "stage_seconds": {
+    "caption": 2747.8163827490057,
+    "instruct": 2057.1510959169946,
+    "vqa": 999.8575774530018
+  },
+  "stage_peak_gb": {
+    "caption": 1.4395899772644043,
+    "instruct": 1.5443501472473145,
+    "vqa": 1.542783260345459
+  },
+  "trainable_by_stage": {
+    "caption": 1837056,
+    "instruct": 6424576,
+    "vqa": 6424576
+  },
+  "feature_cache": {
+    "download_seconds": 113.21411108970642,
+    "downloaded_bytes": 2371796216,
+    "feature_seconds": 249.36948704719543,
+    "n_images": 14597,
+    "feature_bytes": 4394514560,
+    "peak_allocated_gb": 0.8573751449584961,
+    "peak_reserved_gb": 0.904296875,
+    "device": "Tesla T4",
+    "dtype": "float16",
+    "shape": [
+      14597,
+      196,
+      768
+    ]
+  },
+  "gen_seconds_per_answer": {
+    "grounding": 0.052852983777343675,
+    "vqa": 0.05944852104557435
+  },
+  "correct_image_advantage": {
+    "grounding": {
+      "score_advantage": {
+        "mean": 0.515625,
+        "lo": 0.375,
+        "hi": 0.640625
+      },
+      "nll_advantage": {
+        "mean": 1.8735351577936399,
+        "lo": 1.4144073511194222,
+        "hi": 2.3258331317944907
+      }
+    },
+    "vqa": {
+      "score_advantage": {
+        "mean": 0.26197916666666665,
+        "lo": 0.1708333333333333,
+        "hi": 0.3547005208333334
+      },
+      "nll_advantage": {
+        "mean": 0.830055867828681,
+        "lo": 0.5507902888186436,
+        "hi": 1.1345197086453482
+      }
+    }
+  }
+}
